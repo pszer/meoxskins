@@ -110,7 +110,6 @@ MapEditGUITextInput = {
 		end
 
 		local extract = string.match(str,"%x+")
-		print("extract",extract)
 		if not extract then return nil end
 
 		local e_str_len = utf8.len(extract)
@@ -122,7 +121,6 @@ MapEditGUITextInput = {
 	end,
 
 	hexcol_format_func = function(str)
-		print("HEY")
 		local result = ""
 		local count = 0
 		for p,c in utf8.codes(str) do
@@ -142,7 +140,6 @@ MapEditGUITextInput = {
 			end
 		end
 
-		print(result)
 		return result
 	end,
 
