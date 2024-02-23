@@ -42,9 +42,34 @@ local function hslToRgb(h, s, l)
   return math.floor(r * 255), math.floor(g * 255), math.floor(b * 255)
 end
 
+local function rgbToHsl(r, g, b)
+  r, g, b = r / 255, g / 255, b / 255
+
+  local maxVal = math.max(r, g, b)
+  local minVal = math.min(r, g, b)
+
+  local h, s, l = 0, 0, (maxVal + minVal) / 2
+
+  if maxVal ~= minVal then
+    local d = maxVal - minVal
+    s = l > 0.5 and d / (2 - maxVal - minVal) or d / (maxVal + minVal)
+
+    if maxVal == r then
+      h = (g - b) / d + (g < b and 6 or 0)
+    elseif maxVal == g then
+      h = (b - r) / d + 2
+    else
+      h = (r - g) / d + 4
+    end
+
+    h = h / 6
+  end
+
+  return h, s, l
+end
 
 -- each entry in img_table is a table {name,image_data}
-function EditGUIColorSelect:new(action)
+function EditGUIColorSelect:new(colour_change_hook, action)
 	local this = {
 		x=0,
 		y=0,
@@ -70,6 +95,8 @@ function EditGUIColorSelect:new(action)
 		active_y = 0,
 		active_w = 0,
 		active_h = 0,
+
+		colour_change_hook = colour_change_hook,
 
 		hovered_selection = nil,
 		__action = action,
@@ -112,6 +139,7 @@ function EditGUIColorSelect:new(action)
 			if r > 1 then r = 1 end
 			--self.ratio = r
 			self.curr_hue = r
+			if self.colour_change_hook then self:colour_change_hook() end
 		end
 
 		if self.drag_alpha then
@@ -121,6 +149,7 @@ function EditGUIColorSelect:new(action)
 			if r < 0 then r = 0 end
 			if r > 1 then r = 1 end
 			self.curr_alpha = 1.0-r
+			if self.colour_change_hook then self:colour_change_hook() end
 		end
 
 		if self.drag_colour then
@@ -133,6 +162,7 @@ function EditGUIColorSelect:new(action)
 			if lum > 1.0 then lum = 1.0 end
 			self.curr_sat = sat
 			self.curr_lum = lum
+			if self.colour_change_hook then self:colour_change_hook() end
 		end
 
 		-- update positions for colour picker elements
@@ -157,12 +187,8 @@ function EditGUIColorSelect:new(action)
 		self.alpha_y = self.active_y + self.active_h + self.pad
 		self.alpha_w = self.alpha_w
 		self.alpha_h = Sh - self.active_h - 3 * self.pad
-
-		local R,G,B = hslToRgb(self.curr_hue, self.curr_sat, self.curr_lum)
-		self.curr_col[1] = R/255
-		self.curr_col[2] = G/255
-		self.curr_col[3] = B/255
-		self.curr_col[4] = self.curr_alpha
+		
+		this:updateColour()
 	end
 
 	function this:draw()
@@ -183,7 +209,10 @@ function EditGUIColorSelect:new(action)
 
 		love.graphics.setShader(self.colouractive_shader)
 		self.colouractive_shader:send("colour", self.curr_col)
-		love.graphics.draw(self.null_texture, self.active_x, self.active_y, 0, self.active_w, self.active_h)
+		love.graphics.draw(self.null_texture, self.active_x+self.active_w/2, self.active_y, 0, self.active_w/2, self.active_h)
+		local C = {self.curr_col[1],self.curr_col[2],self.curr_col[3],1.0}
+		self.colouractive_shader:send("colour", C)
+		love.graphics.draw(self.null_texture, self.active_x, self.active_y, 0, self.active_w/2, self.active_h)
 
 		love.graphics.setShader(self.colouralpha_shader)
 		self.colouralpha_shader:send("hue", self.curr_hue*360.0)
@@ -295,6 +324,25 @@ function EditGUIColorSelect:new(action)
 		self.w = w end
 	function this.setH(self,h)
 		self.h = h end
+
+	function this:getColour()
+		return self.curr_col
+	end
+	function this:setRGBColour(r,g,b)
+		local h,s,l = rgbToHsl(r,g,b)
+		self.curr_hue = h
+		self.curr_sat = s
+		self.curr_lum = l
+		this:updateColour()
+	end
+
+	function this:updateColour()
+		local R,G,B = hslToRgb(self.curr_hue, self.curr_sat, self.curr_lum)
+		self.curr_col[1] = R/255
+		self.curr_col[2] = G/255
+		self.curr_col[3] = B/255
+		self.curr_col[4] = self.curr_alpha
+	end
 
 	setmetatable(this, EditGUIColorSelect)
 	return this

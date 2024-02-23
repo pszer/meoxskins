@@ -362,6 +362,20 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("alt", "up"):addHook(disable_alt_hook)
 end
 
+function edit:pixelAtCursor()
+	local unproject = cpml.mat4.unproject
+
+	local cam = require 'camera'
+	local viewproj = cam.proj_m * cam.rotview_m
+	local vw,vh = love.window.getMode()
+	local viewport_xywh = {0,0,vw,vh}
+
+	local cursor_v = cpml.vec3.new(x,y,1)
+	local cam_pos = cpml.vec3.new(cam:getPos())
+	local unproject_v = unproject(cursor_v, viewproj, viewport_xywh)
+	local ray = {position=cam_pos, direction=cpml.vec3.normalize(unproject_v - cam_pos)}
+end
+
 local grabbed_mouse_x=0
 local grabbed_mouse_y=0
 function edit:captureMouse()

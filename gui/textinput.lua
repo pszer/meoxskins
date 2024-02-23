@@ -98,6 +98,54 @@ MapEditGUITextInput = {
 		return result
 	end,
 
+	hexcol_validator = function(str)
+		for p,c in utf8.codes(str) do
+			if p==1 then
+				local e = string.match(c,"[%x#]")
+				if not e then return nil end
+			else
+				local e = string.match(c,"[%x]")
+				if not e then return nil end
+			end
+		end
+
+		local extract = string.match(str,"%x+")
+		print("extract",extract)
+		if not extract then return nil end
+
+		local e_str_len = utf8.len(extract)
+		if e_str_len ~= 6 then return nil end
+		
+		local Rs,Gs,Bs = string.sub(extract,1,2), string.sub(extract,3,4), string.sub(extract,5,6)
+		local r,g,b = tonumber(Rs,16), tonumber(Gs,16), tonumber(Bs,16)
+		return {r,g,b}
+	end,
+
+	hexcol_format_func = function(str)
+		print("HEY")
+		local result = ""
+		local count = 0
+		for p,c in utf8.codes(str) do
+			if p==1 then
+				local e = string.match(c,"[%x#]")
+				if not e then
+					result = result .. "~(red)" .. c
+				else
+					if c ~= "#" then count = count+1 end
+				end
+			else
+				local e = string.match(c,"[%x]")
+				if not e or count > 6 then
+					result = result .. "~(red)" .. c
+				end
+				count = count + 1
+			end
+		end
+
+		print(result)
+		return result
+	end,
+
 	rational_validator = function(str)
 		local div_pos = nil
 		for p,c in utf8.codes(str) do
@@ -201,7 +249,7 @@ function MapEditGUITextInput:setup(make,del)
 	self.__deltextinputhook=del
 end
 
-function MapEditGUITextInput:new(init_str,x,y,w,h,validator,format_func,align_x,align_y)
+function MapEditGUITextInput:new(init_str,x,y,w,h,validator,format_func,align_x,align_y,input_hook)
 	assert(type(init_str)=="string")
 
 	assert(self.__maketextinputhook and self.__deltextinputhook,
@@ -281,6 +329,7 @@ function MapEditGUITextInput:new(init_str,x,y,w,h,validator,format_func,align_x,
 			local chars = utf8.len(t)
 			self:shiftCursor(chars)
 		end
+		if input_hook then input_hook(self) end
 	end
 
 	function this:setText(t)
@@ -294,6 +343,10 @@ function MapEditGUITextInput:new(init_str,x,y,w,h,validator,format_func,align_x,
 	end
 
 	function this:updateHoverInfo()
+		if scancodeIsDown("return", CTRL.META) then
+			self:removeHook()
+		end
+
 		local x,y,w,h = self.x, self.y, self.w, self.h
 		local mx,my = love.mouse.getPosition()
 		if x<=mx and mx<=x+w and
@@ -343,6 +396,10 @@ function MapEditGUITextInput:new(init_str,x,y,w,h,validator,format_func,align_x,
 	function this:action()
 		self.__maketextinputhook(this.__hook)
 		self:shiftCursor(1/0)
+	end
+
+	function this:removeHook()
+		self.__deltextinputhook(this.__hook)
 	end
 
 	function this:getText()

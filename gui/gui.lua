@@ -142,16 +142,22 @@ function MapEditGUI:define(mapedit)
 
 	-- Picker window
 	local picker_win_layout = guilayout:define(
-		{id="picker_region",
-		 split_type=nil,
+		{id="hex_region",
+		 split_type="+y",
+		 split_pix=370,
+		 sub=
+			{id="picker_region",
+		 	split_type=nil,
+			},
 		},
-		{"picker_region", region_default_f}
+		{"hex_region", region_default_f},
+		{"picker_region", region_pixoffset_f(8,4)}
 	)
 	local colour_win = guiwindow:define({
 		win_min_w=300,
 		win_max_w=300,
-		win_min_h=300,
-		win_max_h=300,
+		win_min_h=390,
+		win_max_h=390,
 	}, picker_win_layout)
 	-- Picker window
 	
@@ -187,6 +193,7 @@ function MapEditGUI:define(mapedit)
 		win_max_h=75,
 		win_focus=true,
 	}, mapname_win_layout)
+
 
 	context["help_context"] = 
 		contextmenu:define(
@@ -292,10 +299,63 @@ function MapEditGUI:define(mapedit)
 			CONTROL_LOCK.EDIT_WINDOW
 	)
 
-	self.colour_picker = colour_win:new({},{guicolourpicker:new()},20,20,280,280)
+	self.colour_picker = guicolourpicker:new(
+		function(picker)
+			local H,S,L = picker.curr_hue, picker.curr_sat, picker.curr_lum
+
+			local function hslToRgb(h, s, l)
+				local r, g, b
+
+				if s == 0 then
+					r, g, b = l, l, l
+				else
+					function hue2rgb(p, q, t)
+						if t < 0 then t = t + 1 end
+						if t > 1 then t = t - 1 end
+						if t < 1/6 then return p + (q - p) * 6 * t end
+						if t < 1/2 then return q end
+						if t < 2/3 then return p + (q - p) * (2/3 - t) * 6 end
+						return p
+					end
+
+					local q = l < 0.5 and l * (1 + s) or l + s - l * s
+					local p = 2 * l - q
+
+					r = hue2rgb(p, q, h + 1/3)
+					g = hue2rgb(p, q, h)
+					b = hue2rgb(p, q, h - 1/3)
+				end
+
+				return math.floor(r * 255), math.floor(g * 255), math.floor(b * 255)
+			end
+
+			local R,G,B = hslToRgb(H,S,L)
+			R = math.floor(R)
+			G = math.floor(G)
+			B = math.floor(B)
+			R = string.format("%x", R)
+			G = string.format("%x", G)
+			B = string.format("%x", B)
+
+			self.hex_input.text:set("#"..R..G..B)
+		end
+	)
+	self.hex_input = guitextinput:new(
+		"#AACCDD",0,0,280,20,guitextinput.hexcol_validator,guitextbox.hexcol_format_func,"left",nil,
+		function(tinput)
+			local R = tinput:get()
+			if R then
+				self.colour_picker:setRGBColour(R[1],R[2],R[3])
+			else
+			end
+		end
+	)
+
+	self.colour_picker_win = colour_win:new({},
+		{self.colour_picker,self.hex_input},20,20,600,600)
 	self.colour_picker:setX(10)
 	self.colour_picker:setY(30)
-	self.main_panel:pushWindow(self.colour_picker)
+	self.main_panel:pushWindow(self.colour_picker_win)
 end
 
 --
@@ -409,8 +469,6 @@ function MapEditGUI:setupInputHandling()
 		self:exitContextMenu()
 	end)
 	self.cxtm_input:getEvent("cxtm_select", "down"):addHook(cxtm_select_option)
-
-
 
 	self.panel_input = InputHandler:new(CONTROL_LOCK.EDIT_PANEL,
 	                                   {"panel_select","window_move"})
