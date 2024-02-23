@@ -1,16 +1,17 @@
-local guirender    = require 'gui.guidraw'
-local contextmenu  = require 'gui.context'
-local toolbar      = require 'gui.toolbar'
-local popup        = require 'gui.popup'
-local guilayout    = require 'gui.layout'
-local guiscreen    = require 'gui.screen'
-local guiwindow    = require 'gui.window'
-local guitextbox   = require 'gui.textelement'
-local guibutton    = require 'gui.button'
-local guiimage     = require 'gui.image'
-local guiscrollb   = require 'gui.scrollbar'
-local guiimggrid   = require 'gui.gridselection'
-local guitextinput = require 'gui.textinput'
+local guirender       = require 'gui.guidraw'
+local contextmenu     = require 'gui.context'
+local toolbar         = require 'gui.toolbar'
+local popup           = require 'gui.popup'
+local guilayout       = require 'gui.layout'
+local guiscreen       = require 'gui.screen'
+local guiwindow       = require 'gui.window'
+local guitextbox      = require 'gui.textelement'
+local guibutton       = require 'gui.button'
+local guiimage        = require 'gui.image'
+local guiscrollb      = require 'gui.scrollbar'
+local guiimggrid      = require 'gui.gridselection'
+local guitextinput    = require 'gui.textinput'
+local guicolourpicker = require 'gui.colourselect'
 
 local lang         = require 'gui.guilang'
 
@@ -33,7 +34,9 @@ local MapEditGUI = {
 
 	cxtm_input = nil,
 
-	textinput_hook = nil
+	textinput_hook = nil,
+
+	colour_picker = nil,
 
 }
 MapEditGUI.__index = MapEditGUI
@@ -132,10 +135,26 @@ function MapEditGUI:define(mapedit)
 	local about_win = guiwindow:define({
 		win_min_w=300,
 		win_max_w=300,
-		win_min_h=120,
-		win_max_h=120,
+		win_min_h=100,
+		win_max_h=100,
 	}, about_win_layout)
 	-- About window
+
+	-- Picker window
+	local picker_win_layout = guilayout:define(
+		{id="picker_region",
+		 split_type=nil,
+		},
+		{"picker_region", region_default_f}
+	)
+	local colour_win = guiwindow:define({
+		win_min_w=300,
+		win_max_w=300,
+		win_min_h=300,
+		win_max_h=300,
+	}, picker_win_layout)
+	-- Picker window
+	
 
 	-- Language window
 	local lang_win_layout = guilayout:define(
@@ -178,7 +197,7 @@ function MapEditGUI:define(mapedit)
 		 {lang["Keybinds"],
 		  action=function(props)
 		    return end,
-			disable = false},
+			disable = true},
 
 		 {lang["Set Language"],
 		  action=function(props)
@@ -272,6 +291,11 @@ function MapEditGUI:define(mapedit)
 			CONTROL_LOCK.EDIT_PANEL,
 			CONTROL_LOCK.EDIT_WINDOW
 	)
+
+	self.colour_picker = colour_win:new({},{guicolourpicker:new()},20,20,280,280)
+	self.colour_picker:setX(10)
+	self.colour_picker:setY(30)
+	self.main_panel:pushWindow(self.colour_picker)
 end
 
 --

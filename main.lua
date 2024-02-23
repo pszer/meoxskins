@@ -35,7 +35,10 @@ function love.update(dt)
 end
 
 function love.draw()
-	render:viewportPass()
+	render:clear3DCanvas()
+	render:viewportPass(render.shader3d)
+	--render:clearDepthBuffer()
+	render:viewportPass(render.shader3dgrid)
 
 	love.graphics.setCanvas()
 	love.graphics.reset()

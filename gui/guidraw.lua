@@ -36,6 +36,8 @@ local MapEditGUIRender = {
 	__scrlb_bb = nil,
 	__scrlb_b  = nil,
 
+	__bar = nil,
+
 	icons = {},
 
 	grayscale = love.graphics.newShader(
@@ -116,6 +118,8 @@ function MapEditGUIRender:initAssets()
 	self.__scrlb_mm = Loader:getTextureReference("scrlb_mm.png")
 	self.__scrlb_bb = Loader:getTextureReference("scrlb_bb.png")
 	self.__scrlb_b = Loader:getTextureReference("scrlb_b.png")
+
+	self.__bar = Loader:getTextureReference("bar.png")
 
 	self.checkerboard_tex = Loader:getTextureReference("checkerboard.png")
 	self.checkerboard_tex:setWrap("repeat","repeat")
@@ -586,6 +590,7 @@ function MapEditGUIRender:createContextMenuBackground(w,h, col)
 	return canvas
 end
 
+
 function MapEditGUIRender:drawGenericOption(x,y,w,h, bg, txt, icon, arrow, state, buffer_info)
 	local bl = buffer_info.l_no_icon
 	if icon then
@@ -760,6 +765,48 @@ function MapEditGUIRender:drawOption(x,y,w,h, txt, icon, arrow, state, buffer_in
 	end
 
 	love.graphics.setColor(1,1,1,1)
+end
+
+function MapEditGUIRender:drawInset(x,y,w,h)
+	cxtm_bb = self.__cxtm_bb 
+	cxtm_tt = self.__cxtm_tt 
+	cxtm_rr = self.__cxtm_rr 
+	cxtm_ll = self.__cxtm_ll 
+	cxtm_tr = self.__cxtm_tr 
+	cxtm_tl = self.__cxtm_tl 
+	cxtm_br = self.__cxtm_br 
+	cxtm_bl = self.__cxtm_bl
+
+	local bg_col = self.cxtm_bg_col
+	local col = col or {1,1,1}
+
+	love.graphics.origin()
+
+	love.graphics.setColor(bg_col[1], bg_col[2], bg_col[3],1)
+	love.graphics.rectangle("fill",x,y,w,h)
+
+	love.graphics.setColor(col[1],col[2],col[3],1)
+
+	love.graphics.translate(x,y)
+
+	--love.graphics.draw(cxtm_tl,0  ,0,   0, 1,1)
+	--love.graphics.draw(cxtm_tr,w-2,0,   0, 1,1)
+	--love.graphics.draw(cxtm_bl,0  ,h-2, 0, 1,1)
+	--love.graphics.draw(cxtm_br,w-2,h-2, 0, 1,1)
+
+	--local w2 = w-4
+	--local h2 = h-4
+	--love.graphics.draw(cxtm_ll,0  ,2  , 0, 1 ,h2)
+	--love.graphics.draw(cxtm_rr,w-2,2  , 0, 1 ,h2)
+	--love.graphics.draw(cxtm_tt,2  ,0  , 0, w2,1 )
+	--love.graphics.draw(cxtm_bb,2  ,h-2, 0, w2,1 )
+	love.graphics.draw(cxtm_rr, -2  , 0   , 0, 1 , h )
+	love.graphics.draw(cxtm_ll,  w  , 0   , 0, 1 , h )
+	love.graphics.draw(cxtm_tt,  0  , -2  , 0, w , 1 )
+	love.graphics.draw(cxtm_bb,  0  ,  h  , 0, w , 1 )
+
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.origin()
 end
 
 function MapEditGUIRender:generateSphereVertices(radius, numSegments, numRings)

@@ -139,7 +139,9 @@ model.model_mats.leg_r_o = model.model_mats.leg_r
 
 function model:applyLayerTexture(tex, shader)
 	local shader = shader or love.graphics.getShader()
-	shader:send("SkinTexture", tex)
+	if shader:hasUniform("SkinTexture") then
+		shader:send("SkinTexture", tex)
+	end
 end
 
 function model:getVisibleParts()

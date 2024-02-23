@@ -35,7 +35,7 @@ end
 EDIT_KEY_SETTINGS = {
 
 	["edit_action"]  = { "mouse1"  , nil , default = "mouse1"  },
-	["cam_rotate"]   = { "mouse2"  , nil , default = "mouse2"  },
+	["cam_rotate"]   = { "mouse2"  , "mouse3" , default = "mouse2"  },
 	["cam_zoom_in"]   = { "wheelup"  , nil , default = "wheelup"  },
 	["cam_zoom_out"]  = { "wheeldown"    , nil , default = "wheeldown"  },
 	["edit_undo"]  = { "z"    , nil , default = "z"  },

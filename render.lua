@@ -6,6 +6,7 @@ local cpml   = require 'cpml'
 local render = {
 
 	shader3d = love.graphics.newShader("3d.glsl","3d.glsl"),
+	shader3dgrid = love.graphics.newShader("3dgrid.glsl","3dgrid.glsl"),
 
 	--viewport3d = love.graphics.newCanvas(w,h, {format="rgba16f"}),
 	--viewport3d_depth = love.graphics.newCanvas(w,h, {format="depth24stencil8"}),
@@ -27,14 +28,17 @@ function render:setup3DCanvas()
 	 }
 end
 
-local id = cpml.mat4.new()
-function render:viewportPass()
+function render:clear3DCanvas()
 	self:setup3DCanvas()
 	love.graphics.clear(unpack(require 'bg_col'))
-	love.graphics.setShader(self.shader3d)
+end
+
+local id = cpml.mat4.new()
+function render:viewportPass(shader,clear)
+	love.graphics.setShader(shader)
 	camera:sendToShader()
-	render.shader3d:send("u_model", "column", id)
-	love.graphics.setDepthMode("less",true)
+	shader:send("u_model", "column", id)
+	love.graphics.setDepthMode("lequal",true)
 	love.graphics.setMeshCullMode("back")
 
 	local skin_layers = skin:getVisibleLayers()
@@ -43,10 +47,15 @@ function render:viewportPass()
 	for i,layer in ipairs(skin_layers) do
 		model:applyLayerTexture(layer.texture)
 		for i,v in ipairs(visible_parts) do
-			self.shader3d:send("u_model","column",v.mat)
+			shader:send("u_model","column",v.mat)
 			love.graphics.draw(v.mesh)
 		end
 	end
+end
+
+function render:clearDepthBuffer()
+	self:setup3DCanvas()
+	love.graphics.clear(false,true,true)
 end
 
 return render

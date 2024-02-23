@@ -319,7 +319,6 @@ function edit:setupInputHandling()
 		CONTROL_LOCK.EDIT_VIEW.open()
 	end)
 	local viewport_zoom_in = Hook:new(function ()
-		print("hey")
 		local cam = require 'camera'
 		cam.pos[1] = cam.pos[1] * 0.95
 		cam.pos[2] = cam.pos[2] * 0.95

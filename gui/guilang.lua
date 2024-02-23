@@ -151,8 +151,8 @@ local MapEditGUILanguageStrings = {
 		jp="~b~(red)カッパを押すな",
 	},
 	["\nWelcome!\n\nMeoxSkins editor © 2024 \nMIT license (see LICENSE.md)"]={
-		pl="\nWitam!\n\nMeoxSkins editor © 2023 \nMIT licencja\n(zobacz LICENSE.md)",
-		jp="\n いらっしゃいませ！\n\nMeoxSkinsエディター(C) 2023\nMIT特許\n(LICENSE.mdをごらんあさい)",
+		pl="\nWitam!\n\nMeoxSkins editor © 2024 \nMIT licencja\n(zobacz LICENSE.md)",
+		jp="\n いらっしゃいませ！\n\nMeoxSkinsエディター(C) 2024\nMIT特許\n(LICENSE.mdをごらんなさい)",
 	},
 	["~bClose."]={
 		pl="~bZamknij",
@@ -161,6 +161,10 @@ local MapEditGUILanguageStrings = {
 	["Save"]={
 		pl="Zapisz",
 		jp="セーブ"
+	},
+	["Open"]={
+		pl="Otworz",
+		jp="オーペン"
 	},
 	["~iQuit"]={
 		pl="~iWyjdź",
