@@ -12,6 +12,7 @@ local guiscrollb      = require 'gui.scrollbar'
 local guiimggrid      = require 'gui.gridselection'
 local guitextinput    = require 'gui.textinput'
 local guicolourpicker = require 'gui.colourselect'
+local guivisible      = require 'gui.visible'
 
 local lang         = require 'gui.guilang'
 
@@ -187,7 +188,23 @@ function MapEditGUI:define(mapedit)
 		win_max_h=60,
 		win_focus=true,
 	}, skin_mode_win_layout)
-	
+	-- Wide/Slim skin mode window
+
+	-- Visible parts window
+	local visible_win_layout = guilayout:define(
+		{id="visible_region",
+		 split_type=slim,
+		},
+		{"visible_region", region_pixoffset_f(10,10)}
+	)
+	local visible_win = guiwindow:define({
+		win_min_w=160,
+		win_max_w=160,
+		win_min_h=180,
+		win_max_h=180,
+	}, visible_win_layout)
+	-- Visible parts window
+
 
 	-- Language window
 	local lang_win_layout = guilayout:define(
@@ -412,6 +429,12 @@ function MapEditGUI:define(mapedit)
 	self.colour_picker_win = colour_win:new({},
 		{self.colour_picker,self.hex_input},20,20,20,30)
 	self.main_panel:pushWindow(self.colour_picker_win)
+
+	self.visible_win = visible_win:new({},
+	{guivisible:new(function() local edit=require 'edit' return edit.active_mode end)}
+	,20,20,340,30)
+	self.main_panel:pushWindow(self.visible_win)
+
 	--self.colour_picker:setX(10)
 	--self.colour_picker:setY(30)
 end

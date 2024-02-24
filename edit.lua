@@ -47,11 +47,12 @@ function edit:load(args)
 	local skin_name = args.skin_name
 	local skin_mode = args.skin_mode or "wide" -- slim or wide parameter
 
+	print("skin_mode",skin_mode)
+
 	local texture
 	if not skin_name then
 		texture = love.graphics.newCanvas(64,64)
 	else
-		print("YOWZA")
 		local data = fileio:dataFromFile(skin_name)
 		texture = love.graphics.newImage(data)
 
@@ -59,6 +60,8 @@ function edit:load(args)
 	end
 
 	skin:load(texture)
+	self.active_mode = skin_mode
+	model:setupVisibility(skin_mode)
 
 	SET_ACTIVE_KEYBINDS(EDIT_KEY_SETTINGS)
 	CONTROL_LOCK.EDIT_VIEW.open()

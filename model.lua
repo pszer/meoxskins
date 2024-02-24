@@ -59,15 +59,15 @@ local model = {
 		["torso"]  = true,
 		["torso_o"]  = true,
 
-		["arm_slim_r"]  = true,
-		["arm_slim_r_o"]  = true,
-		["arm_slim_l"]  = true,
-		["arm_slim_l_o"]  = true,
+		["arm_slim_r"]  = false,
+		["arm_slim_r_o"]  = false,
+		["arm_slim_l"]  = false,
+		["arm_slim_l_o"]  = false,
 
-		["arm_wide_r"]  = false,
-		["arm_wide_r_o"]  = false,
-		["arm_wide_l"]  = false,
-		["arm_wide_l_o"]  = false,
+		["arm_wide_r"]  = true,
+		["arm_wide_r_o"]  = true,
+		["arm_wide_l"]  = true,
+		["arm_wide_l_o"]  = true,
 
 		["leg_l"]  = true,
 		["leg_l_o"]  = true,
@@ -170,6 +170,60 @@ end
 
 function model:getModelMatrix(label)
 	return self.model_mats[label].mat
+end
+
+function model:setupVisibility(mode)
+	local mode = mode or "wide"
+
+	if mode == "wide" then
+		self.visible = {
+			["head"]   = true,
+			["head_o"] = true,
+
+			["torso"]  = true,
+			["torso_o"]  = true,
+
+			["arm_slim_r"]  = false,
+			["arm_slim_r_o"]  = false,
+			["arm_slim_l"]  = false,
+			["arm_slim_l_o"]  = false,
+
+			["arm_wide_r"]  = true,
+			["arm_wide_r_o"]  = true,
+			["arm_wide_l"]  = true,
+			["arm_wide_l_o"]  = true,
+
+			["leg_l"]  = true,
+			["leg_l_o"]  = true,
+
+			["leg_r"]  = true,
+			["leg_r_o"]  = true,
+		}
+	else
+		self.visible = {
+			["head"]   = true,
+			["head_o"] = true,
+
+			["torso"]  = true,
+			["torso_o"]  = true,
+
+			["arm_slim_r"]  = true,
+			["arm_slim_r_o"]  = true,
+			["arm_slim_l"]  = true,
+			["arm_slim_l_o"]  = true,
+
+			["arm_wide_r"]  = false,
+			["arm_wide_r_o"]  = false,
+			["arm_wide_l"]  = false,
+			["arm_wide_l_o"]  = false,
+
+			["leg_l"]  = true,
+			["leg_l_o"]  = true,
+
+			["leg_r"]  = true,
+			["leg_r_o"]  = true,
+		}
+	end
 end
 
 return model
