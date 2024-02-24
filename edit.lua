@@ -266,7 +266,7 @@ function edit:setupInputHandling()
 	--
 	self.viewport_input = InputHandler:new(CONTROL_LOCK.EDIT_VIEW,
 	                    {"cam_zoom_out","cam_zoom_in","cam_rotate",
-											 "edit_undo","edit_redo","edit_action",
+											 "edit_undo","edit_redo","edit_action","edit_colour_pick",
 										   {"ctrl",CONTROL_LOCK.META},{"alt",CONTROL_LOCK.META},{"super",CONTROL_LOCK.META}})
 
 	-- hooks for camera rotation
@@ -329,6 +329,7 @@ function edit:setupInputHandling()
 	local paint_layer = nil
 	local paint_target = nil
 	local paint_action_start = Hook:new(function ()
+		if not self.active_layer then return end
 		if not self:pixelAtCursor()	then return end
 
 		paint_history = {}
@@ -338,6 +339,8 @@ function edit:setupInputHandling()
 		paint_target = layer.open_preview()
 	end)
 	local paint_action_held = Hook:new(function ()
+		if not paint_history then return end
+
 		--local X,Y = self:pixelAtCursor()	
 		--		local col = gui.colour_picker:getColour()
 		--local target = skin.layers[1].texture
@@ -367,9 +370,18 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("edit_action","down"):addHook(paint_action_start)
 	self.viewport_input:getEvent("edit_action","held"):addHook(paint_action_held)
 	self.viewport_input:getEvent("edit_action","up"):addHook(paint_action_end)
+
+	local colour_pick = Hook:new(function ()
+		local pixels = self:pixelAtCursor(true)
+		local colour = skin:pickColour(pixels)
+		if colour then
+			gui.colour_picker:setRGBColour(colour[1]*255,colour[2]*255,colour[3]*255)
+		end
+	end)
+	self.viewport_input:getEvent("edit_colour_pick","down"):addHook(colour_pick)
 end
 
-function edit:pixelAtCursor()
+function edit:pixelAtCursor(get_all_pixels)
 
 	local unproject = cpml.mat4.unproject
 
@@ -391,6 +403,28 @@ function edit:pixelAtCursor()
 	local A,B,C
 	local A_uv,B_uv,C_uv
 	local visible = model.visible
+
+	local pixels = {}
+
+	local function Barycentric(p, a, b, c)
+		local u,v,w
+		local Dot = cpml.vec3.dot
+
+		v0 = b - a
+		v1 = c - a
+		v2 = p - a
+
+		d00 = Dot(v0, v0)
+		d01 = Dot(v0, v1)
+		d11 = Dot(v1, v1)
+		d20 = Dot(v2, v0)
+		d21 = Dot(v2, v1)
+		denom = d00 * d11 - d01 * d01
+		v = (d11 * d20 - d01 * d21) / denom
+		w = (d00 * d21 - d01 * d20) / denom
+		u = 1.0 - v - w
+		return u,v,w
+	end
 
 	for _,v in ipairs(model:getVisibleParts()) do
 		local mesh = v.mesh
@@ -423,7 +457,21 @@ function edit:pixelAtCursor()
 
 			local pos,dist = ray_triangle(ray, {__v1,__v2,__v3}, false)
 
-			if dist and dist < min_dist then
+			if dist and get_all_pixels then
+				A,B,C = __v1,__v2,__v3
+				A_uv = {V1[4],V1[5]}
+				B_uv = {V2[4],V2[5]}
+				C_uv = {V3[4],V3[5]}
+
+				local u,v,w = Barycentric(pos, A,B,C)
+
+				local final_UV = {0,0}
+				final_UV[1] = u*A_uv[1] +  v*B_uv[1] + w*C_uv[1]
+				final_UV[2] = u*A_uv[2] +  v*B_uv[2] + w*C_uv[2]
+
+				local X,Y = math.floor(final_UV[1]*64)+1, math.floor(final_UV[2]*64)+1
+				table.insert(pixels, {X,Y,dist})
+			elseif dist and dist < min_dist then
 				min_dist = dist
 				min_pos = pos
 				A,B,C = __v1,__v2,__v3
@@ -434,27 +482,7 @@ function edit:pixelAtCursor()
 		end
 	end
 
-	local function Barycentric(p, a, b, c)
-		local u,v,w
-		local Dot = cpml.vec3.dot
-
-		v0 = b - a
-		v1 = c - a
-		v2 = p - a
-
-    d00 = Dot(v0, v0)
-    d01 = Dot(v0, v1)
-    d11 = Dot(v1, v1)
-    d20 = Dot(v2, v0)
-    d21 = Dot(v2, v1)
-    denom = d00 * d11 - d01 * d01
-    v = (d11 * d20 - d01 * d21) / denom
-    w = (d00 * d21 - d01 * d20) / denom
-    u = 1.0 - v - w
-		return u,v,w
-	end
-
-	if min_pos then
+	if min_pos and not get_all_pixels then
 		local u,v,w = Barycentric(min_pos, A,B,C)
 
 		local final_UV = {0,0}
@@ -468,6 +496,8 @@ function edit:pixelAtCursor()
 		--paint:drawPixel{target = target, pixel = {X,Y}, colour=col}
 
 		return X,Y
+	elseif get_all_pixels then
+		return pixels
 	end
 
 	return nil

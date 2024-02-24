@@ -40,6 +40,7 @@ EDIT_KEY_SETTINGS = {
 	["cam_zoom_out"]  = { "wheeldown"    , nil , default = "wheeldown"  },
 	["edit_undo"]  = { "z"    , nil , default = "z"  },
 	["edit_redo"]  = { "x"    , nil , default = "x"  },
+	["edit_colour_pick"]  = { "o"    , nil , default = "o"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},

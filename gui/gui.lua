@@ -13,6 +13,7 @@ local guiimggrid      = require 'gui.gridselection'
 local guitextinput    = require 'gui.textinput'
 local guicolourpicker = require 'gui.colourselect'
 local guivisible      = require 'gui.visible'
+local guilayers       = require 'gui.layers'
 
 local lang         = require 'gui.guilang'
 
@@ -145,7 +146,7 @@ function MapEditGUI:define(mapedit)
 	local picker_win_layout = guilayout:define(
 		{id="hex_region",
 		 split_type="+y",
-		 split_pix=370,
+		 split_pix=280,
 		 sub=
 			{id="picker_region",
 		 	split_type=nil,
@@ -157,8 +158,8 @@ function MapEditGUI:define(mapedit)
 	local colour_win = guiwindow:define({
 		win_min_w=300,
 		win_max_w=300,
-		win_min_h=390,
-		win_max_h=390,
+		win_min_h=300,
+		win_max_h=300,
 	}, picker_win_layout)
 	-- Picker window
 	
@@ -193,7 +194,7 @@ function MapEditGUI:define(mapedit)
 	-- Visible parts window
 	local visible_win_layout = guilayout:define(
 		{id="visible_region",
-		 split_type=slim,
+		 split_type=nil,
 		},
 		{"visible_region", region_pixoffset_f(10,10)}
 	)
@@ -204,7 +205,21 @@ function MapEditGUI:define(mapedit)
 		win_max_h=180,
 	}, visible_win_layout)
 	-- Visible parts window
-
+	
+	-- Layers window
+	local layers_win_layout = guilayout:define(
+		{id="layers_region",
+		 split_type=nil,
+		},
+		{"layers_region", region_default_f}
+	)
+	local layers_win = guiwindow:define({
+		win_min_w=280,
+		win_max_w=280,
+		win_min_h=350,
+		win_max_h=350,
+	}, layers_win_layout)
+	-- Layers window
 
 	-- Language window
 	local lang_win_layout = guilayout:define(
@@ -222,22 +237,6 @@ function MapEditGUI:define(mapedit)
 		win_max_h=115,
 		win_focus=true,
 	}, lang_win_layout)
-	-- Change map name window
-	local mapname_win_layout = guilayout:define(
-		{id="region",
-		 split_type=nil},
-		{"region", region_ypixoffset_f(0.5,10)},
-		{"region", region_ypixoffset_f(0.5,25)},
-		{"region", region_ypixoffset_f(0.5,50)}
-	)
-	local mapname_win = guiwindow:define({
-		win_min_w=200,
-		win_max_w=200,
-		win_min_h=75,
-		win_max_h=75,
-		win_focus=true,
-	}, mapname_win_layout)
-
 
 	context["help_context"] = 
 		contextmenu:define(
@@ -355,19 +354,41 @@ function MapEditGUI:define(mapedit)
 		 split_pix=20,
 		 sub = {
 			id="viewport_region",
-			split_type=nil,
+			split_type="-x",
+			split_pix=300,
+			sub = {
+				id="layers_region",
+				split_type=nil
+			}
 		 }
 		},
 
 		{"toolbar_region", function(l) return l.x,l.y,l.w,l.h end},
-		{"viewport_region", region_pixoffset_f(0,0)}
+		{"viewport_region", region_default_f},
+		{"layers_region", region_default_f}
 	)
+
+	local skin = require 'skin'
+	local edit = require 'edit'
+	local layers_picker = 
+		guilayers:new(
+			function() return skin.layers end,
+			function() return edit.active_layer end,
+			function(a) edit.active_layer = a end
+		)
+
+	--[[self.layers_win = layers_win:new({},
+	{guilayers:new(
+		function() return skin.layers end,
+		function() return edit.active_layer end,
+		function(a) edit.active_layer = a end
+	)},20,20,20,340)
+	self.main_panel:pushWindow(self.layers_win)--]]
 
 	local w,h = love.graphics.getDimensions()
 	self.main_panel = guiscreen:new(
 		panel_layout:new(
-		  0,0,w,h,{main_toolbar,
-				}),
+		  0,0,w,h,{main_toolbar,layers_picker}),
 			function(o) self:handleTopLevelThrownObject(o) end,
 			CONTROL_LOCK.EDIT_PANEL,
 			CONTROL_LOCK.EDIT_WINDOW

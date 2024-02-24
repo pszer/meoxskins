@@ -105,9 +105,9 @@ function MapEditGUILayout:define(layout, ...)
 						 update_xywh)
 					elseif stype == "-x" then
 						-- layout for the right region of the split
-						layout.x = xoffset
+						layout.x = w-xoffset
 						layout.y = y
-						layout.w = w-xoffset
+						layout.w = xoffset
 						layout.h = h
 
 						update_xywh(layout.sub,

@@ -8,6 +8,8 @@ function skin:load(texture, name)
 	local name = name or "Layer"
 	self.layers = {}
 	self:addLayer(texture, name, 1, true)
+	self:addLayer(test, "yo", 2, true)
+	self:addLayer(test, "hi", 3, true)
 end
 
 local NAME_COUNTER=0
@@ -26,7 +28,9 @@ function skin:addLayer(texture, name, index, visible)
 	canvas:setFilter("nearest","nearest")
 	love.graphics.reset()
 	love.graphics.setCanvas(canvas)
-	love.graphics.draw(texture)
+	if texture then
+		love.graphics.draw(texture)
+	end
 	love.graphics.reset()
 
 	local t
@@ -72,6 +76,26 @@ function skin:getVisibleLayers()
 		end
 	end
 	return t
+end
+
+function skin:pickColour(pixels)
+	local count = #self.layers
+	
+	table.sort(pixels, function(a,b) return a[3]<b[3] end)
+
+	for _,pix in ipairs(pixels) do
+		for i=count,1,-1 do
+			local layer = self.layers[i]
+			if layer.visible then
+				local image_data = layer.texture:newImageData()
+
+				local colour = {image_data:getPixel(pix[1]-1,pix[2]-1)}
+				if colour[4] > 0.0 then return colour end
+			end
+		end
+	end
+
+	return nil
 end
 
 return skin
