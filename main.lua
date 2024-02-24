@@ -10,16 +10,31 @@ local edit   = require 'edit'
 
 require "assetloader"
 
-function love.load()
-	local nanaskin = love.graphics.newImage("nanaskin.png")
+function love.load( args )
+	for i,v in ipairs(args) do
+		print(i,v)
+	end
+
+	args = args or {}
+	local skin_name = args[1]
+	local skin_mode = args[2]
+
+	if skin_mode and not (skin_mode == "wide" or skin_mode == "slim") then
+		error("meoxskins expects argument ./meoxskins filename wide/slim")
+	elseif not skin_mode then
+		skin_mode = "wide"
+	end
+
+	--[[local nanaskin = love.graphics.newImage("nanaskin.png")
+	MAG = love.graphics.newImage("img/mag.png")
 	nanaskin:setFilter("nearest","nearest")
 
-	skin:addLayer(nanaskin, "Base", 1, true)
+	skin:addLayer(nanaskin, "Base", 1, true)--]]
 	model:generateModelMatrix()
 
 	Loader:initThread()
 
-	edit:load()
+	edit:load{skin_name = skin_name, skin_mode = skin_mode}
 
 	camera:setPos(0,0,-16)
 	camera:calcProj()
@@ -37,6 +52,14 @@ end
 function love.draw()
 	render:clear3DCanvas()
 	render:viewportPass(render.shader3d)
+
+	--[[if edit.ray_mesh then
+		love.graphics.setMeshCullMode("none")
+		render.shader3d:send("u_model", "column", cpml.mat4.new())
+		render.shader3d:send("SkinTexture", MAG)
+		love.graphics.draw(edit.ray_mesh)
+	end--]]
+
 	--render:clearDepthBuffer()
 	render:viewportPass(render.shader3dgrid)
 

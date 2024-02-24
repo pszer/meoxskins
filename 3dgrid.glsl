@@ -37,7 +37,7 @@ uniform Image MainTex;
 void effect( ) {
 	vec2 f = mod(VaryingTexCoord.xy-vec2(1/2048,1/2048), vec2(1/64.0,1/64.0));
 	if (f.x < 1/1024.0 || f.y < 1/1024.0 ) {
-		love_Canvases[0] = vec4(0.9,0.9,0.9,0.25);
+		love_Canvases[0] = vec4(0.9,0.9,0.9,0.15);
 	} else {
 		love_Canvases[0] = vec4(0.0,0.0,0.0,0.0);
 	}

@@ -17,7 +17,7 @@ end
 function camera:calcProj(x,y)
 	x = x or love.graphics.getWidth()
 	y = y or love.graphics.getHeight()
-	self.proj_m = cpml.mat4.from_perspective(75,x/y,0.5,512)
+	self.proj_m = cpml.mat4.from_perspective(75,x/y,1,512)
 end
 
 local _tempvec3 = cpml.vec3.new()

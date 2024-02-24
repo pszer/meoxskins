@@ -244,7 +244,11 @@ function MapEditGUI:define(mapedit)
 		},
 		function(props) return
 		{lang["Save"],action=function()
-			mapedit:exportAndWriteToFile("test2.lua")
+			local edit = require 'edit'
+			local dialog = require 'dialog'
+			local filepath = dialog.save("Save as")
+			print(filepath)
+			edit:saveToFile(filepath, true)
 		end},
 		{lang["Open"],action=function()
 		end},
@@ -350,12 +354,13 @@ function MapEditGUI:define(mapedit)
 			end
 		end
 	)
+	self.colour_picker:colour_change_hook()
 
 	self.colour_picker_win = colour_win:new({},
-		{self.colour_picker,self.hex_input},20,20,600,600)
+		{self.colour_picker,self.hex_input},20,20)
+	self.main_panel:pushWindow(self.colour_picker_win)
 	self.colour_picker:setX(10)
 	self.colour_picker:setY(30)
-	self.main_panel:pushWindow(self.colour_picker_win)
 end
 
 --

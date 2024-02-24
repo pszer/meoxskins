@@ -2,7 +2,7 @@ local modelv = require 'modelverts'
 --local cpml   = require 'cpml'
 local mat    = require 'mat4'
 
-local v_format = {
+v_format = {
 	{"VertexPosition", "float", 3},
 	{"VertexTexCoord", "float", 2},
 	{"VertexNormal", "float", 3},

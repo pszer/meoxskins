@@ -8,6 +8,14 @@ local guirender   = require 'gui.guidraw'
 local commands    = require 'gui.command'
 local lang        = require 'gui.guilang'
 
+local model = require 'model'
+local skin = require 'skin'
+local paint = require 'paint'
+
+local paint = require 'paint'
+
+local fileio = require 'fileio'
+
 local edit = {
 
 	mode = "viewport",
@@ -26,11 +34,32 @@ local edit = {
 	curr_context_menu = nil,
 	curr_popup = nil,
 
-	file_dropped_hook = nil
+	file_dropped_hook = nil,
+
+	active_layer = nil,
+	active_mode  = "wide",
+
+	working_filename = nil
 }
 edit.__index = edit
 
 function edit:load(args)
+	local skin_name = args.skin_name
+	local skin_mode = args.skin_mode or "wide" -- slim or wide parameter
+
+	local texture
+	if not skin_name then
+		texture = love.graphics.newCanvas(64,64)
+	else
+		print("YOWZA")
+		local data = fileio:dataFromFile(skin_name)
+		texture = love.graphics.newImage(data)
+
+		self.working_filename = file
+	end
+
+	skin:load(texture)
+
 	SET_ACTIVE_KEYBINDS(EDIT_KEY_SETTINGS)
 	CONTROL_LOCK.EDIT_VIEW.open()
 
@@ -276,28 +305,6 @@ end
 
 function edit:setupInputHandling()
 	--
-	-- CONTEXT MENU MODE INPUTS
-	--
-	--[[self.cxtm_input = InputHandler:new(CONTROL_LOCK.MAPEDIT_CONTEXT,
-	                                   {"cxtm_select","cxtm_scroll_up","cxtm_scroll_down"})
-
-	local cxtm_select_option = Hook:new(function ()
-		local cxtm = gui.curr_context_menu
-		if not cxtm then
-			gui:exitContextMenu()
-			return end
-		local hovered_opt = cxtm:getCurrentlyHoveredOption()
-		if not hovered_opt then
-			gui:exitContextMenu()
-			return end
-		local action = hovered_opt.action
-		if action then action() end
-		gui:exitContextMenu()
-	end)
-	self.cxtm_input:getEvent("cxtm_select", "down"):addHook(cxtm_select_option)
-	--]]
-
-	--
 	-- VIEWPORT MODE INPUTS
 	--
 	self.viewport_input = InputHandler:new(CONTROL_LOCK.EDIT_VIEW,
@@ -360,9 +367,19 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("ctrl", "up"):addHook(disable_ctrl_hook)
 	self.viewport_input:getEvent("alt", "down"):addHook(enable_alt_hook)
 	self.viewport_input:getEvent("alt", "up"):addHook(disable_alt_hook)
+
+	--[[local paint_action_start = Hook:new(function ()
+		
+	end)--]]
+	local paint_action_held = Hook:new(function ()
+		self:pixelAtCursor()	
+	end)
+
+	self.viewport_input:getEvent("edit_action","held"):addHook(paint_action_held)
 end
 
 function edit:pixelAtCursor()
+
 	local unproject = cpml.mat4.unproject
 
 	local cam = require 'camera'
@@ -370,10 +387,102 @@ function edit:pixelAtCursor()
 	local vw,vh = love.window.getMode()
 	local viewport_xywh = {0,0,vw,vh}
 
-	local cursor_v = cpml.vec3.new(x,y,1)
-	local cam_pos = cpml.vec3.new(cam:getPos())
+	local x,y = love.mouse.getPosition()
+	local cursor_v = cpml.vec3.new(x,y,1.0)
+	local cursor_v2 = cpml.vec3.new(x,y,0)
+	local cam_pos = cpml.vec3.new(cam.pos)
 	local unproject_v = unproject(cursor_v, viewproj, viewport_xywh)
-	local ray = {position=cam_pos, direction=cpml.vec3.normalize(unproject_v - cam_pos)}
+	local unproject_v2 = unproject(cursor_v2, viewproj, viewport_xywh)
+	--local ray = {position=cam_pos, direction=cpml.vec3.normalize(unproject_v - cam_pos)}
+	local ray = {position=unproject_v2, direction=cpml.vec3.normalize(unproject_v - unproject_v2)}
+
+	local min_dist = 1/0
+	local min_pos = nil
+	local A,B,C
+	local A_uv,B_uv,C_uv
+	local visible = model.visible
+
+	--[[local RV1 = {ray.position.x, ray.position.y, ray.position.z, 0,0,0,0,1}
+	local RV2 = {ray.position.x, ray.position.y-0.5, ray.position.z, 0.5,0,0,0,1}
+	local RV3 = {ray.position.x+ray.direction.x*100, ray.position.y+ray.direction.y*100, ray.position.z+ray.direction.z*100, 0.5,0.5,0,0,1}
+	local RV4 = {ray.position.x+ray.direction.x*100, ray.position.y+ray.direction.y*100-0.5, ray.position.z+ray.direction.z*100, 0.5,0.5,0,0,1}
+	self.ray_mesh = love.graphics.newMesh(v_format, {RV1,RV2,RV3,RV1,RV3,RV4}, "triangles", "static")--]]
+
+	for _,v in ipairs(model:getVisibleParts()) do
+		local mesh = v.mesh
+		local mat  = v.mat
+
+		local start_vi,end_vi = 1,mesh:getVertexCount()
+
+		for i=start_vi,end_vi-1,3 do
+			local V1 = {mesh:getVertex(i+0)}
+			local V2 = {mesh:getVertex(i+1)}
+			local V3 = {mesh:getVertex(i+2)}
+
+			local V1t = {V1[1],V1[2],V1[3],1.0}
+			local V2t = {V2[1],V2[2],V2[3],1.0}
+			local V3t = {V3[1],V3[2],V3[3],1.0}
+
+			cpml.mat4.mul_vec4(V1t, mat, V1t)
+			cpml.mat4.mul_vec4(V2t, mat, V2t)
+			cpml.mat4.mul_vec4(V3t, mat, V3t)
+
+			local __v1 = cpml.vec3.new()
+			local __v2 = cpml.vec3.new()
+			local __v3 = cpml.vec3.new()
+
+			__v1.x,__v1.y,__v1.z = V1t[1],V1t[2],V1t[3]
+			__v2.x,__v2.y,__v2.z = V2t[1],V2t[2],V2t[3]
+			__v3.x,__v3.y,__v3.z = V3t[1],V3t[2],V3t[3]
+
+			local ray_triangle = cpml.intersect.ray_triangle
+
+			local pos,dist = ray_triangle(ray, {__v1,__v2,__v3}, false)
+
+			if dist and dist < min_dist then
+				min_dist = dist
+				min_pos = pos
+				A,B,C = __v1,__v2,__v3
+				A_uv = {V1[4],V1[5]}
+				B_uv = {V2[4],V2[5]}
+				C_uv = {V3[4],V3[5]}
+			end
+		end
+	end
+
+	local function Barycentric(p, a, b, c)
+		local u,v,w
+		local Dot = cpml.vec3.dot
+
+		v0 = b - a
+		v1 = c - a
+		v2 = p - a
+
+    d00 = Dot(v0, v0)
+    d01 = Dot(v0, v1)
+    d11 = Dot(v1, v1)
+    d20 = Dot(v2, v0)
+    d21 = Dot(v2, v1)
+    denom = d00 * d11 - d01 * d01
+    v = (d11 * d20 - d01 * d21) / denom
+    w = (d00 * d21 - d01 * d20) / denom
+    u = 1.0 - v - w
+		return u,v,w
+	end
+
+	if min_pos then
+		local u,v,w = Barycentric(min_pos, A,B,C)
+
+		local final_UV = {0,0}
+		final_UV[1] = u*A_uv[1] +  v*B_uv[1] + w*C_uv[1]
+		final_UV[2] = u*A_uv[2] +  v*B_uv[2] + w*C_uv[2]
+
+		local X,Y = math.floor(final_UV[1]*64)+1, math.floor(final_UV[2]*64)+1
+
+		local col = gui.colour_picker:getColour()
+		local target = skin.layers[1].texture
+		paint:drawPixel{target = target, pixel = {X,Y}, colour=col}
+	end
 end
 
 local grabbed_mouse_x=0
@@ -446,6 +555,25 @@ function edit:mousemoved(x,y, dx,dy)
 	if self.view_rotate_mode then
 		self:rotateCamMode(dx or 0,dy or 0)
 	end
+end
+
+function edit:saveToFile(filepath, only_visible)
+	local raster = love.graphics.newCanvas(64,64)
+	love.graphics.reset()
+	love.graphics.setCanvas(raster)
+	for i,v in ipairs(skin.layers) do
+		local tex = v.texture
+		local vis = v.visible
+
+		if vis or (not vis and not only_visible) then
+			love.graphics.draw(tex)
+		end
+	end
+
+	love.graphics.reset()
+	local image_data = raster:newImageData()
+	local data = image_data:encode("png")
+	fileio:writeToFile(data, filepath)
 end
 
 function edit:viewport_mousemoved(x,y,dx,dy)

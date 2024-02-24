@@ -5,10 +5,16 @@ local skin = {
 
 }
 
-local ID_COUNTER=0
+function skin:load(texture, name)
+	local name = name or "Layer"
+	self.layers = {}
+	self:addLayer(texture, name, 1, true)
+end
+
+local NAME_COUNTER=0
 function skin:addLayer(texture, name, index, visible)
 	if name==nil then
-		ID_COUNTER = ID_COUNTER + 1
+		NAME_COUNTER = NAME_COUNTER + 1
 		name = "Layer "..tostring(ID_COUNTER)
 	end
 	
@@ -16,7 +22,15 @@ function skin:addLayer(texture, name, index, visible)
 	local size = #self.layers
 	if index < 1 then index = 1 end
 	if index > size+1 then index = size+1 end
-	table.insert(self.layers, index, { texture=texture, name=name, visible=visible })
+
+	local canvas = love.graphics.newCanvas(64,64)
+	canvas:setFilter("nearest","nearest")
+	love.graphics.reset()
+	love.graphics.setCanvas(canvas)
+	love.graphics.draw(texture)
+	love.graphics.reset()
+
+	table.insert(self.layers, index, { texture=canvas, name=name, visible=visible, edit=nil })
 end
 
 function skin:emptyLayer()
