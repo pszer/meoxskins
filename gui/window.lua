@@ -43,7 +43,7 @@ local WindowProps = Props:prototype{
 
 function MapEditGUIWindow:define(default_props, layout_def)
 	local obj = {
-		new = function (self, props, elements, w,h)
+		new = function (self, props, elements, w,h,x,y)
 			local this = {
 				props = WindowProps(default_props),
 				layout = nil,
@@ -92,8 +92,8 @@ function MapEditGUIWindow:define(default_props, layout_def)
 			this:setH(h)
 
 			local winw,winh = love.graphics.getDimensions()
-			this.x = winw*0.5 - this.w*0.5
-			this.y = winh*0.5 - this.h*0.5
+			this.x = x or winw*0.5 - this.w*0.5
+			this.y = y or winh*0.5 - this.h*0.5
 			this.layout = layout_def:new(this.x,this.y,this.w,this.h,this.elements)
 
 			function this:update()

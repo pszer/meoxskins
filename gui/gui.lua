@@ -161,6 +161,33 @@ function MapEditGUI:define(mapedit)
 	}, picker_win_layout)
 	-- Picker window
 	
+	-- Wide/Slim skin mode window
+	local skin_mode_win_layout = guilayout:define(
+		{id="text_region",
+		 split_type="+y",
+		 split_pix=40,
+		 sub=
+		 	{id="wide_region",
+			 split_type="+x",
+			 split_pix=50,
+			 sub={
+			 	id="slim_region",
+				split_type=nil
+			 }
+			}
+		},
+		{"text_region", region_pixoffset_f(0,4)},
+		{"wide_region", region_pixoffset_f(8,0)},
+		{"slim_region", region_pixoffset_f(8,0)}
+	)
+	local skin_mode_win = guiwindow:define({
+		win_min_w=100,
+		win_max_w=100,
+		win_min_h=60,
+		win_max_h=60,
+		win_focus=true,
+	}, skin_mode_win_layout)
+	
 
 	-- Language window
 	local lang_win_layout = guilayout:define(
@@ -247,10 +274,36 @@ function MapEditGUI:define(mapedit)
 			local edit = require 'edit'
 			local dialog = require 'dialog'
 			local filepath = dialog.save("Save as")
-			print(filepath)
-			edit:saveToFile(filepath, true)
+			if filepath then
+				edit:saveToFile(filepath, true)
+			end
 		end},
 		{lang["Open"],action=function()
+			local edit = require 'edit'
+			local dialog = require 'dialog'
+			local filepath = dialog.open("Open")
+			if filepath and filepath ~= "" then
+			return skin_mode_win:new(
+				{},
+				{
+					guitextbox:new(lang["Skin type?"],0,0,100,"center","left","top"),
+					guibutton:new(lang["Wide"],nil,0,0,
+						function(self,win)
+							win:delete()
+							edit:load(filepath,"wide")
+							clearKeys()
+						end,
+						"left","middle"),
+					guibutton:new(lang["Slim"],nil,0,0,
+						function(self,win)
+							win:delete()
+							edit:load{skin_name=filepath,skin_mode="slim"}
+							clearKeys()
+						end,
+						"left","middle"),
+				},0,0
+			)
+			end
 		end},
 		{" --- "},
 		{lang["~iQuit"],action=function()love.event.quit()end}
@@ -357,10 +410,10 @@ function MapEditGUI:define(mapedit)
 	self.colour_picker:colour_change_hook()
 
 	self.colour_picker_win = colour_win:new({},
-		{self.colour_picker,self.hex_input},20,20)
+		{self.colour_picker,self.hex_input},20,20,20,30)
 	self.main_panel:pushWindow(self.colour_picker_win)
-	self.colour_picker:setX(10)
-	self.colour_picker:setY(30)
+	--self.colour_picker:setX(10)
+	--self.colour_picker:setY(30)
 end
 
 --

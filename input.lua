@@ -184,6 +184,10 @@ function updateKeys()
 	end
 end
 
+function clearKeys()
+	CONTROL_KEYS_DOWN = {}
+end
+
 -- prematurely stop a key input
 function silenceKey(scancode)
 	CONTROL_KEYS_DOWN[scancode] = nil

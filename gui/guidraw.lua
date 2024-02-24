@@ -121,6 +121,19 @@ function MapEditGUIRender:initAssets()
 
 	self.__bar = Loader:getTextureReference("bar.png")
 
+	self.head = Loader:getTextureReference("s_head.png")
+	self.head_o = Loader:getTextureReference("s_heado.png")
+	self.torso = Loader:getTextureReference("s_torso.png")
+	self.torso_o = Loader:getTextureReference("s_torsoo.png")
+	self.rightleg = Loader:getTextureReference("s_rightleg.png")
+	self.rightleg_o = Loader:getTextureReference("s_rightlego.png")
+	self.leftleg = Loader:getTextureReference("s_leftleg.png")
+	self.leftleg_o = Loader:getTextureReference("s_leftlego.png")
+	self.rightarm = Loader:getTextureReference("s_rightarm.png")
+	self.rightarm_o = Loader:getTextureReference("s_rightarmo.png")
+	self.leftarm = Loader:getTextureReference("s_leftarm.png")
+	self.leftarm_o = Loader:getTextureReference("s_leftarmo.png")
+
 	self.checkerboard_tex = Loader:getTextureReference("checkerboard.png")
 	self.checkerboard_tex:setWrap("repeat","repeat")
 
