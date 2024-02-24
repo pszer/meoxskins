@@ -2,6 +2,7 @@ require "assetloader"
 
 local shadersend   = require "shadersend"
 local cpml         = require "cpml"
+local render       = require "render"
 
 local gui         = require 'gui.gui'
 local guirender   = require 'gui.guidraw'
@@ -39,7 +40,11 @@ local edit = {
 	active_layer = nil,
 	active_mode  = "wide",
 
-	working_filename = nil
+	working_filename = nil,
+
+	command_stack = {},
+	command_pointer = 0,
+	command_stack_max = 128,
 }
 edit.__index = edit
 
@@ -61,6 +66,7 @@ function edit:load(args)
 
 	skin:load(texture)
 	self.active_mode = skin_mode
+	self.active_layer = skin.layers[1]
 	model:setupVisibility(skin_mode)
 
 	SET_ACTIVE_KEYBINDS(EDIT_KEY_SETTINGS)
@@ -116,80 +122,20 @@ end
 function edit:defineCommands()
 	coms = self.commands
 
-	coms["invertible_select"] = commands:define(
+	coms["commit_paint"] = commands:define(
 		{
-		 {"select_objects", "table", nil, PropDefaultTable{}},
+		 {"layer", nil, nil, nil},
+		 {"old_texture", nil, nil, nil},
+		 {"new_texture", nil, nil, nil},
 		},
 		function(props) -- command function
-			self.selection_changed = true
-			local mapedit = self
-			local active_selection = mapedit.active_selection
-			local skip = {}
-
-			-- first we inverse the selection if already selected
-			for i,v in ipairs(props.select_objects) do
-				for j,u in ipairs(active_selection) do
-					if v[2] == u[2] then
-						skip[i] = true
-						table.remove(active_selection, j)
-						self:highlightObject(v,0.0)
-						break
-					end
-				end
-			end
-
-			for i,v in ipairs(props.select_objects) do
-				if not skip[i] then
-					local unique = true
-					for j,u in ipairs(active_selection) do
-						if v[2] == u[2] then
-							unique = false
-							break
-						end
-					end
-
-					if unique then
-						table.insert(active_selection, v)
-						self:highlightObject(v,1.0)
-					end
-				end
-			end
+			props.layer.texture = props.new_texture
+			props.layer.preview = nil
 		end, -- command function
 
 		function(props) -- undo command function
-			self.selection_changed = true
-			local mapedit = self
-			local active_selection = mapedit.active_selection
-			local skip = {}
-
-			-- invert any previous invert selections
-			for i,v in ipairs(props.select_objects) do
-				local unique = true
-				for j,u in ipairs(active_selection) do
-					if v == u then
-						unique = false
-						break
-					end
-				end
-
-				if unique then
-					skip[i] = true
-					table.insert(active_selection, v)
-					self:highlightObject(v,1.0)
-				end
-			end
-
-			for i,v in ipairs(props.select_objects) do
-				if not skip[i] then
-					for j,u in ipairs(active_selection) do
-						if v == u then
-							table.remove(active_selection, j)
-							self:highlightObject(v,0.0)
-							break
-						end
-					end
-				end
-			end -- undo command function
+			props.layer.texture = props.old_texture
+			props.layer.preview = nil
 		end) 
 
 end
@@ -201,8 +147,8 @@ function edit:commitCommand(command_name, props)
 	local command = command_definition:new(props)
 	assert(command)
 
-	local pointer = self.props.mapedit_command_pointer
-	local command_history = self.props.mapedit_command_stack
+	local pointer = self.command_pointer
+	local command_history = self.command_stack
 	local history_length = #command_history
 	-- if the command pointer isn'at the top of the stack (i.e. there have been undo operations)
 	-- we prune any commands after it
@@ -218,14 +164,14 @@ function edit:commitCommand(command_name, props)
 	-- add the new command to the stack, shifting it down if maximum limit of
 	-- remembered commands is reached
 	history_length = #command_history
-	if history_length > self.props.mapedit_command_stack_max then
+	if history_length > self.command_stack_max then
 		for i=1,history_length-1 do
 			command_history[i] = command_history[i+1]
 		end
 		command_history[history_length] = nil
-		self.props.mapedit_command_pointer = history_length
+		self.command_pointer = history_length
 	else
-		self.props.mapedit_command_pointer = history_length
+		self.command_pointer = history_length
 	end
 
 	command:commit()
@@ -279,24 +225,24 @@ function edit:commitComposedCommand(...)
 end
 
 function edit:commitUndo()
-	local pointer = self.props.mapedit_command_pointer
-	local command_history = self.props.mapedit_command_stack
+	local pointer = self.command_pointer
+	local command_history = self.command_stack
 
 	if pointer == 0 then return end
 	local command = command_history[pointer]
 	command:undo()
-	self.props.mapedit_command_pointer = self.props.mapedit_command_pointer - 1
+	self.command_pointer = self.command_pointer - 1
 end
 
 function edit:commitRedo()
-	local pointer = self.props.mapedit_command_pointer
-	local command_history = self.props.mapedit_command_stack
+	local pointer = self.command_pointer
+	local command_history = self.command_stack
 	local history_length = #command_history
 
 	if pointer == history_length then return end
 	local command = command_history[pointer+1]
 	command:commit()
-	self.props.mapedit_command_pointer = self.props.mapedit_command_pointer + 1
+	self.command_pointer = self.command_pointer + 1
 end
 
 function edit:canUndo()
@@ -304,6 +250,14 @@ function edit:canUndo()
 end
 function edit:canRedo()
 	return self.props.mapedit_command_pointer ~= #(self.props.mapedit_command_stack)
+end
+
+function edit:setActiveLayer(layer)
+	self.active_layer = layer
+end
+
+function edit:getActiveLayer(layer)
+	return self.active_layer
 end
 
 function edit:setupInputHandling()
@@ -351,7 +305,7 @@ function edit:setupInputHandling()
 	local viewport_undo = Hook:new(function ()
 		if self.ctrl_modifier then self:commitUndo() end end)
 	local viewport_redo = Hook:new(function ()
-		if self.ctrl_modifer then self:commitRedo() end end)
+		if self.ctrl_modifier then self:commitRedo() end end)
 
 	local enable_super_hook = Hook:new(function () self.super_modifier = true end)
 	local disable_super_hook = Hook:new(function () self.super_modifier = false end)
@@ -371,14 +325,48 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("alt", "down"):addHook(enable_alt_hook)
 	self.viewport_input:getEvent("alt", "up"):addHook(disable_alt_hook)
 
-	--[[local paint_action_start = Hook:new(function ()
-		
-	end)--]]
+	local paint_history = nil
+	local paint_layer = nil
+	local paint_target = nil
+	local paint_action_start = Hook:new(function ()
+		if not self:pixelAtCursor()	then return end
+
+		paint_history = {}
+
+		local layer = self:getActiveLayer()
+		paint_layer = layer
+		paint_target = layer.open_preview()
+	end)
 	local paint_action_held = Hook:new(function ()
-		self:pixelAtCursor()	
+		--local X,Y = self:pixelAtCursor()	
+		--		local col = gui.colour_picker:getColour()
+		--local target = skin.layers[1].texture
+		--paint:drawPixel{target = target, pixel = {X,Y}, colour=col}
+		local X,Y = self:pixelAtCursor()
+
+		-- avoid painting over the same pixel twice
+		if paint_history and paint_history[X] and paint_history[X][Y] then return end
+		if not paint_history[X] then paint_history[X] = {} end
+		paint_history[X][Y] = true
+
+		local col = gui.colour_picker:getColour()
+		paint:drawPixel{target = paint_target, pixel={X,Y}, colour=col}
+	end)
+	local paint_action_end = Hook:new(function ()
+		if paint_layer then
+			local old,new = paint_layer.commit_preview()
+
+			self:commitCommand("commit_paint", {layer=paint_layer,old_texture=old,new_texture=new})
+		end
+
+		paint_history = nil
+		paint_layer = nil
+		paint_target = nil
 	end)
 
+	self.viewport_input:getEvent("edit_action","down"):addHook(paint_action_start)
 	self.viewport_input:getEvent("edit_action","held"):addHook(paint_action_held)
+	self.viewport_input:getEvent("edit_action","up"):addHook(paint_action_end)
 end
 
 function edit:pixelAtCursor()
@@ -396,7 +384,6 @@ function edit:pixelAtCursor()
 	local cam_pos = cpml.vec3.new(cam.pos)
 	local unproject_v = unproject(cursor_v, viewproj, viewport_xywh)
 	local unproject_v2 = unproject(cursor_v2, viewproj, viewport_xywh)
-	--local ray = {position=cam_pos, direction=cpml.vec3.normalize(unproject_v - cam_pos)}
 	local ray = {position=unproject_v2, direction=cpml.vec3.normalize(unproject_v - unproject_v2)}
 
 	local min_dist = 1/0
@@ -404,12 +391,6 @@ function edit:pixelAtCursor()
 	local A,B,C
 	local A_uv,B_uv,C_uv
 	local visible = model.visible
-
-	--[[local RV1 = {ray.position.x, ray.position.y, ray.position.z, 0,0,0,0,1}
-	local RV2 = {ray.position.x, ray.position.y-0.5, ray.position.z, 0.5,0,0,0,1}
-	local RV3 = {ray.position.x+ray.direction.x*100, ray.position.y+ray.direction.y*100, ray.position.z+ray.direction.z*100, 0.5,0.5,0,0,1}
-	local RV4 = {ray.position.x+ray.direction.x*100, ray.position.y+ray.direction.y*100-0.5, ray.position.z+ray.direction.z*100, 0.5,0.5,0,0,1}
-	self.ray_mesh = love.graphics.newMesh(v_format, {RV1,RV2,RV3,RV1,RV3,RV4}, "triangles", "static")--]]
 
 	for _,v in ipairs(model:getVisibleParts()) do
 		local mesh = v.mesh
@@ -482,10 +463,14 @@ function edit:pixelAtCursor()
 
 		local X,Y = math.floor(final_UV[1]*64)+1, math.floor(final_UV[2]*64)+1
 
-		local col = gui.colour_picker:getColour()
-		local target = skin.layers[1].texture
-		paint:drawPixel{target = target, pixel = {X,Y}, colour=col}
+		--local col = gui.colour_picker:getColour()
+		--local target = skin.layers[1].texture
+		--paint:drawPixel{target = target, pixel = {X,Y}, colour=col}
+
+		return X,Y
 	end
+
+	return nil
 end
 
 local grabbed_mouse_x=0
@@ -542,6 +527,14 @@ function edit:update(dt)
 end
 
 function edit:draw()
+	render:clear3DCanvas()
+	render:viewportPass(render.shader3d)
+	render:viewportPass(render.shader3dgrid)
+
+	love.graphics.setCanvas()
+	love.graphics.reset()
+	love.graphics.draw(render.viewport3d)
+
 	love.graphics.reset()
 	love.graphics.origin()
 	love.graphics.setShader()

@@ -45,7 +45,11 @@ function render:viewportPass(shader,clear)
 	local visible_parts = model:getVisibleParts()
 
 	for i,layer in ipairs(skin_layers) do
-		model:applyLayerTexture(layer.texture)
+		if layer.preview then
+			model:applyLayerTexture(layer.preview)
+		else
+			model:applyLayerTexture(layer.texture)
+		end
 		for i,v in ipairs(visible_parts) do
 			shader:send("u_model","column",v.mat)
 			love.graphics.draw(v.mesh)

@@ -50,23 +50,6 @@ function love.update(dt)
 end
 
 function love.draw()
-	render:clear3DCanvas()
-	render:viewportPass(render.shader3d)
-
-	--[[if edit.ray_mesh then
-		love.graphics.setMeshCullMode("none")
-		render.shader3d:send("u_model", "column", cpml.mat4.new())
-		render.shader3d:send("SkinTexture", MAG)
-		love.graphics.draw(edit.ray_mesh)
-	end--]]
-
-	--render:clearDepthBuffer()
-	render:viewportPass(render.shader3dgrid)
-
-	love.graphics.setCanvas()
-	love.graphics.reset()
-	love.graphics.draw(render.viewport3d)
-
 	edit:draw()
 end
 

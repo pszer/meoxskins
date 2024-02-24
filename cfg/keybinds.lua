@@ -39,7 +39,7 @@ EDIT_KEY_SETTINGS = {
 	["cam_zoom_in"]   = { "wheelup"  , nil , default = "wheelup"  },
 	["cam_zoom_out"]  = { "wheeldown"    , nil , default = "wheeldown"  },
 	["edit_undo"]  = { "z"    , nil , default = "z"  },
-	["edit_redo"]  = { "y"    , nil , default = "y"  },
+	["edit_redo"]  = { "x"    , nil , default = "x"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},

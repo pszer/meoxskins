@@ -1,7 +1,6 @@
 local skin = {
 
 	layers = {},
-	--layers_visible = {},
 
 }
 
@@ -30,7 +29,31 @@ function skin:addLayer(texture, name, index, visible)
 	love.graphics.draw(texture)
 	love.graphics.reset()
 
-	table.insert(self.layers, index, { texture=canvas, name=name, visible=visible, edit=nil })
+	local t
+	t = 
+		{ 
+			texture=canvas,
+			name=name,
+			visible=visible,
+			preview=nil,
+
+			open_preview = function()
+				love.graphics.reset()
+				t.preview = love.graphics.newCanvas(64,64)
+				t.preview:setFilter("nearest","nearest")
+				love.graphics.setCanvas(t.preview)
+				love.graphics.draw(t.texture)
+				love.graphics.reset()
+				return t.preview
+			end,
+
+			commit_preview = function()
+				local old_texture = t.texture
+				t.texture = t.preview
+				return old_texture, t.texture
+			end
+		}
+	table.insert(self.layers, index, t)
 end
 
 function skin:emptyLayer()
