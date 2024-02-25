@@ -8,14 +8,14 @@ function skin:load(texture, name)
 	local name = name or "Layer"
 	self.layers = {}
 	self:addLayer(texture, name, 1, true)
-	self:addLayer(test, "yo", 2, true)
-	self:addLayer(test, "hi", 3, true)
 end
 
 local NAME_COUNTER=0
+local ID_COUNTER=0
 function skin:addLayer(texture, name, index, visible)
 	if name==nil then
 		NAME_COUNTER = NAME_COUNTER + 1
+		ID_COUNTER = ID_COUNTER + 1
 		name = "Layer "..tostring(ID_COUNTER)
 	end
 	
@@ -58,6 +58,70 @@ function skin:addLayer(texture, name, index, visible)
 			end
 		}
 	table.insert(self.layers, index, t)
+end
+
+function skin:insertLayer(layer, index)
+	if index then
+		table.insert(self.layers,index,layer)
+	else
+		table.insert(self.layers,layer)
+	end
+end
+
+function skin:removeLayer(index)
+	if type(index) == "number" then
+		local layer = self.layers[index]
+		table.remove(self.layers, index)
+		return layer, index
+	else
+		local I
+		for i,v in ipairs(self.layers) do
+			if v==index then
+				I=i
+				break
+			end
+		end
+		if I then
+			local layer = self.layers[I]
+			table.remove(self.layers, I)
+			return layer, I
+		end
+	end
+end
+
+function skin:createEmptyLayer(name)
+	if name==nil then
+		NAME_COUNTER = NAME_COUNTER + 1
+		ID_COUNTER = ID_COUNTER + 1
+		name = "Layer "..tostring(ID_COUNTER)
+	end
+	local canvas = love.graphics.newCanvas(64,64)
+	canvas:setFilter("nearest","nearest")
+	local t
+	t = 
+		{ 
+			texture=canvas,
+			name=name,
+			visible=true,
+			preview=nil,
+
+			open_preview = function()
+				love.graphics.reset()
+				t.preview = love.graphics.newCanvas(64,64)
+				t.preview:setFilter("nearest","nearest")
+				love.graphics.setCanvas(t.preview)
+				love.graphics.draw(t.texture)
+				love.graphics.reset()
+				return t.preview
+			end,
+
+			commit_preview = function()
+				local old_texture = t.texture
+				t.texture = t.preview
+				return old_texture, t.texture
+			end
+		}
+	return t
 end
 
 function skin:emptyLayer()

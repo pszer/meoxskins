@@ -37,6 +37,8 @@ local MapEditGUIRender = {
 	__scrlb_b  = nil,
 
 	__bar = nil,
+	__visible = nil,
+	__invisible = nil,
 
 	icons = {},
 
@@ -120,6 +122,9 @@ function MapEditGUIRender:initAssets()
 	self.__scrlb_b = Loader:getTextureReference("scrlb_b.png")
 
 	self.__bar = Loader:getTextureReference("bar.png")
+
+	self.__visible = Loader:getTextureReference("visible.png")
+	self.__invisible = Loader:getTextureReference("invisible.png")
 
 	self.head = Loader:getTextureReference("s_head.png")
 	self.head_o = Loader:getTextureReference("s_heado.png")

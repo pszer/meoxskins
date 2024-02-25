@@ -305,6 +305,19 @@ local MapEditGUILanguageStrings = {
 		jp="~b~(red)角度"
 	},
 
+	["Skin type?"]={
+		pl="Typ skinu?",
+		jp="スキン型？"
+	},
+	["Slim"]={
+		pl="Szczupły",
+		jp="スリム"
+	},
+	["Wide"]={
+		pl="Szeroki",
+		jp="広い"
+	},
+
 	["default_group_name"]={
 		eng="Group",
 		pl ="Grupa",

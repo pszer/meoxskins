@@ -112,11 +112,15 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 				if txt then
 					local tw,th = txt:getDimensions()
 					if txt_x < 0 then txt_x = 0 end
-					love.graphics.setColor(0,0,0,1)
-					love.graphics.rectangle("fill", txt_x, txt_y, tw, th)
-					love.graphics.setColor(1,1,1,1)
 					love.graphics.draw(txt, txt_x, txt_y)
 				end
+			end
+
+			local visible = t[count-I].visible
+			if visible then
+				love.graphics.draw(guirender.__visible, _x+grid_pix_w-66,_y)
+			else
+				love.graphics.draw(guirender.__invisible, _x+grid_pix_w-66,_y)
 			end
 		end
 
@@ -152,7 +156,19 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 			local hover_selection = self.table()[I]
 			if hover_selection then
 				self.hovered_selection = hover_selection
+
+				local X = self.x
+				local h_offset = self.grid_h_offset
+				local _x,_y = X,
+											Y*grid_pix_h - h_offset + y
+				if mx >= _x+grid_pix_w-41 and mx <= _x+grid_pix_w-25 and
+				   my >= _y+17 and my <= _y+41 then
+					 self.hovered_visible_icon = true
+				else
+					self.hovered_visible_icon = false
+				end
 			else
+				self.hovered_visible_icon = false
 				self.hovered_selection = nil
 			end
 
@@ -193,7 +209,11 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 			return
 		elseif self.hover and self.hovered_selection then
 			--self.curr_selection = self.hovered_selection
-			set_active(self.hovered_selection)
+			if not self.hovered_visible_icon then
+				set_active(self.hovered_selection)
+			else
+				self.hovered_selection.visible = not self.hovered_selection.visible
+			end
 		end
 
 		if self.__action then

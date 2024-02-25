@@ -62,59 +62,6 @@ function MapEditGUI:define(mapedit)
 	guitextinput:setup(function(i,t) return self:setTextInputHook(i,t)  end,
 	                   function( i ) return self:removeTextInputHook(i) end)
 
-	context["select_undef_context"] = 
-		contextmenu:define(
-		{
-		}
-		,
-		function(props) return
-		 {lang["~bCopy"],
-		  action=function(props)
-		    end,
-			disable = true,
-		  icon = "mapedit/icon_copy.png"},
-
-		 {lang["Paste"],
-		  action=function(props)
-		    end,
-			disable = not mapedit:canPaste(),
-		  icon = "mapedit/icon_dup.png"},
-
-		 {lang["Undo"],
-		  action=function(props)
-		    mapedit:commitUndo() end,
-			disable = not mapedit:canUndo(),
-		  icon = nil},
-
-		 {lang["Redo"],
-		  action=function(props)
-		    mapedit:commitRedo() end,
-			disable = not mapedit:canRedo(),
-		  icon = nil},
-
-		 {lang["~b~(orange)Delete"],
-		  icon = "mapedit/icon_del.png",
-			disable = true},
-
-		 {lang["~(lpurple)Group"], suboptions = function(props) 
-	     return {}
-			end, disable = true},
-
-		 {lang["~(lgray)--Transform--"]},
-
-		 {lang["Flip"], suboptions = function(props) 
-		  return {} end,
-		  disable = true},
-
-		 {lang["Rotate"], suboptions = function(props)
-		 	return {} end,
-		  disable = true},
-
-		 {lang["~bReset"],disable = true, icon = nil},
-
-		 {lang["~(lgray)--Actions--"]}
-		 end)
-
 	-- About window
 	local about_win_layout = guilayout:define(
 		{id="image_region",
@@ -171,7 +118,7 @@ function MapEditGUI:define(mapedit)
 		 sub=
 		 	{id="wide_region",
 			 split_type="+x",
-			 split_pix=50,
+			 split_pix=75,
 			 sub={
 			 	id="slim_region",
 				split_type=nil
@@ -179,12 +126,12 @@ function MapEditGUI:define(mapedit)
 			}
 		},
 		{"text_region", region_pixoffset_f(0,4)},
-		{"wide_region", region_pixoffset_f(8,0)},
-		{"slim_region", region_pixoffset_f(8,0)}
+		{"wide_region", region_pixoffset_f(32.5,0)},
+		{"slim_region", region_pixoffset_f(32.5,0)}
 	)
 	local skin_mode_win = guiwindow:define({
-		win_min_w=100,
-		win_max_w=100,
+		win_min_w=150,
+		win_max_w=150,
 		win_min_h=60,
 		win_max_h=60,
 		win_focus=true,
@@ -280,6 +227,44 @@ function MapEditGUI:define(mapedit)
 			disable = false}
 		 end)
 
+	context["layers_context"] = 
+		contextmenu:define(
+		{
+		}
+		,
+		function(props) 
+			local edit = require 'edit'
+			local skin = require 'skin'
+			local active_layer = edit:getActiveLayer()
+			local disable = active_layer==nil
+		return
+		 {lang["~(green)New layer"],
+		  action=function(props)
+				local layer = skin:createEmptyLayer()
+				edit:commitCommand("add_layer",{layer=layer})
+		    return end,
+			disable = false},
+		 {lang["~bDelete layer"],
+		  action=function(props)
+				edit:commitCommand("delete_layer",{layer=edit.active_layer})
+		    return end,
+			disable = disable},
+		 {lang["Move layer down"],
+		  action=function(props)
+		    return end,
+			disable = disable},
+		 {lang["Move layer up"],
+		  action=function(props)
+		    return end,
+			disable = disable},
+		{" --- "},
+		 {lang["Slim/Wide mode"],
+		  action=function(props)
+				edit:commitCommand("swap_mode",{})
+		    return end,
+			disable = disable}
+		 end)
+
 	context["main_file_context"] =
 		contextmenu:define(
 		{
@@ -302,21 +287,21 @@ function MapEditGUI:define(mapedit)
 			return skin_mode_win:new(
 				{},
 				{
-					guitextbox:new(lang["Skin type?"],0,0,100,"center","left","top"),
+					guitextbox:new(lang["Skin type?"],0,0,150,"center","left","top"),
 					guibutton:new(lang["Wide"],nil,0,0,
 						function(self,win)
 							win:delete()
-							edit:load(filepath,"wide")
+							edit:load{skin_name=filepath,skin_mode="wide"}
 							clearKeys()
 						end,
-						"left","middle"),
+						"middle","middle"),
 					guibutton:new(lang["Slim"],nil,0,0,
 						function(self,win)
 							win:delete()
 							edit:load{skin_name=filepath,skin_mode="slim"}
 							clearKeys()
 						end,
-						"left","middle"),
+						"middle","middle"),
 				},0,0
 			)
 			end
@@ -336,6 +321,12 @@ function MapEditGUI:define(mapedit)
 		 generate =
 		   function(props)
 			   return context["main_file_context"], {}
+		   end
+		},
+		{lang["Edit"],
+		 generate =
+		   function(props)
+			   return context["layers_context"], {}
 		   end
 		},
 		{lang["Help"],
@@ -364,7 +355,7 @@ function MapEditGUI:define(mapedit)
 		},
 
 		{"toolbar_region", function(l) return l.x,l.y,l.w,l.h end},
-		{"viewport_region", region_default_f},
+		{"viewport_region", region_pixoffset_f(0,0)},
 		{"layers_region", region_default_f}
 	)
 

@@ -113,7 +113,7 @@ function MapEditGUILayout:define(layout, ...)
 						update_xywh(layout.sub,
 						-- left region
 						-- x  y     w     h
-						   x, y, xoffset, h,
+						   x, y, w-xoffset, h,
 						   update_xywh)
 					elseif stype == "+y" then
 						-- layout for the top region of the split

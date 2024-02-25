@@ -119,8 +119,29 @@ function edit:saveConfig(conf_fpath)
 	file:close()
 end
 
+function edit:swapSkinMode()
+	if self.active_mode == "slim" then
+		self.active_mode = "wide"
+	else
+		self.active_mode = "slim"
+	end
+end
+
 function edit:defineCommands()
 	coms = self.commands
+
+	coms["swap_mode"] = commands:define(
+		{
+		},
+		function(props) -- command function
+			self:swapSkinMode()
+			model:setupVisibility(self.active_mode)
+		end, -- command function
+
+		function(props) -- undo command function
+			self:swapSkinMode()
+			model:setupVisibility(self.active_mode)
+		end)
 
 	coms["commit_paint"] = commands:define(
 		{
@@ -136,6 +157,37 @@ function edit:defineCommands()
 		function(props) -- undo command function
 			props.layer.texture = props.old_texture
 			props.layer.preview = nil
+		end)
+
+	coms["add_layer"] = commands:define(
+		{
+		 {"layer", nil, nil, nil},
+		},
+		function(props) -- command function
+			skin:insertLayer(props.layer)
+			edit.active_layer = props.layer
+		end, -- command function
+
+		function(props) -- undo command function
+			print("MEOX")
+			skin:removeLayer(props.layer)
+			edit.active_layer = nil
+		end) 
+
+	coms["delete_layer"] = commands:define(
+		{
+		 {"layer", nil, nil, nil},
+		 {"index", nil, nil, nil},
+		},
+		function(props) -- command function
+			props.layer,props.index = skin:removeLayer(props.layer)
+			edit.active_layer = nil
+		end, -- command function
+
+		function(props) -- undo command function
+			print("MEOX")
+			skin:insertLayer(props.layer, props.index)
+			edit.active_layer = props.layer
 		end) 
 
 end
@@ -169,7 +221,7 @@ function edit:commitCommand(command_name, props)
 			command_history[i] = command_history[i+1]
 		end
 		command_history[history_length] = nil
-		self.command_pointer = history_length
+		self.command_pointer = history_length-1
 	else
 		self.command_pointer = history_length
 	end
@@ -266,7 +318,8 @@ function edit:setupInputHandling()
 	--
 	self.viewport_input = InputHandler:new(CONTROL_LOCK.EDIT_VIEW,
 	                    {"cam_zoom_out","cam_zoom_in","cam_rotate",
-											 "edit_undo","edit_redo","edit_action","edit_colour_pick",
+											 "edit_undo","edit_redo","edit_action","edit_colour_pick","edit_colour_fill",
+											 "edit_erase",
 										   {"ctrl",CONTROL_LOCK.META},{"alt",CONTROL_LOCK.META},{"super",CONTROL_LOCK.META}})
 
 	-- hooks for camera rotation
@@ -329,7 +382,9 @@ function edit:setupInputHandling()
 	local paint_layer = nil
 	local paint_target = nil
 	local paint_action_start = Hook:new(function ()
+		if erase_history then return end
 		if not self.active_layer then return end
+		if not self.active_layer.visible then return end
 		if not self:pixelAtCursor()	then return end
 
 		paint_history = {}
@@ -341,19 +396,17 @@ function edit:setupInputHandling()
 	local paint_action_held = Hook:new(function ()
 		if not paint_history then return end
 
-		--local X,Y = self:pixelAtCursor()	
-		--		local col = gui.colour_picker:getColour()
-		--local target = skin.layers[1].texture
-		--paint:drawPixel{target = target, pixel = {X,Y}, colour=col}
 		local X,Y = self:pixelAtCursor()
 
-		-- avoid painting over the same pixel twice
-		if paint_history and paint_history[X] and paint_history[X][Y] then return end
-		if not paint_history[X] then paint_history[X] = {} end
-		paint_history[X][Y] = true
+		if X then
+			-- avoid painting over the same pixel twice
+			if paint_history and paint_history[X] and paint_history[X][Y] then return end
+			if not paint_history[X] then paint_history[X] = {} end
+			paint_history[X][Y] = true
 
-		local col = gui.colour_picker:getColour()
-		paint:drawPixel{target = paint_target, pixel={X,Y}, colour=col}
+			local col = gui.colour_picker:getColour()
+			paint:drawPixel{target = paint_target, pixel={X,Y}, colour=col}
+		end
 	end)
 	local paint_action_end = Hook:new(function ()
 		if paint_layer then
@@ -370,6 +423,66 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("edit_action","down"):addHook(paint_action_start)
 	self.viewport_input:getEvent("edit_action","held"):addHook(paint_action_held)
 	self.viewport_input:getEvent("edit_action","up"):addHook(paint_action_end)
+
+	local erase_history = nil
+	local erase_layer = nil
+	local erase_target = nil
+	local erase_action_start = Hook:new(function ()
+		if paint_history then return end
+		if not self.active_layer then return end
+		if not self.active_layer.visible then return end
+		if not self:pixelAtCursor()	then return end
+
+		erase_history = {}
+
+		local layer = self:getActiveLayer()
+		erase_layer = layer
+		erase_target = layer.open_preview()
+	end)
+	local erase_action_held = Hook:new(function ()
+		if not erase_history then return end
+		local X,Y = self:pixelAtCursor()
+
+		if X then
+			-- avoid eraseing over the same pixel twice
+			if erase_history and erase_history[X] and erase_history[X][Y] then return end
+			if not erase_history[X] then erase_history[X] = {} end
+			erase_history[X][Y] = true
+
+			paint:erasePixel{target = erase_target, pixel={X,Y}}
+		end
+	end)
+	local erase_action_end = Hook:new(function ()
+		if erase_layer then
+			local old,new = erase_layer.commit_preview()
+
+			self:commitCommand("commit_paint", {layer=erase_layer,old_texture=old,new_texture=new})
+		end
+
+		erase_history = nil
+		erase_layer = nil
+		erase_target = nil
+	end)
+
+	self.viewport_input:getEvent("edit_erase","down"):addHook(erase_action_start)
+	self.viewport_input:getEvent("edit_erase","held"):addHook(erase_action_held)
+	self.viewport_input:getEvent("edit_erase","up"):addHook(erase_action_end)
+
+	local paint_fill = Hook:new(function ()
+		local layer = self:getActiveLayer()
+		if not self.active_layer then return end
+		if not self.active_layer.visible then return end
+		local x,y,dist,mesh,index = self:pixelAtCursor()
+
+		if not mesh then return end
+
+		local target = layer.open_preview()
+		local col = gui.colour_picker:getColour()
+		paint:fillFace{target=target,colour=col,index=index,mesh=mesh}
+		local old,new = layer.commit_preview()
+		self:commitCommand("commit_paint", {layer=layer,old_texture=old,new_texture=new})
+	end)
+	self.viewport_input:getEvent("edit_colour_fill","down"):addHook(paint_fill)
 
 	local colour_pick = Hook:new(function ()
 		local pixels = self:pixelAtCursor(true)
@@ -400,6 +513,8 @@ function edit:pixelAtCursor(get_all_pixels)
 
 	local min_dist = 1/0
 	local min_pos = nil
+	local min_mesh = nil
+	local min_index = nil
 	local A,B,C
 	local A_uv,B_uv,C_uv
 	local visible = model.visible
@@ -470,10 +585,12 @@ function edit:pixelAtCursor(get_all_pixels)
 				final_UV[2] = u*A_uv[2] +  v*B_uv[2] + w*C_uv[2]
 
 				local X,Y = math.floor(final_UV[1]*64)+1, math.floor(final_UV[2]*64)+1
-				table.insert(pixels, {X,Y,dist})
+				table.insert(pixels, {X,Y,dist,mesh,i})
 			elseif dist and dist < min_dist then
 				min_dist = dist
 				min_pos = pos
+				min_mesh = mesh
+				min_index = i
 				A,B,C = __v1,__v2,__v3
 				A_uv = {V1[4],V1[5]}
 				B_uv = {V2[4],V2[5]}
@@ -495,7 +612,7 @@ function edit:pixelAtCursor(get_all_pixels)
 		--local target = skin.layers[1].texture
 		--paint:drawPixel{target = target, pixel = {X,Y}, colour=col}
 
-		return X,Y
+		return X,Y,min_dist,min_mesh,min_index
 	elseif get_all_pixels then
 		return pixels
 	end

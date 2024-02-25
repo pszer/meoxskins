@@ -39,8 +39,10 @@ EDIT_KEY_SETTINGS = {
 	["cam_zoom_in"]   = { "wheelup"  , nil , default = "wheelup"  },
 	["cam_zoom_out"]  = { "wheeldown"    , nil , default = "wheeldown"  },
 	["edit_undo"]  = { "z"    , nil , default = "z"  },
-	["edit_redo"]  = { "x"    , nil , default = "x"  },
+	["edit_redo"]  = { "y"    , nil , default = "y"  },
 	["edit_colour_pick"]  = { "o"    , nil , default = "o"  },
+	["edit_colour_fill"]  = { "f"    , nil , default = "f"  },
+	["edit_erase"]  = { "x"    , nil , default = "x"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},
