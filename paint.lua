@@ -1,17 +1,60 @@
 local paint = {
 
-	paint_shader = love.graphics.newShader("paint.glsl")
+	paint_shader = love.graphics.newShader("paint.glsl"),
+
+	right_arm_region = {40,16,16,16},
+	left_arm_region  = {32,48,14,16},
+	right_leg_region = {0 ,16,16,16},
+	left_leg_region  = {16,46,16,16},
+
+	right_arm_o_region = {40,32,16,16},
+	left_arm_o_region  = {48,48,14,16},
+	right_leg_o_region = {0 ,32,16,16},
+	left_leg_o_region  = {0,48,16,16},
 
 }
+
+paint.mirror_dest = {}
+paint.mirror_dest["right_arm_region"] = paint["left_arm_region"]
+paint.mirror_dest["left_arm_region"] = paint["right_arm_region"]
+paint.mirror_dest["right_arm_o_region"] = paint["left_arm_o_region"]
+paint.mirror_dest["left_arm_o_region"] = paint["right_arm_o_region"]
+paint.mirror_dest["right_leg_region"] = paint["left_leg_region"]
+paint.mirror_dest["left_leg_region"] = paint["right_leg_region"]
+paint.mirror_dest["right_leg_o_region"] = paint["left_leg_o_region"]
+paint.mirror_dest["left_leg_o_region"] = paint["right_leg_o_region"]
 
 function paint:drawPixel(args)
 	local canvas = args.target
 	local pos    = args.pixel
-	local colour  = args.colour
+	local colour = args.colour
+	local mirror = args.mirror
 
 	if not canvas then error("paint:drawPixel(): no target given.") end
 	if not pos then error("paint:drawPixel(): no pixel position given.") end
 	if not colour then error("paint:drawPixel(): no colour given.") end
+
+	local function test_rect(rect)
+		local x,y,w,h = rect[1],rect[2],rect[3],rect[4]
+		return pos[1] >= x and pos[1] <= x+w and
+					 pos[2] >= y and pos[2] <= y+h
+	end
+
+	if mirror then
+		for i,v in pairs(self.mirror_dest) do
+			if test_rect(self[i]) then
+				local m1 = self[i]
+				local m2 = v
+
+				local Dx = m2[1] - m1[1]
+				local Dy = m2[2] - m1[2]
+
+				local new_pos = {pos[1]+Dx,pos[2]+Dy}
+
+				self:drawPixel{target=canvas,pixel=new_pos,colour=colour,mirror=false}
+			end
+		end
+	end
 
 	love.graphics.reset()
 	love.graphics.setShader(self.paint_shader)
@@ -24,6 +67,7 @@ end
 function paint:erasePixel(args)
 	local canvas = args.target
 	local pos    = args.pixel
+	local mirror = args.mirror
 
 	if not canvas then error("paint:drawPixel(): no target given.") end
 	if not pos then error("paint:drawPixel(): no pixel position given.") end

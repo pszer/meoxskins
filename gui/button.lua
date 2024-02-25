@@ -47,7 +47,7 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 		local toggleable_action = nil
 		if action then
 			toggleable_action = function(self,win)
-				self.held = true
+				self.held = not self.held
 				return action(self,win)
 			end
 		else

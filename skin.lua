@@ -60,6 +60,24 @@ function skin:addLayer(texture, name, index, visible)
 	table.insert(self.layers, index, t)
 end
 
+function skin:getLayerCount(layer)
+	return #self.layers
+end
+
+function skin:getLayerIndex(layer)
+	for i,v in ipairs(self.layers) do
+		if v==layer then return i end
+	end
+	return nil
+end
+
+function skin:swapLayers(i1,i2)
+	print(i1,i2)
+	local temp = self.layers[i2]
+	self.layers[i2] = self.layers[i1]
+	self.layers[i1] = temp
+end
+
 function skin:insertLayer(layer, index)
 	if index then
 		table.insert(self.layers,index,layer)

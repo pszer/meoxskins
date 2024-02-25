@@ -32,6 +32,8 @@ local edit = {
 	ctrl_modifier  = false,
 	alt_modifier   = false,
 
+	mirror_mode = false,
+
 	curr_context_menu = nil,
 	curr_popup = nil,
 
@@ -188,7 +190,20 @@ function edit:defineCommands()
 			print("MEOX")
 			skin:insertLayer(props.layer, props.index)
 			edit.active_layer = props.layer
-		end) 
+		end)
+
+	coms["swap_layers"] = commands:define(
+		{
+			{"index1", nil, nil, nil},
+			{"index2", nil, nil, nil},
+		},
+		function(props)
+			skin:swapLayers(props.index1,props.index2)
+		end,
+		function(props)
+			skin:swapLayers(props.index1,props.index2)
+		end
+	)
 
 end
 
@@ -405,7 +420,7 @@ function edit:setupInputHandling()
 			paint_history[X][Y] = true
 
 			local col = gui.colour_picker:getColour()
-			paint:drawPixel{target = paint_target, pixel={X,Y}, colour=col}
+			paint:drawPixel{target = paint_target, pixel={X,Y}, colour=col, mirror=self.mirror_mode}
 		end
 	end)
 	local paint_action_end = Hook:new(function ()
@@ -456,7 +471,7 @@ function edit:setupInputHandling()
 		if erase_layer then
 			local old,new = erase_layer.commit_preview()
 
-			self:commitCommand("commit_paint", {layer=erase_layer,old_texture=old,new_texture=new})
+			self:commitCommand("commit_paint", {layer=erase_layer,old_texture=old,new_texture=new,mirror=self.mirror_mode})
 		end
 
 		erase_history = nil

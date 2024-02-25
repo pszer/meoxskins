@@ -4,6 +4,7 @@
 --
 
 local guirender = require 'gui.guidraw'
+local guibutton = require 'gui.button'
 
 local EditGUIVisible = {
 	__type = "mapeditbutton",
@@ -67,14 +68,13 @@ local EditGUIVisible = {
 }
 EditGUIVisible.__index = EditGUIVisible
 
-function EditGUIVisible:new(get_mode)
+function EditGUIVisible:new(get_mode, get_mirror_mode)
 	local this = {
 		x=0,
 		y=0,
 		w=140,
 		h=160,
 		hover = false,
-
 		get_mode = get_mode
 	}
 
@@ -137,6 +137,14 @@ function EditGUIVisible:new(get_mode)
 			draw_part(guirender["rightarm"],"arm_slim_r")
 		end
 
+		local mirror_mode = get_mirror_mode()
+		if mirror_mode then
+			love.graphics.setShader()
+		else
+			love.graphics.setShader(self.grayscale_shader)
+		end
+		love.graphics.draw(guirender["mirror"])
+
 		love.graphics.reset()
 	end
 
@@ -177,6 +185,11 @@ function EditGUIVisible:new(get_mode)
 		if test("leftleg",nil) then return end
 		if test("rightleg_o","rightleg") then return end
 		if test("rightleg",nil) then return end
+
+		if test_rect{115,129,24,31} then
+			local edit = require 'edit'
+			edit.mirror_mode = not edit.mirror_mode
+		end
 	end
 
 	function this.setX(self,x)

@@ -274,7 +274,7 @@ function EditGUIColorSelect:new(colour_change_hook, action)
 			self.hover_alpha = true
 		end
 
-		return self
+		if self.hover then return self end
 	end
 
 	function this:getCurrentlyHoveredOption()

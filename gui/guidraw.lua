@@ -138,6 +138,7 @@ function MapEditGUIRender:initAssets()
 	self.rightarm_o = Loader:getTextureReference("s_rightarmo.png")
 	self.leftarm = Loader:getTextureReference("s_leftarm.png")
 	self.leftarm_o = Loader:getTextureReference("s_leftarmo.png")
+	self.mirror = Loader:getTextureReference("s_mirror.png")
 
 	self.checkerboard_tex = Loader:getTextureReference("checkerboard.png")
 	self.checkerboard_tex:setWrap("repeat","repeat")

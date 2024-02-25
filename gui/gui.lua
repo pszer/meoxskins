@@ -251,10 +251,21 @@ function MapEditGUI:define(mapedit)
 			disable = disable},
 		 {lang["Move layer down"],
 		  action=function(props)
+				if not active_layer then return end
+				local index = skin:getLayerIndex(active_layer)
+				if index<=1 then return end
+				if skin:getLayerCount() < 2 then return end
+				edit:commitCommand("swap_layers",{index1=index,index2=index-1})
 		    return end,
 			disable = disable},
 		 {lang["Move layer up"],
 		  action=function(props)
+				if not active_layer then return end
+				local count = skin:getLayerCount()
+				if count < 2 then return end
+				local index = skin:getLayerIndex(active_layer)
+				if index>=count then return end
+				edit:commitCommand("swap_layers",{index1=index,index2=index+1})
 		    return end,
 			disable = disable},
 		{" --- "},
@@ -443,7 +454,10 @@ function MapEditGUI:define(mapedit)
 	self.main_panel:pushWindow(self.colour_picker_win)
 
 	self.visible_win = visible_win:new({},
-	{guivisible:new(function() local edit=require 'edit' return edit.active_mode end)}
+	{guivisible:new(
+		function() local edit=require 'edit' return edit.active_mode end,
+		function() local edit=require 'edit' return edit.mirror_mode end
+	)}
 	,20,20,340,30)
 	self.main_panel:pushWindow(self.visible_win)
 
