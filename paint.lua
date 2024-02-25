@@ -5,7 +5,7 @@ local paint = {
 	right_arm_region = {40,16,16,16},
 	left_arm_region  = {32,48,14,16},
 	right_leg_region = {0 ,16,16,16},
-	left_leg_region  = {16,46,16,16},
+	left_leg_region  = {16,48,16,16},
 
 	right_arm_o_region = {40,32,16,16},
 	left_arm_o_region  = {48,48,14,16},
