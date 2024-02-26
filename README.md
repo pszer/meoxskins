@@ -7,6 +7,8 @@ or you can use File > Open to open a skin image.
 
 Select a colour using the colour picker, then left click to paint.
 
+Press O to pick a colour underneath your cursor.
+
 Right click on the viewport to rotate your view.
 
 Middle click on a window to move it using the mouse.
@@ -41,4 +43,5 @@ Ctrl+Z - Undo
 Ctrl+Y - Redo
 X - Erase
 F - Fill
+O - Pick colour
 M - Toggle mirror editing
