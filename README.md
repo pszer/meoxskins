@@ -2,6 +2,7 @@
 ## Usage
 MeoxSkins be launched using the console, using 
 >love meoxskins.love "skin.png" "slim"/"wide"
+
 or you can use File > Open to open a skin image.
 
 Select a colour using the colour picker, then left click to paint.
@@ -25,3 +26,17 @@ You can utilize layers to organise different parts of your skin. In the "Edit" d
 Layers can be hidden by pressing the eye icons of the Layer viewer on the right side of the screen.
 
 ![Viewport](https://github.com/pszer/meoxskins/blob/master/layers.png)
+
+Parts of the model can be hidden using the visible parts window. Click on parts to toggle their visibility.
+
+![Viewport](https://github.com/pszer/meoxskins/blob/master/visible.png)
+
+### Control list
+Left click - Paint/select
+Right click - Rotate camera
+Middle click - Move window
+Ctrl+Z - Undo
+Ctrl+Y - Redo
+X - Erase
+F - Fill
+M - Toggle mirror editing
