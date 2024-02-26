@@ -334,7 +334,7 @@ function edit:setupInputHandling()
 	self.viewport_input = InputHandler:new(CONTROL_LOCK.EDIT_VIEW,
 	                    {"cam_zoom_out","cam_zoom_in","cam_rotate",
 											 "edit_undo","edit_redo","edit_action","edit_colour_pick","edit_colour_fill",
-											 "edit_erase",
+											 "edit_erase","edit_mirror",
 										   {"ctrl",CONTROL_LOCK.META},{"alt",CONTROL_LOCK.META},{"super",CONTROL_LOCK.META}})
 
 	-- hooks for camera rotation
@@ -464,7 +464,7 @@ function edit:setupInputHandling()
 			if not erase_history[X] then erase_history[X] = {} end
 			erase_history[X][Y] = true
 
-			paint:erasePixel{target = erase_target, pixel={X,Y}}
+			paint:erasePixel{target = erase_target, pixel={X,Y}, mirror=self.mirror_mode}
 		end
 	end)
 	local erase_action_end = Hook:new(function ()
@@ -507,6 +507,9 @@ function edit:setupInputHandling()
 		end
 	end)
 	self.viewport_input:getEvent("edit_colour_pick","down"):addHook(colour_pick)
+
+	local mirror_action = Hook:new(function () self.mirror_mode = not self.mirror_mode end)
+	self.viewport_input:getEvent("edit_mirror","down"):addHook(mirror_action)
 end
 
 function edit:pixelAtCursor(get_all_pixels)

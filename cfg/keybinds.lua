@@ -43,6 +43,7 @@ EDIT_KEY_SETTINGS = {
 	["edit_colour_pick"]  = { "o"    , nil , default = "o"  },
 	["edit_colour_fill"]  = { "f"    , nil , default = "f"  },
 	["edit_erase"]  = { "x"    , nil , default = "x"  },
+	["edit_mirror"]  = { "m"    , nil , default = "m"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},

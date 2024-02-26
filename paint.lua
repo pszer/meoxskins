@@ -2,27 +2,124 @@ local paint = {
 
 	paint_shader = love.graphics.newShader("paint.glsl"),
 
-	right_arm_region = {40,16,16,16},
-	left_arm_region  = {32,48,14,16},
-	right_leg_region = {0 ,16,16,16},
-	left_leg_region  = {16,48,16,16},
+	mirror = {
 
-	right_arm_o_region = {40,32,16,16},
-	left_arm_o_region  = {48,48,14,16},
-	right_leg_o_region = {0 ,32,16,16},
-	left_leg_o_region  = {0,48,16,16},
+		["slim"]={
+			arm_r_front  = {rect={44,20,3,12},dest="arm_l_front"},
+			arm_r_right  = {rect={40,20,4,12},dest="arm_l_left"},
+			arm_r_left   = {rect={47,20,4,12},dest="arm_l_right"},
+			arm_r_back   = {rect={51,20,3,12},dest="arm_l_back"},
+			arm_r_top    = {rect={44,16,3,4},dest="arm_l_top"},
+			arm_r_bottom = {rect={47,16,3,4},dest="arm_l_bottom"},
+
+			arm_l_front  = {rect={44-8,20+32,3,12},dest="arm_r_front"},
+			arm_l_right  = {rect={40-8,20+32,4,12},dest="arm_r_left"},
+			arm_l_left   = {rect={47-8,20+32,4,12},dest="arm_r_right"},
+			arm_l_back   = {rect={51-8,20+32,3,12},dest="arm_r_back"},
+			arm_l_top    = {rect={44-8,16+32,3,4},dest="arm_r_top"},
+			arm_l_bottom = {rect={47-8,16+32,3,4},dest="arm_r_bottom"},
+
+			arm_r_o_front  = {rect={44,20+16,3,12},dest="arm_l_o_front"},
+			arm_r_o_right  = {rect={40,20+16,4,12},dest="arm_l_o_left"},
+			arm_r_o_left   = {rect={47,20+16,4,12},dest="arm_l_o_right"},
+			arm_r_o_back   = {rect={51,20+16,3,12},dest="arm_l_o_back"},
+			arm_r_o_top    = {rect={44,16+16,3,4},dest="arm_l_o_top"},
+			arm_r_o_bottom = {rect={47,16+16,3,4},dest="arm_l_o_bottom"},
+
+			arm_l_o_front  = {rect={44-8+16,20+32,3,12},dest="arm_r_o_front"},
+			arm_l_o_right  = {rect={40-8+16,20+32,4,12},dest="arm_r_o_left"},
+			arm_l_o_left   = {rect={47-8+16,20+32,4,12},dest="arm_r_o_right"},
+			arm_l_o_back   = {rect={51-8+16,20+32,3,12},dest="arm_r_o_back"},
+			arm_l_o_top    = {rect={44-8+16,16+32,3,4},dest="arm_r_o_top"},
+			arm_l_o_bottom = {rect={47-8+16,16+32,3,4},dest="arm_r_o_bottom"},
+
+			leg_r_front  = {rect={04,20,4,12},dest="leg_l_front"},
+			leg_r_right  = {rect={00,20,4,12},dest="leg_l_left"},
+			leg_r_left   = {rect={08,20,4,12},dest="leg_l_right"},
+			leg_r_back   = {rect={12,20,4,12},dest="leg_l_back"},
+			leg_r_top    = {rect={04,16,4,4},dest="leg_l_top"},
+			leg_r_bottom = {rect={08,16,4,4},dest="leg_l_bottom"},
+			leg_r_o_front  = {rect={04,20+16,4,12},dest="leg_l_o_front"},
+			leg_r_o_right  = {rect={00,20+16,4,12},dest="leg_l_o_left"},
+			leg_r_o_left   = {rect={08,20+16,4,12},dest="leg_l_o_right"},
+			leg_r_o_back   = {rect={12,20+16,4,12},dest="leg_l_o_back"},
+			leg_r_o_top    = {rect={04,16+16,4,4},dest="leg_l_o_top"},
+			leg_r_o_bottom = {rect={08,16+16,4,4},dest="leg_l_o_bottom"},
+
+			leg_l_front  = {rect={04+16,20+32,4,12},dest="leg_r_front"},
+			leg_l_right  = {rect={00+16,20+32,4,12},dest="leg_r_left"},
+			leg_l_left   = {rect={08+16,20+32,4,12},dest="leg_r_right"},
+			leg_l_back   = {rect={12+16,20+32,4,12},dest="leg_r_back"},
+			leg_l_top    = {rect={04+16,16+32,4,4},dest="leg_r_top"},
+			leg_l_bottom = {rect={08+16,16+32,4,4},dest="leg_r_bottom"},
+			leg_l_o_front  = {rect={04,20+32,4,12},dest="leg_r_o_front"},
+			leg_l_o_right  = {rect={00,20+32,4,12},dest="leg_r_o_left"},
+			leg_l_o_left   = {rect={08,20+32,4,12},dest="leg_r_o_right"},
+			leg_l_o_back   = {rect={12,20+32,4,12},dest="leg_r_o_back"},
+			leg_l_o_top    = {rect={04,16+32,4,4},dest="leg_r_o_top"},
+			leg_l_o_bottom = {rect={08,16+32,4,4},dest="leg_r_o_bottom"},
+		},
+
+		["wide"]={
+			arm_r_front  = {rect={44,20,4,12},dest="arm_l_front"},
+			arm_r_right  = {rect={40,20,4,12},dest="arm_l_left"},
+			arm_r_left   = {rect={48,20,4,12},dest="arm_l_right"},
+			arm_r_back   = {rect={52,20,4,12},dest="arm_l_back"},
+			arm_r_top    = {rect={44,16,4,4},dest="arm_l_top"},
+			arm_r_bottom = {rect={48,16,4,4},dest="arm_l_bottom"},
+
+			arm_l_front  = {rect={44-8,20+32,4,12},dest="arm_r_front"},
+			arm_l_right  = {rect={40-8,20+32,4,12},dest="arm_r_left"},
+			arm_l_left   = {rect={48-8,20+32,4,12},dest="arm_r_right"},
+			arm_l_back   = {rect={52-8,20+32,4,12},dest="arm_r_back"},
+			arm_l_top    = {rect={44-8,16+32,4,4},dest="arm_r_top"},
+			arm_l_bottom = {rect={48-8,16+32,4,4},dest="arm_r_bottom"},
+
+			arm_r_o_front  = {rect={44,20+16,4,12},dest="arm_l_o_front"},
+			arm_r_o_right  = {rect={40,20+16,4,12},dest="arm_l_o_left"},
+			arm_r_o_left   = {rect={48,20+16,4,12},dest="arm_l_o_right"},
+			arm_r_o_back   = {rect={52,20+16,4,12},dest="arm_l_o_back"},
+			arm_r_o_top    = {rect={44,16+16,4,4},dest="arm_l_o_top"},
+			arm_r_o_bottom = {rect={48,16+16,4,4},dest="arm_l_o_bottom"},
+
+			arm_l_o_front  = {rect={44-8+16,20+32,4,12},dest="arm_r_o_front"},
+			arm_l_o_right  = {rect={40-8+16,20+32,4,12},dest="arm_r_o_left"},
+			arm_l_o_left   = {rect={48-8+16,20+32,4,12},dest="arm_r_o_right"},
+			arm_l_o_back   = {rect={52-8+16,20+32,4,12},dest="arm_r_o_back"},
+			arm_l_o_top    = {rect={44-8+16,16+32,4,4},dest="arm_r_o_top"},
+			arm_l_o_bottom = {rect={48-8+16,16+32,4,4},dest="arm_r_o_bottom"},
+
+			leg_r_front  = {rect={04,20,4,12},dest="leg_l_front"},
+			leg_r_right  = {rect={00,20,4,12},dest="leg_l_left"},
+			leg_r_left   = {rect={08,20,4,12},dest="leg_l_right"},
+			leg_r_back   = {rect={12,20,4,12},dest="leg_l_back"},
+			leg_r_top    = {rect={04,16,4,4},dest="leg_l_top"},
+			leg_r_bottom = {rect={08,16,4,4},dest="leg_l_bottom"},
+			leg_r_o_front  = {rect={04,20+16,4,12},dest="leg_l_o_front"},
+			leg_r_o_right  = {rect={00,20+16,4,12},dest="leg_l_o_left"},
+			leg_r_o_left   = {rect={08,20+16,4,12},dest="leg_l_o_right"},
+			leg_r_o_back   = {rect={12,20+16,4,12},dest="leg_l_o_back"},
+			leg_r_o_top    = {rect={04,16+16,4,4},dest="leg_l_o_top"},
+			leg_r_o_bottom = {rect={08,16+16,4,4},dest="leg_l_o_bottom"},
+
+			leg_l_front  = {rect={04+16,20+32,4,12},dest="leg_r_front"},
+			leg_l_right  = {rect={00+16,20+32,4,12},dest="leg_r_left"},
+			leg_l_left   = {rect={08+16,20+32,4,12},dest="leg_r_right"},
+			leg_l_back   = {rect={12+16,20+32,4,12},dest="leg_r_back"},
+			leg_l_top    = {rect={04+16,16+32,4,4},dest="leg_r_top"},
+			leg_l_bottom = {rect={08+16,16+32,4,4},dest="leg_r_bottom"},
+			leg_l_o_front  = {rect={04,20+32,4,12},dest="leg_r_o_front"},
+			leg_l_o_right  = {rect={00,20+32,4,12},dest="leg_r_o_left"},
+			leg_l_o_left   = {rect={08,20+32,4,12},dest="leg_r_o_right"},
+			leg_l_o_back   = {rect={12,20+32,4,12},dest="leg_r_o_back"},
+			leg_l_o_top    = {rect={04,16+32,4,4},dest="leg_r_o_top"},
+			leg_l_o_bottom = {rect={08,16+32,4,4},dest="leg_r_o_bottom"},
+		},
+
+
+	}
 
 }
-
-paint.mirror_dest = {}
-paint.mirror_dest["right_arm_region"] = paint["left_arm_region"]
-paint.mirror_dest["left_arm_region"] = paint["right_arm_region"]
-paint.mirror_dest["right_arm_o_region"] = paint["left_arm_o_region"]
-paint.mirror_dest["left_arm_o_region"] = paint["right_arm_o_region"]
-paint.mirror_dest["right_leg_region"] = paint["left_leg_region"]
-paint.mirror_dest["left_leg_region"] = paint["right_leg_region"]
-paint.mirror_dest["right_leg_o_region"] = paint["left_leg_o_region"]
-paint.mirror_dest["left_leg_o_region"] = paint["right_leg_o_region"]
 
 function paint:drawPixel(args)
 	local canvas = args.target
@@ -41,15 +138,20 @@ function paint:drawPixel(args)
 	end
 
 	if mirror then
-		for i,v in pairs(self.mirror_dest) do
-			if test_rect(self[i]) then
-				local m1 = self[i]
-				local m2 = v
+		local edit = require 'edit'
+		local mode = edit.active_mode
 
-				local Dx = m2[1] - m1[1]
+		local mirror_info = self.mirror[mode]
+
+		for i,v in pairs(mirror_info) do
+			if test_rect(v.rect) then
+				local m1 = v.rect
+				local m2 = mirror_info[v.dest].rect
+
+				local Dx = m2[1] + (m1[1]+m1[3]-pos[1]) + 1
 				local Dy = m2[2] - m1[2]
 
-				local new_pos = {pos[1]+Dx,pos[2]+Dy}
+				local new_pos = {Dx,pos[2]+Dy}
 
 				self:drawPixel{target=canvas,pixel=new_pos,colour=colour,mirror=false}
 			end
@@ -71,6 +173,33 @@ function paint:erasePixel(args)
 
 	if not canvas then error("paint:drawPixel(): no target given.") end
 	if not pos then error("paint:drawPixel(): no pixel position given.") end
+
+	local function test_rect(rect)
+		local x,y,w,h = rect[1],rect[2],rect[3],rect[4]
+		return pos[1] >= x and pos[1] <= x+w and
+					 pos[2] >= y and pos[2] <= y+h
+	end
+
+	if mirror then
+		local edit = require 'edit'
+		local mode = edit.active_mode
+
+		local mirror_info = self.mirror[mode]
+
+		for i,v in pairs(mirror_info) do
+			if test_rect(v.rect) then
+				local m1 = v.rect
+				local m2 = mirror_info[v.dest].rect
+
+				local Dx = m2[1] + (m1[1]+m1[3]-pos[1]) + 1
+				local Dy = m2[2] - m1[2]
+
+				local new_pos = {Dx,pos[2]+Dy}
+
+				self:erasePixel{target=canvas,pixel=new_pos,mirror=false}
+			end
+		end
+	end
 
 	love.graphics.reset()
 	love.graphics.setBlendMode("replace")

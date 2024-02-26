@@ -40,7 +40,7 @@ void effect( ) {
 	float light = 1.0;
 	float dot_f = dot(frag_normal,vec3(0.0,-1,-1.2));
 	dot_f = max(normalize(dot_f), 0.0);
-	light = 0.98 + 0.02 * dot_f;
+	light = 0.99 + 0.01 * dot_f;
 
 	love_Canvases[0] = vec4(texcolor.xyz * light,texcolor.a);
 }
