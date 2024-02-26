@@ -28,6 +28,8 @@ Layers can be hidden by pressing the eye icons of the Layer viewer on the right 
 ![Viewport](https://github.com/pszer/meoxskins/blob/master/layers.png)
 
 Parts of the model can be hidden using the visible parts window. Click on parts to toggle their visibility.
+On the visible window there is also a mirror toggle in the bottom right. In mirror mode, painting and erasing on the arms/legs
+are mirrored.
 
 ![Viewport](https://github.com/pszer/meoxskins/blob/master/visible.png)
 
