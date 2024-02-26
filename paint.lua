@@ -133,8 +133,8 @@ function paint:drawPixel(args)
 
 	local function test_rect(rect)
 		local x,y,w,h = rect[1],rect[2],rect[3],rect[4]
-		return pos[1] >= x and pos[1] <= x+w and
-					 pos[2] >= y and pos[2] <= y+h
+		return pos[1] > x and pos[1] <= x+w and
+					 pos[2] > y and pos[2] <= y+h
 	end
 
 	if mirror then
@@ -145,6 +145,9 @@ function paint:drawPixel(args)
 
 		for i,v in pairs(mirror_info) do
 			if test_rect(v.rect) then
+				print("hit",i)
+				print(pos[1],pos[2],unpack(v.rect))
+
 				local m1 = v.rect
 				local m2 = mirror_info[v.dest].rect
 
@@ -176,8 +179,8 @@ function paint:erasePixel(args)
 
 	local function test_rect(rect)
 		local x,y,w,h = rect[1],rect[2],rect[3],rect[4]
-		return pos[1] >= x and pos[1] <= x+w and
-					 pos[2] >= y and pos[2] <= y+h
+		return pos[1] > x and pos[1] <= x+w and
+					 pos[2] > y and pos[2] <= y+h
 	end
 
 	if mirror then
