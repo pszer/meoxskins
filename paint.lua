@@ -208,7 +208,7 @@ function paint:erasePixel(args)
 	love.graphics.setBlendMode("replace")
 	love.graphics.setColor(0,0,0,0)
 	love.graphics.setCanvas(canvas)
-	love.graphics.points(pos[1]+1, pos[2]+1)
+	love.graphics.points(pos[1]-1, pos[2])
 	love.graphics.reset()
 end
 
