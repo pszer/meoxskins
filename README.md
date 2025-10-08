@@ -37,11 +37,19 @@ are mirrored.
 
 ### Control list
 Left click - Paint/select
+
 Right click - Rotate camera
+
 Middle click - Move window
+
 Ctrl+Z - Undo
+
 Ctrl+Y - Redo
+
 X - Erase
+
 F - Fill
+
 O - Pick colour
+
 M - Toggle mirror editing
