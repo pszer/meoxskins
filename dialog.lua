@@ -130,6 +130,8 @@ typedef const char *LPCSTR;
 typedef char *LPSTR;
 typedef void *HWND;
 typedef void *HINSTANCE;
+typedef long LPARAM;    
+typedef int BOOL;      
 
 typedef struct {
   DWORD lStructSize;
