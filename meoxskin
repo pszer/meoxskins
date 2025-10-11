@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if ! command -v love &> /dev/null; then
+	echo "LÖVE (Love2D) is not installed on your system."
+	echo "  - Debian/Ubuntu: sudo apt install love"
+  echo "  - Fedora:        sudo dnf install love"
+  echo "  - Arch Linux:    sudo pacman -S love"
+  echo "  - Or visit https://love2d.org/ for more options."
+  echo
+  exit 1
+fi
+
+love "$(dirname "$0")"
