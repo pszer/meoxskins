@@ -104,6 +104,12 @@ function MapEditGUIWindow:define(default_props, layout_def)
 					self.layout:setH(self.h)
 					self.layout:updateXywh()
 				end
+
+				for i,v in ipairs(self.elements) do
+					if v.update and v.wants_update then
+						v:update()
+					end
+				end
 			end
 
 			function this:delete()

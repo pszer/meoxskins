@@ -73,9 +73,16 @@ gboolean gtk_file_chooser_set_current_folder (
     GtkFileChooser *chooser,
     const gchar *filename
 );
+
+typedef void GtkFileFilter;
+
+GtkFileFilter * gtk_file_filter_new(void);
+void gtk_file_filter_add_pattern(GtkFileFilter *filter, const gchar *pattern);
+void gtk_file_chooser_add_filter(GtkFileChooser *chooser, GtkFileFilter *filter);
+void gtk_file_filter_set_name(GtkFileFilter *filter, const gchar *name);
 ]]
 
-local function show (action, button, title, start_dir)
+local function show (action, button, title, start_dir, filter_name, filter_patterns)
     gtk.gtk_init(nil, nil)
 
     local d = gtk.gtk_file_chooser_dialog_new(
@@ -88,6 +95,15 @@ local function show (action, button, title, start_dir)
 
 		if start_dir then
 			gtk.gtk_file_chooser_set_current_folder(d,start_dir)
+		end
+
+		if filter_name and filter_patterns then
+			local gtkfilter = gtk.gtk_file_filter_new()
+			gtk.gtk_file_filter_set_name(gtkfilter, filter_name)
+			for _,pattern in ipairs(filter_patterns) do
+				gtk.gtk_file_filter_add_pattern(gtkfilter, pattern)
+			end
+			gtk.gtk_file_chooser_add_filter(d, gtkfilter)
 		end
         
     local response = gtk.gtk_dialog_run(d)
@@ -104,14 +120,14 @@ local function show (action, button, title, start_dir)
     end
 end
 
-local function save (title, dir)
+local function save (title, dir, filter_name, filter_patterns)
     return show(gtk.GTK_FILE_CHOOSER_ACTION_SAVE,
-        '_Save', title or 'Save As', dir)
+        '_Save', title or 'Save As', dir, filter_name, filter_patterns)
 end
 
-local function open (title, dir)
+local function open (title, dir, filter_name, filter_patterns)
     return show(gtk.GTK_FILE_CHOOSER_ACTION_OPEN,
-        '_Open', title or 'Open', dir)
+        '_Open', title or 'Open', dir, filter_name, filter_patterns)
 end
 
 return {
@@ -174,6 +190,10 @@ local function windows_open_dialog(title, initial_dir)
     ofn.lpstrTitle = title
     ofn.lpstrInitialDir = initial_dir
     ofn.Flags = 0x00000008 -- OFN_PATHMUSTEXIST
+
+		--local filter = "Image Files (*.png;*.jpg)\0*.png;*.jpg\0All Files (*.*)\0*.*\0\0"
+    --ofn.lpstrFilter = filter
+    --ofn.nFilterIndex = 1
 
     if comdlg32.GetOpenFileNameA(ofn) then
         return ffi.string(ofn.lpstrFile)

@@ -4,10 +4,13 @@
 local filter_worker = {
 	active_worker = nil,
 	commit_flag = false,
+	silent_commit = false,
 	preview_on = true,
+
+	history = {}
 }
 
-function filter_worker:new(filter, layer, args)
+function filter_worker:new(filter, layer, args, silent_commit)
 	local fw = {
 		filter=filter,
 		layer=layer,
@@ -15,6 +18,7 @@ function filter_worker:new(filter, layer, args)
 
 		_update_preview=true,
 	}
+	filter_worker.silent_commit = silent_commit
 
 	function fw:result()
 		return fw.filter:apply(fw.layer.texture, fw.params)
@@ -28,7 +32,6 @@ function filter_worker:new(filter, layer, args)
 	function fw:discard()
 		layer.discard_preview()
 		self._update_preview=false
-
 		self.filter=nil
 		self.layer=nil
 		self.params={}
@@ -52,7 +55,6 @@ function filter_worker:new(filter, layer, args)
 		end
 
 		for i,v in pairs(args) do
-			print(i,v, self.params[i])
 			if type(v) == "table" then
 				if not table_eq(v,self.params[i]) then
 					self.params[i] = v
@@ -79,10 +81,21 @@ function filter_worker:new(filter, layer, args)
 	return fw
 end
 
+function filter_worker:add_to_history(fw)
+	if filter_worker.silent_commit then return end
+
+	fw = fw or filter_worker.active_worker
+	table.insert(filter_worker.history, 1, {filter=fw.filter,params=fw.params})
+	if #filter_worker.history >= 20 then
+		table.remove(filter_worker.history, 20)
+	end
+end
+
 function filter_worker:discard()
 	filter_worker.active_worker:discard()
 	filter_worker:set_commit(false)
 	filter_worker.active_worker = nil
+	filter_worker.silent_commit = false
 end
 function filter_worker:set_commit(f)
 	filter_worker.commit_flag = f
@@ -95,6 +108,10 @@ function filter_worker:update_args(args)
 	if filter_worker.active_worker then
 		filter_worker.active_worker:update_args(args)
 	end
+end
+
+function filter_worker:is_active()
+	return filter_worker.active_worker~=nil
 end
 
 function filter_worker:preview_state(s)

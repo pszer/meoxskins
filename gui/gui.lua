@@ -185,6 +185,80 @@ function MapEditGUI:define(mapedit)
 		win_focus=true,
 	}, lang_win_layout)
 
+	local hsl_adjust_layout = guilayout:define(
+		{id="panel",
+		 split_type="-x",
+		 split_pix=70,
+		 sub =
+		{id="text",
+		 split_type="+y",
+	 	 split_pix="25",
+	 	 sub = {
+		  id="bars",
+			split_type="+y",
+			split_pix="256",
+			sub = {
+		   id="input",
+			 split_type=nil
+			}
+		 }}},
+		{"text", region_offset_f(0.00000-0.01,0.2)},
+		{"text", region_offset_f(0.33333-0.01,0.2)},
+		{"text", region_offset_f(0.66666-0.01,0.2)},
+		{"bars", region_offset_f(-0.1666+0.3333-0.04,0)},
+		{"bars", region_offset_f(-0.1666+0.6666-0.04,0)},
+		{"bars", region_offset_f(-0.1666+1.0000-0.04,0)},
+		{"input", region_offset_f(0.00000+0.05,0.2)},
+		{"input", region_offset_f(0.33333+0.05,0.2)},
+		{"input", region_offset_f(0.66666+0.05,0.2)},
+
+		{"panel", region_pixoffset_f(2,14)},
+		{"panel", region_pixoffset_f(2,39)},
+		{"panel", region_pixoffset_f(2,94)}
+	)
+	local hsl_adjust_win = guiwindow:define({
+		win_min_w=240,
+		win_max_w=240,
+		win_min_h=316,
+		win_max_h=316,
+		win_focus=false,
+	}, hsl_adjust_layout)
+
+	local contrast_adjust_layout = guilayout:define(
+		{id="panel",
+		 split_type="-x",
+		 split_pix=70,
+		 sub =
+		{id="text",
+		 split_type="+y",
+	 	 split_pix="25",
+	 	 sub = {
+		  id="bars",
+			split_type="+y",
+			split_pix="256",
+			sub = {
+		   id="input",
+			 split_type=nil
+			}
+		 }}},
+		{"text", region_offset_f(0.0-0.01,0.2)},
+		{"text", region_offset_f(0.5-0.01,0.2)},
+		{"bars", region_offset_f(-0.25+0.5-0.04,0)},
+		{"bars", region_offset_f(-0.25+1.0-0.04,0)},
+		{"input", region_offset_f(0.0+0.05,0.2)},
+		{"input", region_offset_f(0.5+0.05,0.2)},
+
+		{"panel", region_pixoffset_f(2,14)},
+		{"panel", region_pixoffset_f(2,39)}
+	)
+	local contrast_adjust_win = guiwindow:define({
+		win_min_w=175,
+		win_max_w=175,
+		win_min_h=316,
+		win_max_h=316,
+		win_focus=false,
+	}, contrast_adjust_layout)
+
 	context["help_context"] = 
 		contextmenu:define(
 		{
@@ -273,6 +347,224 @@ function MapEditGUI:define(mapedit)
 		  action=function(props)
 				edit:commitCommand("swap_mode",{})
 		    return end,
+			disable = disable,tooltip=lang["Change skin to have wide or slim arms."]}
+		 end)
+
+	context["filters_context"] = 
+		contextmenu:define(
+		{
+		}
+		,
+		function(props) 
+			local edit = require 'edit'
+			local skin = require 'skin'
+			local active_layer = edit:getActiveLayer()
+			local disable = active_layer==nil
+			local filter_worker = require 'filterworker'
+		return
+		 {lang["Recent filters"],
+	 	  disable = #filter_worker.history < 1 or not edit:getActiveLayer(),
+		  suboptions = function(props) 
+				local history = {}
+				function trunc(n)
+					if n >= 0 then
+						return math.floor(n * 1000) / 1000
+					else
+						return math.ceil(n * 1000) / 1000
+					end
+				end
+				for i,v in ipairs(filter_worker.history) do
+					if i==9 then break end
+					local string = ""
+					for i,v in pairs(v.params) do
+						if string ~= "" then string = string .. ", " end
+						local ss = v
+						if type(ss)=="number" then ss=trunc(ss) end
+						ss = tostring(ss)
+						string = string .. i .. "=" .. ss
+					end
+					table.insert(history, #history+1,
+					{
+						lang[v.filter.name],
+						disable = disable,
+						action = function(props)
+							filter_worker:new(v.filter,active_layer,v.params,true)
+							filter_worker:set_commit(true)
+						end,
+						tooltip = string
+					})
+				end
+				return history
+		 end},
+		 {lang["Adjust HSL"],
+		  action=function(props)
+				if not active_layer then return end
+				local filters = require 'filters'
+				local fw = require 'filterworker'
+				local params = {hueShift=0.0,satScale=1.0,lumScale=1.0,lumCurvedRemap=0.0}
+				local worker = fw:new(filters.get("hsl_adjust"), active_layer, {hueShift=0.0,satScale=1.0,lumScale=1.0,lumCurvedRemap=0.0})
+				worker:update_args(params)
+
+				local function remaptoggle()
+					if params.lumCurvedRemap == 1.0 then params.lumCurvedRemap = 0.0 else params.lumCurvedRemap = 1.0 end	
+					worker:update_args(params)
+				end
+
+				local hue_in, sat_in, lum_in
+				local hue_bar, sat_bar, lum_bar
+				hue_bar, sat_bar, lum_bar =
+					guiscrollb:new(256, 0.5,
+						function(scrlb)
+							params.hueShift = (scrlb.ratio*360.0) + (360.0*1.5)
+							local h = params.hueShift % 360.0
+							if h > 180 then h = h - 360 end
+							hue_in:setText(tostring(math.floor(h)))
+							worker:update_args(params)
+						end),
+					guiscrollb:new(256, 0.5, function(scrlb)
+							params.satScale = (scrlb.ratio-0.5)*-2.0 + 1.0
+							sat_in:setText(tostring(params.satScale))
+							worker:update_args(params)
+						end),
+					guiscrollb:new(256, 0.5, function(scrlb)
+							params.lumScale = (scrlb.ratio-0.5)*-2.0 + 1.0
+							if params.lumScale > 1.0 then
+								params.lumScale = 2.1*(params.lumScale - 1.0) + 1.0
+							end
+							lum_in:setText(tostring(params.lumScale))
+							worker:update_args(params)
+						end)
+				hue_in, sat_in, lum_in =
+					guitextinput:new("0",0,0,40,20,guitextinput.float_validator,
+						function (str)
+							return guitextinput.float_format_func(str) .. "~r°"
+						end,"left","top",
+						function(self)
+							if self:inputValid() then
+								local H = self:get()
+								params.hueShift = H
+								hue_bar:setRatio(H/360.0+0.5)
+								worker:update_args(params)
+							end
+						end),
+					guitextinput:new("1.0",0,0,40,20,guitextinput.float_validator,guitextinput.float_format_func,"left","top",
+						function(self)
+							if self:inputValid() then
+								local S = self:get()
+								params.satScale = S
+								sat_bar:setRatio((1.0-S)*0.5+0.5)
+								worker:update_args(params)
+							end
+						end
+				),
+					guitextinput:new("1.0",0,0,40,20,guitextinput.float_validator,guitextinput.float_format_func,"left","top",
+						function(self)
+							if self:inputValid() then
+								local L = self:get()
+								params.lumScale = L
+								if L <= 1.0 then
+									lum_bar:setRatio((1.0-L)*0.5+0.5)
+								else
+									lum_bar:setRatio(((1.0-L)*0.5)/2.1+0.5)
+								end
+								worker:update_args(params)
+							end
+						end
+				)
+
+		    return hsl_adjust_win:new({},
+				{
+					guitextbox:new(lang["Hue"],0,0,66,"center"),
+					guitextbox:new(lang["Sat"],0,0,66,"center"),
+					guitextbox:new(lang["Lum"],0,0,66,"center"),
+					hue_bar,
+					sat_bar,
+					lum_bar,
+					hue_in,
+					sat_in,
+					lum_in,
+					guibutton:new(lang["~b~(green)Confirm"],nil,0,0,function(self,win) fw:set_commit(true) win:delete() end,"left","top",false),
+					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) fw:discard() win:delete() end,"left","top",false),
+					guibutton:new(lang["~(lpurple)Gamma"],nil,0,0,function(self,win) remaptoggle() end,"left","top",true,false),
+				},
+				0,0,300,330)
+			end,
+			disable = disable},
+		 {lang["Contrast/Brightness"],
+		  action=function(props)
+				if not active_layer then return end
+				local filters = require 'filters'
+				local fw = require 'filterworker'
+				local params = {lumBrightness=0.0,lumContrast=1.0}
+				local worker = fw:new(filters.get("contrast"), active_layer, {})
+				worker:update_args(params)
+
+				function trunc(n)
+					if n >= 0 then
+						return math.floor(n * 100) / 100
+					else
+						return math.ceil(n * 100) / 100
+					end
+				end
+
+				local lum_in, contrast_in
+				local lum_bar, contrast_bar
+				lum_bar, contrast_bar =
+					guiscrollb:new(256, 0.5, function(scrlb)
+							params.lumBrightness = (scrlb.ratio-0.5)*-2.0
+							lum_in:setText(tostring(trunc(params.lumBrightness)))
+							worker:update_args(params)
+						end),
+					guiscrollb:new(256, 0.5, function(scrlb)
+							params.lumContrast = (scrlb.ratio-0.5)*-2.0 + 1.0
+							contrast_in:setText(tostring(trunc(params.lumContrast)))
+							worker:update_args(params)
+						end)
+				lum_in, contrast_in =
+					guitextinput:new("0.0",0,0,40,20,guitextinput.float_validator,guitextinput.float_format_func,"left","top",
+						function(self)
+							if self:inputValid() then
+								local B = self:get()
+								params.lumBrightness = B
+								lum_bar:setRatio(0.5 - (B*0.5))
+								worker:update_args(params)
+							end
+						end
+				),
+					guitextinput:new("1.0",0,0,40,20,guitextinput.float_validator,guitextinput.float_format_func,"left","top",
+						function(self)
+							if self:inputValid() then
+								local C = self:get()
+								params.lumContrast = C
+								contrast_bar:setRatio((1.0-C)*0.5+0.5)
+								worker:update_args(params)
+							end
+						end
+				)
+
+		    return contrast_adjust_win:new({},
+				{
+					guitextbox:new(lang["Lum"],0,0,66,"center"),
+					guitextbox:new(lang["Con"],0,0,66,"center"),
+					lum_bar,
+					contrast_bar,
+					lum_in,
+					contrast_in,
+					guibutton:new(lang["~b~(green)Confirm"],nil,0,0,function(self,win) fw:set_commit(true) win:delete() end,"left","top",false),
+					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) fw:discard() win:delete() end,"left","top",false),
+				},
+				0,0,300,330)
+			end,
+			disable = disable},
+		{" --- "},
+		 {lang["Invert (HSL)"],
+		  action=function(props)
+				if not active_layer then return end
+				local filters = require 'filters'
+				local fw = require 'filterworker'
+				fw:new(filters.get("invert_hsl"), active_layer, {})
+				fw:set_commit(true)
+		    return end,
 			disable = disable}
 		 end)
 
@@ -286,7 +578,7 @@ function MapEditGUI:define(mapedit)
 			local edit = require 'edit'
 			local dialog = require 'dialog'
 			local dirmem = require 'dirmem'
-			local filepath = dialog.save("Save as", dirmem.get("save"))
+			local filepath = dialog.save("Save as", dirmem.get("save"), ".png Skin File", {"*.png", "*.PNG"})
 			if filepath then
 				edit:saveToFile(filepath, true)
 				dirmem.memo("save", filepath)
@@ -297,7 +589,7 @@ function MapEditGUI:define(mapedit)
 			local edit = require 'edit'
 			local dialog = require 'dialog'
 			local dirmem = require 'dirmem'
-			local filepath = dialog.open("Open", dirmem.get("open"))
+			local filepath = dialog.open("Open", dirmem.get("open"), ".png Skin File", {"*.png", "*.PNG"})
 			if filepath and filepath ~= "" then
 				dirmem.memo("open",filepath)
 				dirmem.init("save",filepath)
@@ -344,6 +636,12 @@ function MapEditGUI:define(mapedit)
 		 generate =
 		   function(props)
 			   return context["layers_context"], {}
+		   end
+		},
+		{lang["Filters"],
+		 generate =
+		   function(props)
+			   return context["filters_context"], {}
 		   end
 		},
 		{lang["Help"],

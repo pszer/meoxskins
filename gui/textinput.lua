@@ -261,7 +261,7 @@ function MapEditGUITextInput:new(init_str,x,y,w,h,validator,format_func,align_x,
 
 		hover=false,
 		capture=false,
-		validator = validator,
+		validator = validator or MapEditGUITextInput.identity_validator,
 
 		align_x=align_x or "middle",
 		align_y=align_y or "middle",

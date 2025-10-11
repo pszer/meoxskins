@@ -41,7 +41,12 @@ function skin:addLayer(texture, name, index, visible)
 			visible=visible,
 			preview=nil,
 
-			open_preview = function()
+			open_preview = function(c)
+				if c then
+					t.preview = c
+					return c
+				end
+
 				love.graphics.reset()
 				t.preview = love.graphics.newCanvas(64,64)
 				t.preview:setFilter("nearest","nearest")
@@ -55,6 +60,10 @@ function skin:addLayer(texture, name, index, visible)
 				local old_texture = t.texture
 				t.texture = t.preview
 				return old_texture, t.texture
+			end,
+
+			discard_preview = function()
+				t.preview = nil
 			end
 		}
 	table.insert(self.layers, index, t)

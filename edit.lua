@@ -17,6 +17,11 @@ local paint = require 'paint'
 
 local fileio = require 'fileio'
 
+local filter = require 'filter'
+local fw = require 'filterworker'
+local filter_worker = fw
+
+
 local edit = {
 
 	mode = "viewport",
@@ -169,7 +174,6 @@ function edit:defineCommands()
 		end, -- command function
 
 		function(props) -- undo command function
-			print("MEOX")
 			skin:removeLayer(props.layer)
 			edit.active_layer = nil
 		end) 
@@ -185,7 +189,6 @@ function edit:defineCommands()
 		end, -- command function
 
 		function(props) -- undo command function
-			print("MEOX")
 			skin:insertLayer(props.layer, props.index)
 			edit.active_layer = props.layer
 		end)
@@ -395,6 +398,8 @@ function edit:setupInputHandling()
 	local paint_layer = nil
 	local paint_target = nil
 	local paint_action_start = Hook:new(function ()
+		if filter_worker:is_active() then return end
+
 		if erase_history then return end
 		if not self.active_layer then return end
 		if not self.active_layer.visible then return end
@@ -684,15 +689,29 @@ function edit:rotateCamMode(mdx,mdy)
 	cam:setPos(length*newdir[1]/length2,length*newdir[2]/length2,length*newdir[3]/length2)
 end
 
+function edit:update_filter_worker()
+	if fw:preview_state() then
+		fw.active_worker:preview()
+	end
+
+	if not fw:is_commit() then return end
+
+	local layer, oldt, newt = fw.active_worker:state()
+	self:commitCommand("commit_paint", {layer=layer,old_texture=oldt,new_texture=newt})
+	fw:add_to_history()
+	fw:discard()
+end
+
 function edit:update(dt)
 	gui:update(dt)
 	self.viewport_input:poll()
+	self:update_filter_worker()
 end
 
 function edit:draw()
 	render:clear3DCanvas()
 	render:viewportPass(render.shader3d)
-	render:viewportPass(render.shader3dgrid)
+	render:viewportPass(render.shader3dgrid, false, true)
 
 	love.graphics.setCanvas()
 	love.graphics.reset()

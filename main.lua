@@ -11,10 +11,6 @@ local edit   = require 'edit'
 require "assetloader"
 
 function love.load( args )
-	for i,v in ipairs(args) do
-		print(i,v)
-	end
-
 	args = args or {}
 	local skin_name = args[1]
 	local skin_mode = args[2]
@@ -25,11 +21,6 @@ function love.load( args )
 		skin_mode = "wide"
 	end
 
-	--[[local nanaskin = love.graphics.newImage("nanaskin.png")
-	MAG = love.graphics.newImage("img/mag.png")
-	nanaskin:setFilter("nearest","nearest")
-
-	skin:addLayer(nanaskin, "Base", 1, true)--]]
 	model:generateModelMatrix()
 
 	Loader:initThread()
@@ -43,7 +34,6 @@ end
 
 function love.update(dt)
 	local t = love.timer.getTime()
-	--camera:setPos(math.sin(t)*16,0,-math.cos(t)*16)
 	camera:calcMat()
 	edit:update(dt)
 	updateKeys()

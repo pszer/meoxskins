@@ -6,6 +6,8 @@ require "prop"
 
 local guirender = require 'gui.guidraw'
 
+local popup = require 'gui.popup'
+
 local MapEditContext = {
 	__type = "mapeditcontextmenu",
 	buffer_info = {
@@ -66,11 +68,18 @@ function MapEditContext:define(prototype, options)
 	local p = Props:prototype(prototype)
 	local obj = {
 		new = function(self, props, X, Y)
+
+			local last_mx, last_my = {}, {}
+			last_mx[1],last_my[1]=love.mouse.getX(),love.mouse.getY()
+			--local last_mx[2],last_my[2]=love.mouse.getX(),love.mouse.getY()
+
 			local this = { -- this
 				props  = p(props),
 				options = {},
 				x = X or love.mouse.getX(),
 				y = Y or love.mouse.getY(),
+
+				tooltip = nil,
 
 				--
 				-- this functions
@@ -113,6 +122,9 @@ function MapEditContext:define(prototype, options)
 						end
 					end
 					draw_option_list(self.options,draw_option_list)
+					if self.tooltip then
+						self.tooltip:draw()
+					end
 				end,
 
 				updateHoverInfo = function(self,mx,my)
@@ -167,7 +179,27 @@ function MapEditContext:define(prototype, options)
 						return hovered
 					end
 
-					return test_options(self.options, test_options)
+					local result = test_options(self.options, test_options)
+
+					if mx==(last_mx[15]or-1) and my==(last_my[15]or-1) then
+						local h = self:getCurrentlyHoveredOption()
+						if not self.tooltip and h and h.tooltip then
+							self.tooltip = popup:throw(h.tooltip,10000)
+						end
+					else
+						if self.tooltip then
+							self.tooltip:release()
+							self.tooltip = nil
+						end
+					end
+
+					for i=15,2,-1 do
+						last_mx[i]=last_mx[i-1]
+						last_my[i]=last_my[i-1]
+					end
+					last_mx[1],last_my[1]=mx,my
+
+					return result
 				end,
 
 				getCurrentlyHoveredOption = function(self)
@@ -203,6 +235,7 @@ function MapEditContext:define(prototype, options)
 				local subopt  = v.suboptions
 				local text_drawable = nil
 				local icon = guirender.icons[v.icon] or nil
+				local tooltip = v.tooltip
 
 				assert(name, "MapEditContext:define(): no name given for an option")
 
@@ -251,7 +284,8 @@ function MapEditContext:define(prototype, options)
 					 x=0,
 					 y=0,
 					 bg=nil,
-					 icon = icon}
+					 icon = icon,
+					 tooltip=tooltip}
 				return o
 			end
 

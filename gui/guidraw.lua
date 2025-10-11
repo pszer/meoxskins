@@ -663,7 +663,7 @@ function MapEditGUIRender:drawGenericOption(x,y,w,h, bg, txt, icon, arrow, state
 		love.graphics.setShader()
 	end
 	if arrow then
-		love.graphics.draw(self.icons["mapedit/icon_sub.png"],
+		love.graphics.draw(self.icons["icon_sub.png"],
 			x + w - buffer_info.arrow_r, y + buffer_info.arrow_t)
 	end
 
@@ -779,7 +779,7 @@ function MapEditGUIRender:drawOption(x,y,w,h, txt, icon, arrow, state, buffer_in
 		love.graphics.setShader()
 	end
 	if arrow then
-		love.graphics.draw(self.icons["mapedit/icon_sub.png"],
+		love.graphics.draw(self.icons["icon_sub.png"],
 			x + w - buffer_info.arrow_r, y + buffer_info.arrow_t)
 	end
 

@@ -34,7 +34,7 @@ function render:clear3DCanvas()
 end
 
 local id = cpml.mat4.new()
-function render:viewportPass(shader,clear)
+function render:viewportPass(shader,clear,single)
 	love.graphics.setShader(shader)
 	camera:sendToShader()
 	shader:send("u_model", "column", id)
@@ -45,6 +45,7 @@ function render:viewportPass(shader,clear)
 	local visible_parts = model:getVisibleParts()
 
 	for i,layer in ipairs(skin_layers) do
+		if single and i>=2 then break end
 		if layer.preview then
 			model:applyLayerTexture(layer.preview)
 		else

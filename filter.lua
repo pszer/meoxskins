@@ -11,7 +11,7 @@ local filter = {
 --
 -- defaults is a table which specifies the default values to use for the uniform values,
 -- its indices are the names for the variable.
-function filter:define_shader_filter(shader, params, defaults)
+function filter:define_shader_filter(shader, params, defaults, name)
 	if type(shader) == "string" then
 		shader = love.graphics.newShader(
 			-- default vertex shader
@@ -28,6 +28,7 @@ function filter:define_shader_filter(shader, params, defaults)
 		params = params,
 		shader = shader,
 		defaults = defaults,
+		name = name or "Unknown filter"
 	}
 
 	f.apply = function(self, canvas, args)

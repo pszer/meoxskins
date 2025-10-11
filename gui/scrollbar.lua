@@ -9,25 +9,27 @@ MapEditGUIScrollbar.__index = MapEditGUIScrollbar
 
 require "input"
 
-function MapEditGUIScrollbar:new(h)
+function MapEditGUIScrollbar:new(h, start_ratio, on_scroll)
 	local this = {
 		x=0,
 		y=0,
 		w=20,
 		h=h,
-		ratio = 0.0,
+		ratio = start_ratio or 0.0,
 		drag=false,
 
 		__start_mx=0,
 		__start_my=0,
-		__start_ratio = 0.0,
+		__start_ratio = start_ratio or 0.0,
 
-		hover=false
+		hover=false,
+		wants_update=false
 	}
 
 	function this:update()
 		local status = scancodeIsUp("mouse1", CONTROL_LOCK.META)
 		if status then
+			self.wants = false
 			self.drag = false
 		end
 
@@ -38,6 +40,7 @@ function MapEditGUIScrollbar:new(h)
 			if r < 0 then r = 0 end
 			if r > 1 then r = 1 end
 			self.ratio = r
+			if on_scroll then on_scroll(self) end
 		end
 	end
 
@@ -65,6 +68,7 @@ function MapEditGUIScrollbar:new(h)
 
 	function this:action()
 		self.drag = true
+		self.wants_update = true
 
 		self.__start_mx,self.__start_my = love.mouse.getPosition()
 		local r = (self.__start_my-self.y-10)/(self.h-20)
@@ -81,6 +85,12 @@ function MapEditGUIScrollbar:new(h)
 		end
 	function this.setH(self,h) 
 		self.h = h end
+
+	function this.setRatio(self,r)
+		self.ratio = r
+		if self.ratio < 0.0 then self.ratio=0.0 end
+		if self.ratio > 1.0 then self.ratio=1.0 end
+	end
 
 	setmetatable(this, MapEditGUIScrollbar)
 	return this
