@@ -146,6 +146,10 @@ function skin:createEmptyLayer(name)
 				local old_texture = t.texture
 				t.texture = t.preview
 				return old_texture, t.texture
+			end,
+
+			discard_preview = function()
+				t.preview = nil
 			end
 		}
 	return t
