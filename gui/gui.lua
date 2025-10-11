@@ -272,20 +272,22 @@ function MapEditGUI:define(mapedit)
 
 		 {lang["Set Language"],
 		  action=function(props)
-		    return lang_win:new({},
+		    local win = lang_win:new({},
 				{
 					guitextbox:new(lang["Set Language"],0,0,100,"center"),
-					guibutton:new("English","mapedit/flag_en.png",0,0, function(self,win) lang:setLanguage("eng")
+					guibutton:new("English","flag_en.png",0,0, function(self,win) lang:setLanguage("eng")
 					                                                    guirender:loadFonts(lang:getFontInfo())
 					                                                    MapEditGUI:define(mapedit) end,"middle","top"),
-					guibutton:new("Polish","mapedit/flag_pl.png",0,0, function(self,win) lang:setLanguage("pl")
+					guibutton:new("Polish","flag_pl.png",0,0, function(self,win) lang:setLanguage("pl")
 					                                                   guirender:loadFonts(lang:getFontInfo())
 					                                                   MapEditGUI:define(mapedit) end,"middle","top"),
-					guibutton:new("Japanese","mapedit/flag_jp.png",0,0, function(self,win) lang:setLanguage("jp")
+					guibutton:new("Japanese","flag_jp.png",0,0, function(self,win) lang:setLanguage("jp")
 					                                                     guirender:loadFonts(lang:getFontInfo())
 					                                                     MapEditGUI:define(mapedit) end,"middle","top"),
 				},
 				0,0,100,115)
+				win:centre(0.3,0.5)
+				return win
 				end,
 			disable = false},
 
@@ -319,6 +321,7 @@ function MapEditGUI:define(mapedit)
 		    return end,
 			disable = false},
 		 {lang["~bDelete layer"],
+	 	  icon="icon_del.png",
 		  action=function(props)
 				edit:commitCommand("delete_layer",{layer=edit.active_layer})
 		    return end,
@@ -765,8 +768,9 @@ function MapEditGUI:define(mapedit)
 	,20,20,340,30)
 	self.main_panel:pushWindow(self.visible_win)
 
-	--self.colour_picker:setX(10)
-	--self.colour_picker:setY(30)
+	self.main_panel:update()
+	self.main_panel:resize()
+	layers_picker:update()
 end
 
 --
@@ -855,6 +859,12 @@ end
 --
 --
 
+	local window_move_m_start_x = 0
+	local window_move_m_start_y = 0
+	local window_move_start_x = 0
+	local window_move_start_y = 0
+	local window_move_flag = false
+	local window_move_window = nil
 function MapEditGUI:setupInputHandling()
 	self.cxtm_input = InputHandler:new(CONTROL_LOCK.EDIT_CONTEXT,
 	                                   {"cxtm_select","cxtm_scroll_up","cxtm_scroll_down"})
@@ -899,13 +909,6 @@ function MapEditGUI:setupInputHandling()
 	end)
 	self.win_input:getEvent("window_select", "down"):addHook(window_select_option)
 
-	local window_move_m_start_x = 0
-	local window_move_m_start_y = 0
-	local window_move_start_x = 0
-	local window_move_start_y = 0
-	local window_move_flag = false
-	local window_move_window = nil
-
 	local window_move_start = Hook:new(function ()
 		local win = self.main_panel:getCurrentlyHoveredWindow()
 		if not win then return end
@@ -923,6 +926,7 @@ function MapEditGUI:setupInputHandling()
 		local dx,dy = x-window_move_m_start_x, y-window_move_m_start_y
 		win:setX(window_move_start_x + dx)
 		win:setY(window_move_start_y + dy)
+		win:update()
 	end)
 
 	local window_move_finish = Hook:new(function ()
@@ -933,6 +937,17 @@ function MapEditGUI:setupInputHandling()
 	self.win_input:getEvent("window_move", "held"):addHook(window_move_action)
 	self.win_input:getEvent("window_move", "up"):addHook(window_move_finish)
 
+end
+
+function MapEditGUI:handleWindowMovement()
+	if not window_move_flag then return end
+	local win = window_move_window
+	if not win then return end
+	local x,y = love.mouse.getPosition()
+	local dx,dy = x-window_move_m_start_x, y-window_move_m_start_y
+	win:setX(window_move_start_x + dx)
+	win:setY(window_move_start_y + dy)
+	win:update()
 end
 
 function MapEditGUI:handleTopLevelThrownObject(obj)
@@ -990,10 +1005,17 @@ function MapEditGUI:keypressed(key,scancode,isrepeat)
 end
 
 function MapEditGUI:update(dt)
+	self:handleWindowMovement()
 	self:updateMainPanel()
 	self:updatePopupMenu()
 	self:updateContextMenu()
 	self:poll()
+end
+
+function MapEditGUI:resize()
+	self.main_panel:update()
+	self.main_panel:resize()
+	layers_picker:update()
 end
 
 function MapEditGUI:draw()

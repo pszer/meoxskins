@@ -161,6 +161,12 @@ function MapEditGUIScreen:new(layout, throw_obj, lock, win_lock)
 		end
 	end
 
+	function this:resize()
+		if self.layout then
+			self.layout:updateXywh()
+		end
+	end
+
 	function this:draw()
 		for i,v in ipairs(self.elements) do
 			if self.element_status[i] then

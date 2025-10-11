@@ -120,6 +120,14 @@ function MapEditGUIWindow:define(default_props, layout_def)
 				end
 			end
 
+			function this:centre(xr,yr)
+				local wx,wy = love.graphics.getDimensions()
+				xr=xr or 0.5
+				yr=yr or 0.5
+				self:setX(wx*xr - self.w/2)
+				self:setY(wy*yr - self.h/2)
+			end
+
 			function this.getCurrentlyHoveredOption(self)
 				for i,v in ipairs(self.menus) do
 					if v.hover then
@@ -203,6 +211,7 @@ function MapEditGUIWindow:define(default_props, layout_def)
 			end
 
 			setmetatable(this, MapEditGUIWindow)
+			this:update()
 			return this
 		end}
 	return obj

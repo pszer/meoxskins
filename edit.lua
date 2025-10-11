@@ -762,6 +762,7 @@ end
 
 function edit:resize(w,h)
 	gui:exitContextMenu()
+	gui:update()
 end
 
 function edit:setFileDropHook(hook_func)

@@ -49,6 +49,11 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 			self.grid_h_offset = -diff * self.scroll_r
 		end
 
+		local scrlb = self.scrollbar
+		scrlb:setX(self.x + self.w)
+		scrlb:setY(self.y)
+		scrlb:setH(self.h)
+
 		self.scrollbar:update()
 		self:generateText()
 	end
