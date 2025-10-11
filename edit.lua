@@ -54,8 +54,6 @@ function edit:load(args)
 	local skin_name = args.skin_name
 	local skin_mode = args.skin_mode or "wide" -- slim or wide parameter
 
-	print("skin_mode",skin_mode)
-
 	local texture
 	if not skin_name then
 		texture = love.graphics.newCanvas(64,64)

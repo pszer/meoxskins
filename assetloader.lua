@@ -174,7 +174,7 @@ function Loader:popRequest( demand , timeout )
 		print(string.format("Loader: failed to load %s%s, %s", asset_table.__dir, filename or "(nil)", error_str or ""))
 		return true
 	else
-		print(string.format("Loader: %s%s success", asset_table.__dir, filename))
+		--print(string.format("Loader: %s%s success", asset_table.__dir, filename))
 	end
 
 	asset_table[filename] = self:finaliseAsset( asset_type , filename , asset )

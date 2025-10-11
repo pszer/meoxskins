@@ -220,7 +220,7 @@ function MapEditGUI:define(mapedit)
 		    return about_win:new({},
 				{
 					guiimage:new("ic.png",0,0,80,120,function() self:displayPopup(lang["~b~(red)Do not click the kappa."]) end),
-					guitextbox:new(lang["\nWelcome!\n\nMeoxSkins editor © 2024 \nMIT license (see LICENSE.md)"],0,0,300,"center"),
+					guitextbox:new(lang["\nWelcome!\n\nMeoxSkins editor © 2025 \nMIT license (see LICENSE.md)"],0,0,300,"center"),
 					guibutton:new(lang["~bClose."],nil,0,0, function(self,win) win:delete() end,"middle","bottom")}
 					,256,256,256,256)
 				end,
@@ -285,36 +285,42 @@ function MapEditGUI:define(mapedit)
 		{lang["Save"],action=function()
 			local edit = require 'edit'
 			local dialog = require 'dialog'
-			local filepath = dialog.save("Save as")
+			local dirmem = require 'dirmem'
+			local filepath = dialog.save("Save as", dirmem.get("save"))
 			if filepath then
 				edit:saveToFile(filepath, true)
+				dirmem.memo("save", filepath)
+				dirmem.init("open", filepath)
 			end
 		end},
 		{lang["Open"],action=function()
 			local edit = require 'edit'
 			local dialog = require 'dialog'
-			local filepath = dialog.open("Open")
+			local dirmem = require 'dirmem'
+			local filepath = dialog.open("Open", dirmem.get("open"))
 			if filepath and filepath ~= "" then
-			return skin_mode_win:new(
-				{},
-				{
-					guitextbox:new(lang["Skin type?"],0,0,150,"center","left","top"),
-					guibutton:new(lang["Wide"],nil,0,0,
-						function(self,win)
-							win:delete()
-							edit:load{skin_name=filepath,skin_mode="wide"}
-							clearKeys()
-						end,
-						"middle","middle"),
-					guibutton:new(lang["Slim"],nil,0,0,
-						function(self,win)
-							win:delete()
-							edit:load{skin_name=filepath,skin_mode="slim"}
-							clearKeys()
-						end,
-						"middle","middle"),
-				},0,0
-			)
+				dirmem.memo("open",filepath)
+				dirmem.init("save",filepath)
+				return skin_mode_win:new(
+					{},
+					{
+						guitextbox:new(lang["Skin type?"],0,0,150,"center","left","top"),
+						guibutton:new(lang["Wide"],nil,0,0,
+							function(self,win)
+								win:delete()
+								edit:load{skin_name=filepath,skin_mode="wide"}
+								clearKeys()
+							end,
+							"middle","middle"),
+						guibutton:new(lang["Slim"],nil,0,0,
+							function(self,win)
+								win:delete()
+								edit:load{skin_name=filepath,skin_mode="slim"}
+								clearKeys()
+							end,
+							"middle","middle"),
+					},0,0
+				)
 			end
 		end},
 		{" --- "},

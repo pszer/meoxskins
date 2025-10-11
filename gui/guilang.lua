@@ -150,9 +150,9 @@ local MapEditGUILanguageStrings = {
 		pl="~b~(red)Nie klikaj kappy.",
 		jp="~b~(red)カッパを押すな",
 	},
-	["\nWelcome!\n\nMeoxSkins editor © 2024 \nMIT license (see LICENSE.md)"]={
-		pl="\nWitam!\n\nMeoxSkins editor © 2024 \nMIT licencja\n(zobacz LICENSE.md)",
-		jp="\n いらっしゃいませ！\n\nMeoxSkinsエディター(C) 2024\nMIT特許\n(LICENSE.mdをごらんなさい)",
+	["\nWelcome!\n\nMeoxSkins editor © 2025 \nMIT license (see LICENSE.md)"]={
+		pl="\nWitam!\n\nMeoxSkins editor © 2025 \nMIT licencja\n(zobacz LICENSE.md)",
+		jp="\n いらっしゃいませ！\n\nMeoxSkinsエディター(C) 2025\nMIT特許\n(LICENSE.mdをごらんなさい)",
 	},
 	["~bClose."]={
 		pl="~bZamknij",
@@ -315,14 +315,41 @@ local MapEditGUILanguageStrings = {
 	},
 	["Wide"]={
 		pl="Szeroki",
-		jp="広い"
+		jp="ワイド"
 	},
 
 	["default_group_name"]={
 		eng="Group",
 		pl ="Grupa",
 		jp ="組",
-	}
+	},
+
+	["~(green)New layer"]={
+		eng="~(green)New layer",
+		pl ="~(green)Nowa warstwa",
+		jp ="~(green)新しいレイヤー",
+	},
+	["~bDelete layer"]={
+		eng="~bDelete layer",
+		pl ="~bUsuń warstwę",
+		jp ="~bレイヤーを削除r",
+	},
+	["Move layer up"]={
+		eng="Move layer up",
+		pl ="Przesuń warstwę w górę",
+		jp ="レイヤーを上に移動",
+	},
+	["Move layer down"]={
+		eng="Move layer down",
+		pl ="Przesuń warstwę w dół",
+		jp ="レイヤーを下に移動",
+	},
+	["Slim/Wide mode"]={
+		eng="Slim/Wide mode",
+		pl ="Tryb wąski/szeroki",
+		jp ="スリム・ワイドモード",
+	},
+
 }
 
 function MapEditGUILanguage:setLanguage(lang)
