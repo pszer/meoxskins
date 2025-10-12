@@ -27,7 +27,7 @@ function skin:loadProject(texture, name)
 	end
 end
 
-local NAME_COUNTER=0
+local NAME_COUNTER=1
 local ID_COUNTER=0
 function skin:addLayer(texture, name, index, visible)
 	if name==nil then
@@ -149,7 +149,12 @@ function skin:createEmptyLayer(name)
 			visible=true,
 			preview=nil,
 
-			open_preview = function()
+			open_preview = function(c)
+				if c then
+					t.preview = c
+					return c
+				end
+
 				love.graphics.reset()
 				t.preview = love.graphics.newCanvas(64,64)
 				t.preview:setFilter("nearest","nearest")

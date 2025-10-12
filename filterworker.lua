@@ -1,5 +1,11 @@
 -- holds an instance of an actively open filter the user is using and
 -- updates the preview only when new parameters are given
+--
+-- TODO
+--
+-- fix filters not working on layer other than base
+--
+--
 
 local filter_worker = {
 	active_worker = nil,
@@ -69,7 +75,7 @@ function filter_worker:new(filter, layer, args, silent_commit)
 
 	function fw:preview()
 		if not self._update_preview then return end
-		fw.layer.open_preview(fw.result())
+		fw.layer.open_preview(fw:result())
 		self._update_preview = false
 	end
 
