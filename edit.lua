@@ -52,28 +52,13 @@ local edit = {
 	command_stack = {},
 	command_pointer = 0,
 	command_stack_max = 128,
+
+	autosave_timer = 0,
+	autosave_disable = false,
 }
 edit.__index = edit
 
-function edit:load(args)
-	local skin_name = args.skin_name
-	local skin_mode = args.skin_mode or "wide" -- slim or wide parameter
-
-	local texture
-	if not skin_name then
-		texture = love.graphics.newCanvas(64,64)
-	else
-		local data = fileio:dataFromFile(skin_name)
-		texture = love.graphics.newImage(data)
-
-		self.working_filename = file
-	end
-
-	skin:load(texture)
-	self.active_mode = skin_mode
-	self.active_layer = skin.layers[1]
-	model:setupVisibility(skin_mode)
-
+function edit:init()
 	SET_ACTIVE_KEYBINDS(EDIT_KEY_SETTINGS)
 	CONTROL_LOCK.EDIT_VIEW.open()
 
@@ -82,6 +67,91 @@ function edit:load(args)
 	self:setupInputHandling()
 	self:defineCommands()
 	gui:init(self)
+end
+
+function edit:checkAutosaveRecover()
+	local state = self:checkSessionFile()
+	if state ~= "exit" then
+		local guilayout       = require 'gui.layout'
+		local guiwindow       = require 'gui.window'
+		local guitextbox      = require 'gui.textelement'
+		local guibutton       = require 'gui.button'
+		local region_offset_f = function(_x,_y) return function(l) return l.x+l.w*_x, l.y+l.h*_y, l.w, l.h end end
+
+		local recover_win = guiwindow:define({
+			 win_min_w=330,
+			 win_max_w=330,
+			 win_min_h=50,
+ 			 win_max_h=50,
+	 		 win_focus=true,
+			},
+			guilayout:define(
+				{id="region",
+				 split_type=nil},
+				{"region", region_offset_f(0.5,0.10)},
+				{"region", region_offset_f(0.4,0.5)},
+				{"region", region_offset_f(0.6,0.5)}
+			)
+		)
+
+		edit.autosave_disable = true
+		local win =
+			recover_win:new({},{
+				guitextbox:new(lang["Recover autosaved project?"],0,0,330,"left","middle"),
+				guibutton:new(lang["~(green)~bYes"],nil,0,0,
+					function(self,win)
+						edit.autosave_disable = false
+						edit:recoverAutosave()
+						win:delete()
+					end,
+					"middle","top"),
+				guibutton:new(lang["No"],nil,0,0,
+					function(self,win)
+						edit.autosave_disable = false
+						win:delete()
+					end,
+					"middle","top")}
+			,0,0,150,50)
+		win:centre(0.5,0.5)
+		gui:handleTopLevelThrownObject(win)
+	end
+end
+
+function edit:load(args)
+	local skin_name = args.skin_name
+	local skin_mode = args.skin_mode or "wide" -- slim or wide parameter
+	local skin_data = args.skin_data
+
+	local texture
+	if not skin_name then
+		texture = skin_data or love.graphics.newCanvas(64,64)
+	else
+		local data = fileio:dataFromFile(skin_name)
+		texture = love.graphics.newImage(data)
+		self.working_filename = file
+
+		local w,h = texture:getDimensions()
+
+		if h ~= 64 or w%64 ~= 0 then
+			errstr = ""
+			if h ~= 64 then errstr = lang["Height is not 64"] end
+			if w%64 ~= 0 then
+				if errstr ~= "" then errstr = errstr .. ", " end
+				errstr = errstr .. lang["Width not a multiple of 64"]
+			end
+			gui:displayPopup(lang["Unable to load file."] .. " " .. errstr,5.0)	
+			texture = love.graphics.newCanvas(64,64)
+			self.working_filename = file .. ".png"
+		end
+	end
+
+	--skin:load(texture)
+	skin:loadProject(texture)
+	self.active_mode = skin_mode
+	self.active_layer = skin.layers[1]
+	model:setupVisibility(skin_mode)
+
+	self:init()
 end
 
 function edit:quit()
@@ -702,10 +772,55 @@ function edit:update_filter_worker()
 	fw:discard()
 end
 
+function edit:autosave(dt)
+	local autosave = require 'cfg.autosave'
+
+	if self.autosave_disable then
+		self.autosave_timer = 0
+		return
+	end
+
+	self.autosave_timer = self.autosave_timer + dt
+	if self.autosave_timer > autosave.interval then
+		local autosave_file = love.filesystem.newFile(autosave.autosave_file, "w")
+		self:saveProjectToFile(autosave_file)
+		autosave_file:close()
+
+		self:updateSessionFile("running")
+
+		self.autosave_timer=0
+	end
+end
+
+function edit:checkSessionFile()
+	local autosave = require 'cfg.autosave'
+	local crash_file = love.filesystem.newFile(autosave.session_file, "r")
+	local data = crash_file:read()
+	crash_file:close()
+	return data
+end
+
+function edit:updateSessionFile(state)
+	local autosave = require 'cfg.autosave'
+	local crash_file = love.filesystem.newFile(autosave.session_file, "w")
+	crash_file:write(state)
+	crash_file:close()
+end
+
+function edit:recoverAutosave()
+	local autosave = require 'cfg.autosave'
+	--local file = love.filesystem.newFile(autosave.autosave_file,"r")
+	--local data = file:read()
+	--edit:load{skin_data=love.graphics.newImage(data)}
+	edit:load{skin_data=love.graphics.newImage(autosave.autosave_file)}
+	--file:close()
+end
+
 function edit:update(dt)
 	gui:update(dt)
 	self.viewport_input:poll()
 	self:update_filter_worker()
+	self:autosave(dt)
 end
 
 function edit:draw()
@@ -751,7 +866,31 @@ function edit:saveToFile(filepath, only_visible)
 	love.graphics.reset()
 	local image_data = raster:newImageData()
 	local data = image_data:encode("png")
-	fileio:writeToFile(data, filepath)
+	if type(filepath) == "string" then
+		fileio:writeToFile(data, filepath)
+	else
+		filepath:write(data)
+	end
+end
+
+function edit:saveProjectToFile(filepath)
+	local layer_count = #skin.layers
+	local raster = love.graphics.newCanvas(64*layer_count,64)
+	love.graphics.reset()
+	love.graphics.setCanvas(raster)
+	for i,v in ipairs(skin.layers) do
+		local tex = v.texture
+		love.graphics.draw(tex, (i-1)*64)
+	end
+
+	love.graphics.reset()
+	local image_data = raster:newImageData()
+	local data = image_data:encode("png")
+	if type(filepath) == "string" then
+		fileio:writeToFile(data, filepath)
+	else
+		filepath:write(data)
+	end
 end
 
 function edit:viewport_mousemoved(x,y,dx,dy)
@@ -763,6 +902,7 @@ end
 function edit:resize(w,h)
 	gui:exitContextMenu()
 	gui:update()
+	gui:resize()
 end
 
 function edit:setFileDropHook(hook_func)
@@ -782,6 +922,10 @@ end
 
 function edit:textinput(t)
 	gui:textinput(t)
+end
+
+function edit:quit()
+	self:updateSessionFile("exit")
 end
 
 return edit

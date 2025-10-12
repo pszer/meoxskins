@@ -110,6 +110,13 @@ function MapEditGUIScreen:new(layout, throw_obj, lock, win_lock)
 		return self.window_stack[s]
 	end
 
+	function this:updateAll()
+		for i,v in pairs(self.elements) do
+			if v.update then v:updateHoverInfo() v:update() end end
+		for i,v in pairs(self.window_stack) do
+			if v.update then v:updateHoverInfo() v:update() end end
+	end
+
 	function this:update()
 		local w,h = love.graphics.getDimensions()
 		self.layout.w=w
@@ -165,6 +172,7 @@ function MapEditGUIScreen:new(layout, throw_obj, lock, win_lock)
 		if self.layout then
 			self.layout:updateXywh()
 		end
+		self:updateAll()
 	end
 
 	function this:draw()

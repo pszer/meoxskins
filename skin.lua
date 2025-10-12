@@ -10,6 +10,23 @@ function skin:load(texture, name)
 	self:addLayer(texture, name, 1, true)
 end
 
+function skin:loadProject(texture, name)
+	local layer_count = math.floor(texture:getPixelDimensions() / 64.0)
+
+	self.layers = {}
+	for i=1,layer_count do
+		local layer_tex = love.graphics.newCanvas()
+		layer_tex:setFilter("nearest")
+
+		love.graphics.reset()
+		love.graphics.setCanvas(layer_tex)
+		love.graphics.draw(texture,(-i+1)*64,0)
+		love.graphics.reset()
+
+		self:addLayer(layer_tex, "Layer " .. tostring(i), i, true)
+	end
+end
+
 local NAME_COUNTER=0
 local ID_COUNTER=0
 function skin:addLayer(texture, name, index, visible)

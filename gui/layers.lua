@@ -78,7 +78,7 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 		love.graphics.setColor(0,0,0,1)
 		love.graphics.rectangle("fill",x,y,w,h)
 
-		local h_offset = self.grid_h_offset
+		local h_offset = math.floor(self.grid_h_offset)
 		local t = self.table()
 		local count = #t
 

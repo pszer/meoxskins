@@ -70,33 +70,31 @@ function MapEditGUIWindow:define(default_props, layout_def)
 				local winw,winh = love.graphics.getDimensions()
 				if x < 0      then x = 0 end
 				if x > winw-w then x = winw-w end
-				self.x=x end
+				self.x=x
+				self:updateLayout()
+			end
 			function this:setY(y)
 				local w,h = self.w, self.h
 				local winw,winh = love.graphics.getDimensions()
 				if y < 0      then y = 0 end
 				if y > winh-h then y = winh-h end
-				self.y=y end
+				self.y=y
+				self:updateLayout()
+			end
 			function this:setW(w)
 				if w < self.props.win_min_w then w = self.props.win_min_w end
 				if w > self.props.win_max_w then w = self.props.win_max_w end
 				self.w=w
+				self:updateLayout()
 			end
 			function this:setH(h)
 				if h < self.props.win_min_h then h = self.props.win_min_h end
 				if h > self.props.win_max_h then h = self.props.win_max_h end
 				self.h=h
+				self:updateLayout()
 			end
 
-			this:setW(w)
-			this:setH(h)
-
-			local winw,winh = love.graphics.getDimensions()
-			this.x = x or winw*0.5 - this.w*0.5
-			this.y = y or winh*0.5 - this.h*0.5
-			this.layout = layout_def:new(this.x,this.y,this.w,this.h,this.elements)
-
-			function this:update()
+			function this:updateLayout()
 				if self.layout then
 					self.layout:setX(self.x)
 					self.layout:setY(self.y)
@@ -104,6 +102,10 @@ function MapEditGUIWindow:define(default_props, layout_def)
 					self.layout:setH(self.h)
 					self.layout:updateXywh()
 				end
+			end
+
+			function this:update()
+				self:updateLayout()
 
 				for i,v in ipairs(self.elements) do
 					if v.update and v.wants_update then
@@ -211,6 +213,14 @@ function MapEditGUIWindow:define(default_props, layout_def)
 			end
 
 			setmetatable(this, MapEditGUIWindow)
+
+			this:setW(w)
+			this:setH(h)
+
+			local winw,winh = love.graphics.getDimensions()
+			this.x = x or winw*0.5 - this.w*0.5
+			this.y = y or winh*0.5 - this.h*0.5
+			this.layout = layout_def:new(this.x,this.y,this.w,this.h,this.elements)
 			this:update()
 			return this
 		end}

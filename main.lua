@@ -30,6 +30,8 @@ function love.load( args )
 	camera:setPos(0,0,-16)
 	camera:calcProj()
 	render:createCanvas()
+
+	edit:checkAutosaveRecover()
 end
 
 function love.update(dt)
@@ -37,6 +39,8 @@ function love.update(dt)
 	camera:calcMat()
 	edit:update(dt)
 	updateKeys()
+
+	love.timer.sleep(0.0022)
 end
 
 function love.draw()
@@ -46,6 +50,7 @@ end
 function love.resize()
 	camera:calcProj()
 	render:createCanvas()
+	if GAMESTATE.resize then GAMESTATE:resize() end
 end
 
 GAMESTATE = edit

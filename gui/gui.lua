@@ -185,6 +185,7 @@ function MapEditGUI:define(mapedit)
 		win_focus=true,
 	}, lang_win_layout)
 
+
 	local hsl_adjust_layout = guilayout:define(
 		{id="panel",
 		 split_type="-x",
@@ -293,12 +294,14 @@ function MapEditGUI:define(mapedit)
 
 		 {lang["~iAbout"],
 		  action=function(props)
-		    return about_win:new({},
+		    local win = about_win:new({},
 				{
 					guiimage:new("ic.png",0,0,80,120,function() self:displayPopup(lang["~b~(red)Do not click the kappa."]) end),
 					guitextbox:new(lang["\nWelcome!\n\nMeoxSkins editor © 2025 \nMIT license (see LICENSE.md)"],0,0,300,"center"),
 					guibutton:new(lang["~bClose."],nil,0,0, function(self,win) win:delete() end,"middle","bottom")}
 					,256,256,256,256)
+				win:centre()
+				return win
 				end,
 			disable = false}
 		 end)
@@ -584,6 +587,17 @@ function MapEditGUI:define(mapedit)
 			local filepath = dialog.save("Save as", dirmem.get("save"), ".png Skin File", {"*.png", "*.PNG"})
 			if filepath then
 				edit:saveToFile(filepath, true)
+				dirmem.memo("save", filepath)
+				dirmem.init("open", filepath)
+			end
+		end},
+		{lang["Save as Project"],action=function()
+			local edit = require 'edit'
+			local dialog = require 'dialog'
+			local dirmem = require 'dirmem'
+			local filepath = dialog.save("Save as", dirmem.get("save"), ".png Skin File", {"*.png", "*.PNG"})
+			if filepath then
+				edit:saveProjectToFile(filepath, true)
 				dirmem.memo("save", filepath)
 				dirmem.init("open", filepath)
 			end
@@ -1015,7 +1029,7 @@ end
 function MapEditGUI:resize()
 	self.main_panel:update()
 	self.main_panel:resize()
-	layers_picker:update()
+	--layers_picker:update()
 end
 
 function MapEditGUI:draw()
