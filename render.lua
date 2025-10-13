@@ -8,9 +8,6 @@ local render = {
 	shader3d = love.graphics.newShader("3d.glsl","3d.glsl"),
 	shader3dgrid = love.graphics.newShader("3dgrid.glsl","3dgrid.glsl"),
 
-	--viewport3d = love.graphics.newCanvas(w,h, {format="rgba16f"}),
-	--viewport3d_depth = love.graphics.newCanvas(w,h, {format="depth24stencil8"}),
-
 }
 
 function render:createCanvas()

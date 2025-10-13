@@ -44,6 +44,7 @@ EDIT_KEY_SETTINGS = {
 	["edit_colour_fill"]  = { "f"    , nil , default = "f"  },
 	["edit_erase"]  = { "x"    , nil , default = "x"  },
 	["edit_mirror"]  = { "m"    , nil , default = "m"  },
+	["edit_grid"]  = { "g"    , nil , default = "g"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},

@@ -98,7 +98,9 @@ function filter_worker:add_to_history(fw)
 end
 
 function filter_worker:discard()
-	filter_worker.active_worker:discard()
+	if filter_worker.active_worker then
+		filter_worker.active_worker:discard()
+	end
 	filter_worker:set_commit(false)
 	filter_worker.active_worker = nil
 	filter_worker.silent_commit = false

@@ -353,7 +353,12 @@ function MapEditGUI:define(mapedit)
 		  action=function(props)
 				edit:commitCommand("swap_mode",{})
 		    return end,
-			disable = disable,tooltip=lang["Change skin to have wide or slim arms."]}
+			disable = disable,tooltip=lang["Change skin to have wide or slim arms."]},
+		 {lang["Toggle grid"],
+		  action=function(props)
+				edit:toggleGrid()
+		    return end,
+			disable = disable,tooltip=lang["Enable or disable the grid overlay."]}
 		 end)
 
 	context["filters_context"] = 
@@ -365,8 +370,8 @@ function MapEditGUI:define(mapedit)
 			local edit = require 'edit'
 			local skin = require 'skin'
 			local active_layer = edit:getActiveLayer()
-			local disable = active_layer==nil
 			local filter_worker = require 'filterworker'
+			local disable = active_layer==nil or filter_worker.active_worker
 		return
 		 {lang["Recent filters"],
 	 	  disable = #filter_worker.history < 1 or not edit:getActiveLayer(),

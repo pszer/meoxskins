@@ -55,6 +55,8 @@ local edit = {
 
 	autosave_timer = 0,
 	autosave_disable = false,
+
+	render_grid = true
 }
 edit.__index = edit
 
@@ -405,7 +407,7 @@ function edit:setupInputHandling()
 	self.viewport_input = InputHandler:new(CONTROL_LOCK.EDIT_VIEW,
 	                    {"cam_zoom_out","cam_zoom_in","cam_rotate",
 											 "edit_undo","edit_redo","edit_action","edit_colour_pick","edit_colour_fill",
-											 "edit_erase","edit_mirror",
+											 "edit_erase","edit_mirror","edit_grid",
 										   {"ctrl",CONTROL_LOCK.META},{"alt",CONTROL_LOCK.META},{"super",CONTROL_LOCK.META}})
 
 	-- hooks for camera rotation
@@ -583,6 +585,11 @@ function edit:setupInputHandling()
 
 	local mirror_action = Hook:new(function () self.mirror_mode = not self.mirror_mode end)
 	self.viewport_input:getEvent("edit_mirror","down"):addHook(mirror_action)
+
+	local grid_toggle = Hook:new(function ()
+		self.render_grid = not self.render_grid
+	end)
+	self.viewport_input:getEvent("edit_grid","down"):addHook(grid_toggle)
 end
 
 function edit:pixelAtCursor(get_all_pixels)
@@ -826,7 +833,9 @@ end
 function edit:draw()
 	render:clear3DCanvas()
 	render:viewportPass(render.shader3d)
-	render:viewportPass(render.shader3dgrid, false, true)
+	if edit.render_grid then
+		render:viewportPass(render.shader3dgrid, false, true)
+	end
 
 	love.graphics.setCanvas()
 	love.graphics.reset()
@@ -891,6 +900,10 @@ function edit:saveProjectToFile(filepath)
 	else
 		filepath:write(data)
 	end
+end
+
+function edit:toggleGrid()
+	self.render_grid = not self.render_grid
 end
 
 function edit:viewport_mousemoved(x,y,dx,dy)
