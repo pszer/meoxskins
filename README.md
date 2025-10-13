@@ -1,9 +1,14 @@
 # MeoxSkins skin editor for Minecraft.
 ## Usage
+For linux, if the Love2D package is installed then
 MeoxSkins be launched using the console, using 
 >love meoxskins.love "skin.png" "slim"/"wide"
+or with
+>./meoxskin
 
-or you can use File > Open to open a skin image.
+You can use File > Open to open a skin image/project.
+
+File > Save exports the skin to a file that will work with Minecraft, File > Save as Project will export in a .png layout that remembers layers.
 
 Select a colour using the colour picker, then left click to paint.
 
@@ -35,6 +40,10 @@ are mirrored.
 
 ![Viewport](https://github.com/pszer/meoxskins/blob/master/visible.png)
 
+Filters such as brightness or contrast adjustment can be accessed in the toolbar.
+
+An autosave is made every 10 seconds and will be recovered in case the program crashes.
+
 ### Control list
 Left click - Paint/select
 
@@ -53,3 +62,5 @@ F - Fill
 O - Pick colour
 
 M - Toggle mirror editing
+
+G - Toggle grid overlay

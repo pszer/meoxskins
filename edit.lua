@@ -74,6 +74,10 @@ end
 function edit:checkAutosaveRecover()
 	local state = self:checkSessionFile()
 	if state ~= "exit" then
+		local autosave = require "cfg.autosave"
+		local test_file = love.filesystem.newFile(autosave.autosave_file)
+		if not test_file then test_file:close() return end
+
 		local guilayout       = require 'gui.layout'
 		local guiwindow       = require 'gui.window'
 		local guitextbox      = require 'gui.textelement'
@@ -802,6 +806,12 @@ end
 function edit:checkSessionFile()
 	local autosave = require 'cfg.autosave'
 	local crash_file = love.filesystem.newFile(autosave.session_file, "r")
+
+	if not crash_file then
+		self:updateSessionFile("running")
+		return "running"
+	end	
+
 	local data = crash_file:read()
 	crash_file:close()
 	return data
@@ -816,11 +826,7 @@ end
 
 function edit:recoverAutosave()
 	local autosave = require 'cfg.autosave'
-	--local file = love.filesystem.newFile(autosave.autosave_file,"r")
-	--local data = file:read()
-	--edit:load{skin_data=love.graphics.newImage(data)}
 	edit:load{skin_data=love.graphics.newImage(autosave.autosave_file)}
-	--file:close()
 end
 
 function edit:update(dt)
