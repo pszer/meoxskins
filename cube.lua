@@ -29,7 +29,7 @@ local function cubeToTris(args)
 	local xw,yw,zw = size[1],size[2],size[3]
 
 	local verts = {}
-	local origin = origin or {0,0,0}
+--	local origin = origin or {0,0,0}
 
 	local V = {}
 	V[1] = {  x ,  y  ,  z  }

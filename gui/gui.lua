@@ -139,6 +139,7 @@ function MapEditGUI:define(mapedit)
 		{"buttons_region", region_offset_f(0.97,0.00)},
 		{"buttons_region", region_offset_f(0.63,0.00)},
 		{"buttons_region", region_offset_f(0.03,0.06)},
+		{"buttons_region", region_offset_f(0.35,0.40)},
 		{"tools_region", region_offset_f(0.07,0.40)},
 		{"tools_region", region_offset_f(0.30,0.40)},
 		{"tools_region", region_offset_f(0.54,0.40)},
@@ -154,7 +155,46 @@ function MapEditGUI:define(mapedit)
 		win_title=lang["Curves"],
 		win_icon="icon_curves.png"
 	}, curves_layout)
-	-- Picker window
+	-- Curves filter window
+	--
+	-- Pose window
+	local pose_window_layout = guilayout:define(
+		{id="box_region",
+		 split_type="+x",
+		 split_pix=102,
+		 sub=
+			{id="text_region",
+			split_type="+y",
+			split_pix=25,
+			sub=
+				{id="rot_region",
+				 split_type=nil},
+			}
+		},
+		{"rot_region", region_offset_f(0.1366+0.0000,0.000)},
+		{"rot_region", region_offset_f(0.1366+0.3333,0.000)},
+		{"rot_region", region_offset_f(0.1366+0.6666,0.000)},
+		{"box_region", region_offset_f(0.06,0.05+0/6.0)},
+		{"box_region", region_offset_f(0.06,0.05+1/6.0)},
+		{"box_region", region_offset_f(0.06,0.05+2/6.0)},
+		{"box_region", region_offset_f(0.06,0.05+3/6.0)},
+		{"box_region", region_offset_f(0.06,0.05+4/6.0)},
+		{"box_region", region_offset_f(0.6,0.05+5/6.0)},
+		{"text_region",region_offset_f(0.1366+0.0000,0.300)},
+		{"text_region",region_offset_f(0.1166+0.3333,0.300)},
+		{"text_region",region_offset_f(0.1166+0.6666,0.300)}
+	)
+	local pose_win = guiwindow:define({
+		win_min_w=262,
+		win_max_w=262,
+		win_min_h=220,
+		win_max_h=220,
+		win_titlebar=true,
+		win_title=lang["Pose"],
+		win_show_close=true
+		--win_icon="icon_pose.png"
+	}, pose_window_layout)
+	-- Pose window
 	
 	-- Wide/Slim skin mode window
 	local skin_mode_win_layout = guilayout:define(
@@ -508,16 +548,148 @@ function MapEditGUI:define(mapedit)
 				edit:setBackgroundColour(r,g,b)
 		    return end,
 			disable = disable,tooltip=lang["Changes background to the currently picked colour."]},
-		 {lang["Slim/Wide mode"],
-		  action=function(props)
-				edit:commitCommand("swap_mode",{})
-		    return end,
-			disable = disable,tooltip=lang["Change skin to have wide or slim arms."]},
 		 {lang["Toggle grid"],
 		  action=function(props)
 				edit:toggleGrid()
 		    return end,
 			disable = disable,tooltip=lang["Enable or disable the grid overlay."]}
+		 end)
+
+	context["skins_context"] = 
+		contextmenu:define(
+		{}
+		,
+		function(props) 
+			local edit = require 'edit'
+			local skin = require 'skin'
+			local model = require 'model'
+		return
+		 {lang["Slim/Wide mode"],
+		  action=function(props)
+				edit:commitCommand("swap_mode",{})
+		    return end,
+			disable = disable,tooltip=lang["Change skin to have wide or slim arms."]},
+		 {lang["Pose"],
+		  action=function(props)
+				--edit:commitCommand("swap_mode",{})
+			
+				local mat   = require 'mat4'
+				local model = require 'model'
+				local limb  = "head"
+				local rx_bar, ry_bar, rz_bar
+
+				local range = 3.14 * 0.88
+				local function updatePose()
+					local null = 1.0
+					--if limb~="head" then null = 0.0 end
+					model:setPose(limb, mat.rot{ (rx_bar.ratio-0.5)*range,  (ry_bar.ratio-0.5)*range*null, (rz_bar.ratio-0.5)*range,})
+				end
+
+				local function getXYZrot(m)
+					local xr,yr,zr
+
+					xr = math.asin(-m[10])
+					yr = math.atan(m[9],m[11])
+					zr = math.atan(m[2],m[6])
+
+					return xr,yr,zr
+				end
+
+				rx_bar =
+					guiscrollb:new(200, 0.5,
+						function(scrlb)
+							updatePose()
+						end, 0.95)
+				ry_bar =
+					guiscrollb:new(200, 0.5,
+						function(scrlb)
+							updatePose()
+						end, 0.95)
+				rz_bar =
+					guiscrollb:new(200, 0.5,
+						function(scrlb)
+							updatePose()
+						end, 0.95)
+
+				local function updateBars(new_limb)
+					if new_limb == "arm_r" then new_limb = "arm_slim_r" end
+					if new_limb == "arm_l" then new_limb = "arm_slim_l" end
+					local xr,yr,zr = getXYZrot(model.model_mats[new_limb].rot)
+					rx_bar.ratio = 0.5 + xr/range
+					ry_bar.ratio = 0.5 + yr/range
+					rz_bar.ratio = 0.5 + zr/range
+				end
+				updateBars("head")
+
+				local head_tick,arm_r_tick,arm_l_tick,leg_r_tick,leg_l_tick
+				head_tick = guitickbox:new("Head",0,0,"dot",function(self)
+					updateBars("head")
+					limb = "head"
+					head_tick.state = true
+					arm_r_tick.state = false
+					arm_l_tick.state = false
+					leg_r_tick.state = false
+					leg_l_tick.state = false
+				end, true)
+				arm_l_tick = guitickbox:new("Left arm",0,0,"dot",function(self)
+					updateBars("arm_l")
+					limb = "arm_l"
+					head_tick.state = false
+					arm_r_tick.state = false
+					arm_l_tick.state = true
+					leg_r_tick.state = false
+					leg_l_tick.state = false
+				end, false)
+				arm_r_tick = guitickbox:new("Right arm",0,0,"dot",function(self)
+					updateBars("arm_r")
+					limb = "arm_r"
+					head_tick.state = false
+					arm_r_tick.state = true
+					arm_l_tick.state = false
+					leg_r_tick.state = false
+					leg_l_tick.state = false
+				end, false)
+				leg_r_tick = guitickbox:new("Right leg",0,0,"dot",function(self)
+					updateBars("leg_r")
+					limb = "leg_r"
+					head_tick.state = false
+					arm_r_tick.state = false
+					arm_l_tick.state = false
+					leg_r_tick.state = true
+					leg_l_tick.state = false
+				end, false)
+				leg_l_tick = guitickbox:new("Left leg",0,0,"dot",function(self)
+					updateBars("leg_l")
+					limb = "leg_l"
+					head_tick.state = false
+					arm_r_tick.state = false
+					arm_l_tick.state = false
+					leg_r_tick.state = false
+					leg_l_tick.state = true
+				end, false)
+
+
+				--
+				return pose_win:new({win_show_close=true},
+					{
+						ry_bar, rx_bar, rz_bar,
+
+						head_tick, arm_r_tick, arm_l_tick, leg_r_tick, leg_l_tick,
+
+						guibutton:new(lang["Reset"], nil, 0,0,
+							function(self)
+								rx_bar.ratio=0.5
+								ry_bar.ratio=0.5
+								rz_bar.ratio=0.5
+								updatePose()
+							end, "middle"),
+
+						guitextbox:new(lang["Yaw"],0,0,53,"middle","left","top",true),
+						guitextbox:new(lang["Pitch"],0,0,53,"middle","left","top",true),
+						guitextbox:new(lang["Roll"],0,0,53,"middle","left","top",true),
+					},300,300,300,300)
+		    end,
+			disable = disable,tooltip=lang["Change pose of limbs."]}
 		 end)
 
 	context["filters_context"] = 
@@ -809,6 +981,7 @@ function MapEditGUI:define(mapedit)
 					guibutton:new(lang["~b~(green)Confirm"],nil,0,0,function(self,win) fw:set_commit(true) win:delete() end,"right","top",false),
 					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) edit:unlockEdit() fw:discard() win:delete() end,"left","top",false),
 					guitickbox:new(lang["Preview"],0,0,"tick",function(self,win) edit:setPreviewStatus(self.state) end, edit:getPreviewStatus(), false),
+					guibutton:new(lang["Reset"],0,0,"tick",function(self,win) curve:resetCurve() end, edit:getPreviewStatus(), false),
 					valuetick,redtick,greentick,bluetick
 				},
 				0,0,300,330)
@@ -914,6 +1087,12 @@ function MapEditGUI:define(mapedit)
 		 generate =
 		   function(props)
 			   return context["filters_context"], {}
+		   end
+		},
+		{lang["Skin"],
+		 generate =
+		   function(props)
+			   return context["skins_context"], {}
 		   end
 		},
 		{lang["Help"],

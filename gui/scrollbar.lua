@@ -9,13 +9,14 @@ MapEditGUIScrollbar.__index = MapEditGUIScrollbar
 
 require "input"
 
-function MapEditGUIScrollbar:new(h, start_ratio, on_scroll)
+function MapEditGUIScrollbar:new(h, start_ratio, on_scroll, h_ratio)
 	local this = {
 		x=0,
 		y=0,
 		w=20,
 		h=h,
 		ratio = start_ratio or 0.0,
+		h_ratio = h_ratio or 1.0,
 		drag=false,
 
 		__start_mx=0,
@@ -84,7 +85,7 @@ function MapEditGUIScrollbar:new(h, start_ratio, on_scroll)
 	function this.setW(self,w)
 		end
 	function this.setH(self,h) 
-		self.h = h end
+		self.h = h * self.h_ratio end
 
 	function this.setRatio(self,r)
 		self.ratio = r

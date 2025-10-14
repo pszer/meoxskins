@@ -91,37 +91,37 @@ local model = {
 
 		["leg_l"] = {
 			mat = mat.new(),
-			pos = mat.trans{-2,6,-2},
+			pos = mat.trans{-2,6,-0},
 			rot = mat.rot  {0,0,0.05},
 		},
 
 		["leg_r"] = {
 			mat = mat.new(),
-			pos = mat.trans{2, 6,-2},
+			pos = mat.trans{2, 6,-0},
 			rot = mat.rot  {0,0,-0.05},
 		},
 
 		["arm_slim_r"] = {
 			mat = mat.new(),
-			pos = mat.trans{6,-6,-2},
+			pos = mat.trans{4,-4+0.2,0},
 			rot = mat.rot  {0,0,-0.1},
 		},
 
 		["arm_slim_l"] = {
 			mat = mat.new(),
-			pos = mat.trans{-6,-6,-2},
+			pos = mat.trans{-4,-4+0.2,0},
 			rot = mat.rot  {0,0,0.1},
 		},
 
 		["arm_wide_r"] = {
 			mat = mat.new(),
-			pos = mat.trans{6,-6,-2},
+			pos = mat.trans{4,-4,0},
 			rot = mat.rot  {0,0,-0.1},
 		},
 
 		["arm_wide_l"] = {
 			mat = mat.new(),
-			pos = mat.trans{-6,-6,-2},
+			pos = mat.trans{-4,-4,0},
 			rot = mat.rot  {0,0,0.1},
 		},
 	}
@@ -136,6 +136,33 @@ model.model_mats.arm_slim_l_o = model.model_mats.arm_slim_l
 model.model_mats.arm_wide_l_o = model.model_mats.arm_wide_l
 model.model_mats.leg_l_o = model.model_mats.leg_l
 model.model_mats.leg_r_o = model.model_mats.leg_r
+
+function model:setPose(limb, rot, pos)
+	local mats = self.model_mats
+
+	if limb == "arm_r" then
+		self:setPose("arm_slim_r",rot,pos)
+		self:setPose("arm_wide_r",rot,pos)
+		return
+	end
+	if limb == "arm_l" then
+		self:setPose("arm_slim_l",rot,pos)
+		self:setPose("arm_wide_l",rot,pos)
+		return
+	end
+
+	if rot then
+		mats[limb].rot = rot
+		mats[limb .. "_o"].rot = rot
+	end
+	if pos then
+		mats[limb].pos = pos
+		mats[limb .. "_o"].pos = pos
+	end
+
+	self:generateModelMatrix(limb)
+	self:generateModelMatrix(limb.."_o")
+end
 
 function model:applyLayerTexture(tex, shader)
 	local shader = shader or love.graphics.getShader()
@@ -224,6 +251,55 @@ function model:setupVisibility(mode)
 			["leg_r_o"]  = true,
 		}
 	end
+end
+
+local __overlay_mem = {}
+function model:hideOverlayShortcut(on)
+	if on then
+		__overlay_mem["head_o"] = self.visible["head_o"]
+		__overlay_mem["torso_o"]  = self.visible["torso_o"]
+		__overlay_mem["arm_slim_r_o"]  = self.visible["arm_slim_r_o"]
+		__overlay_mem["arm_slim_l_o"]  = self.visible["arm_slim_l_o"]
+		__overlay_mem["arm_wide_r_o"]  = self.visible["arm_wide_r_o"]
+		__overlay_mem["arm_wide_l_o"]  = self.visible["arm_wide_l_o"]
+		__overlay_mem["leg_l_o"]  = self.visible["leg_l_o"]
+		__overlay_mem["leg_r_o"]  = self.visible["leg_r_o"]
+		self.visible["head_o"] = false 
+		self.visible["torso_o"]  = false 
+		self.visible["arm_slim_r_o"]  = false 
+		self.visible["arm_slim_l_o"]  = false 
+		self.visible["arm_wide_r_o"]  = false 
+		self.visible["arm_wide_l_o"]  = false 
+		self.visible["leg_l_o"]  = false 
+		self.visible["leg_r_o"]  = false
+	else
+		self.visible["head_o"]       = __overlay_mem["head_o"] or self.visible["head_o"] 
+		self.visible["torso_o"]      = __overlay_mem["torso_o"] or self.visible["torso_o"] 
+		self.visible["arm_slim_r_o"] = __overlay_mem["arm_slim_r_o"]  or self.visible["arm_slim_r_o"] 
+		self.visible["arm_slim_l_o"] = __overlay_mem["arm_slim_l_o"] or self.visible["arm_slim_l_o"] 
+		self.visible["arm_wide_r_o"] = __overlay_mem["arm_wide_r_o"] or self.visible["arm_wide_r_o"] 
+		self.visible["arm_wide_l_o"] = __overlay_mem["arm_wide_l_o"] or self.visible["arm_wide_l_o"] 
+		self.visible["leg_l_o"]      = __overlay_mem["leg_l_o"] or self.visible["leg_l_o"] 
+		self.visible["leg_r_o"]      = __overlay_mem["leg_r_o"] or self.visible["leg_r_o"] 
+	end
+end
+
+function model:isOverlayFullyHidden(mode)
+	return
+		(not self.visible["head_o"]) and 
+		(not self.visible["torso_o"])  and
+		(
+			((not self.visible["arm_wide_l_o"]) and
+			(not self.visible["arm_wide_r_o"]) and mode=="wide")
+
+			or
+
+			((not self.visible["arm_slim_l_o"]) and
+			(not self.visible["arm_slim_r_o"]) and mode=="slim")
+		) 
+		and
+		(not self.visible["leg_l_o"]) and
+		(not self.visible["leg_r_o"])
 end
 
 return model

@@ -250,6 +250,22 @@ function edit:defineCommands()
 			props.layer.preview = nil
 		end)
 
+		--[[
+	coms["commit_pose"] = commands:define(
+		{
+		 {"old_pose", nil, nil, nil},
+		 {"new_pose", nil, nil, nil}, -- { ["limb"] = {rot=rot,pos=pos,mat=mat} , ... }
+		},
+		function(props) -- command function
+			local model_mats = model.model_mats
+			for limb,v in pairs(model_mats) do
+				props.old_pose[limb] = {rot=v.rot,pos=v.pos,mat=v.mat}
+			end
+		end, -- command function
+
+		function(props) -- undo command function
+		end)]]--
+
 	coms["merge_layer"] = commands:define(
 		{
 		 {"base_layer", nil, nil, nil},
@@ -468,7 +484,7 @@ function edit:setupInputHandling()
 	self.viewport_input = InputHandler:new(CONTROL_LOCK.EDIT_VIEW,
 	                    {"cam_zoom_out","cam_zoom_in","cam_rotate",
 											 "edit_undo","edit_redo","edit_action","edit_colour_pick","edit_colour_fill",
-											 "edit_erase","edit_mirror","edit_grid","edit_alpha_override",
+											 "edit_erase","edit_mirror","edit_grid","edit_alpha_override","edit_hide_overlay",
 										   {"ctrl",CONTROL_LOCK.META},{"alt",CONTROL_LOCK.META},{"super",CONTROL_LOCK.META}})
 
 	-- hooks for camera rotation
@@ -526,6 +542,13 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("ctrl", "up"):addHook(disable_ctrl_hook)
 	self.viewport_input:getEvent("alt", "down"):addHook(enable_alt_hook)
 	self.viewport_input:getEvent("alt", "up"):addHook(disable_alt_hook)
+
+	local hideoverlaytoggle = false
+	local hide_overylay_hook = Hook:new(function ()
+		model:hideOverlayShortcut(not hideoverlaytoggle)
+		hideoverlaytoggle = not hideoverlaytoggle
+	end)
+	self.viewport_input:getEvent("edit_hide_overlay","down"):addHook(hide_overylay_hook)
 
 	local paint_history = nil
 	local paint_layer = nil

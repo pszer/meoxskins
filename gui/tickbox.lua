@@ -118,6 +118,7 @@ function MapEditTickbox:new(str,x,y,appearance,action,start,disable)
 			love.graphics.draw(graphic,self.x,self.y)
 			love.graphics.setBlendMode("alpha")
 		end
+		love.graphics.reset()
 	end
 
 	function this.setX(self,x)

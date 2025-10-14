@@ -81,6 +81,13 @@ function EditGUICurves:new(wS,hS, curves_change_hook, histograms, action)
 		end
 	end
 
+	function this:updateSamples(channel)
+		if type(channel)=="string" then
+			channel = self[channel]
+		end
+		_,channel.get_sample = cubiccurve.generate(channel.x,channel.y,self.sample_count,channel.samples, true)
+	end
+
 	function this:generateHistogramGraphic(channel_name)
 		local channel = self[channel_name]
 		if not histograms[channel_name] then return end
@@ -228,6 +235,16 @@ function EditGUICurves:new(wS,hS, curves_change_hook, histograms, action)
 
 		table.remove(channel.x, index)
 		table.remove(channel.y, index)
+	end
+
+	function this:resetCurve(channel)
+		channel = channel or self.active_channel
+		if type(channel) == "string" then
+			channel = self[channel] -- value,red,green,blue
+		end
+
+		channel.x,channel.y = {0.0,1.0},{0.0,1.0}
+		self:updateSamples(channel)
 	end
 
 	-- returns false if out of range
