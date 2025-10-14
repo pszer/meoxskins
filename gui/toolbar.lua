@@ -95,7 +95,6 @@ function MapEditToolbar:define(prototype, ...)
 					if v.disable then state = "disable" 
 					elseif v.hover then state = "hover" 
 					end
-					--print(state)
 
 					guirender:drawGenericOption(x + menu_x, y + menu_y, v.w, v.h, v.bg, v.text, v.icon, false,
 					 state, buffer_info)

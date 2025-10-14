@@ -13,14 +13,14 @@ local model = require 'model'
 local skin = require 'skin'
 local paint = require 'paint'
 
-local paint = require 'paint'
-
 local fileio = require 'fileio'
 
 local filter = require 'filter'
 local fw = require 'filterworker'
 local filter_worker = fw
 
+local histogram  = require 'histogram'
+local cubiccurve = require 'cubiccurve'
 
 local edit = {
 
@@ -56,7 +56,11 @@ local edit = {
 	autosave_timer = 0,
 	autosave_disable = false,
 
-	render_grid = true
+	render_grid = true,
+
+	lock_edit = false,
+
+	alpha_lock_override = false,
 }
 edit.__index = edit
 
@@ -77,6 +81,10 @@ function edit:checkAutosaveRecover()
 		local autosave = require "cfg.autosave"
 		local test_file = love.filesystem.newFile(autosave.autosave_file)
 		if not test_file then test_file:close() return end
+
+		self.active_mode = state
+		if not (self.active_mode=="wide" or self.active_mode=="slim") then
+			self.active_mode = "wide" end
 
 		local guilayout       = require 'gui.layout'
 		local guiwindow       = require 'gui.window'
@@ -240,6 +248,31 @@ function edit:defineCommands()
 			props.layer.preview = nil
 		end)
 
+	coms["merge_layer"] = commands:define(
+		{
+		 {"base_layer", nil, nil, nil},
+		 {"top_layer" , nil, nil, nil},
+		 {"top_layer_index", nil, nil, nil},
+		 {"old_texture", nil, nil, nil},
+		 {"new_texture", nil, nil, nil},
+		},
+		function(props) -- command function
+			if not props.old_texture then
+				props.old_texture = props.base_layer.texture end
+			if not props.new_texture then
+				props.new_texture = props.top_layer.merge_result(props.base_layer) end
+
+			props.base_layer.texture = props.new_texture
+			props.base_layer.preview = nil
+			skin:removeLayer(props.top_layer)
+		end, -- command function
+
+		function(props) -- undo command function
+			props.base_layer.texture = props.old_texture
+			props.base_layer.preview = nil
+			skin:insertLayer(props.top_layer, props.top_layer_index)
+		end)
+
 	coms["add_layer"] = commands:define(
 		{
 		 {"layer", nil, nil, nil},
@@ -369,6 +402,8 @@ function edit:commitComposedCommand(...)
 end
 
 function edit:commitUndo()
+	if self.lock_edit then gui:displayPopup(lang["Can't do this right now"], 2.5) return end
+
 	local pointer = self.command_pointer
 	local command_history = self.command_stack
 
@@ -379,6 +414,8 @@ function edit:commitUndo()
 end
 
 function edit:commitRedo()
+	if self.lock_edit then gui:displayPopup(lang["Can't do this right now"], 2.5) return end
+
 	local pointer = self.command_pointer
 	local command_history = self.command_stack
 	local history_length = #command_history
@@ -404,6 +441,24 @@ function edit:getActiveLayer(layer)
 	return self.active_layer
 end
 
+function edit:mergeLayerDown(layer)
+	if self.lock_edit then gui:displayPopup(lang["Can't do this right now"], 2.5) return end
+
+	layer = layer or self:getActiveLayer()
+	if not layer then return end
+
+	local base_i, top_i
+	for i,l in ipairs(skin.layers) do
+		if l==layer then base_i=i break end
+	end
+
+	if not base_i then return end
+	top_i = base_i+1
+	if not skin.layers[top_i] then return end
+
+	self:commitCommand("merge_layer", {base_layer=skin.layers[base_i], top_layer=skin.layers[top_i], top_layer_index=top_i})
+end
+
 function edit:setupInputHandling()
 	--
 	-- VIEWPORT MODE INPUTS
@@ -411,7 +466,7 @@ function edit:setupInputHandling()
 	self.viewport_input = InputHandler:new(CONTROL_LOCK.EDIT_VIEW,
 	                    {"cam_zoom_out","cam_zoom_in","cam_rotate",
 											 "edit_undo","edit_redo","edit_action","edit_colour_pick","edit_colour_fill",
-											 "edit_erase","edit_mirror","edit_grid",
+											 "edit_erase","edit_mirror","edit_grid","edit_alpha_override",
 										   {"ctrl",CONTROL_LOCK.META},{"alt",CONTROL_LOCK.META},{"super",CONTROL_LOCK.META}})
 
 	-- hooks for camera rotation
@@ -474,6 +529,7 @@ function edit:setupInputHandling()
 	local paint_layer = nil
 	local paint_target = nil
 	local paint_action_start = Hook:new(function ()
+		if self.lock_edit or filter_worker:is_active() then gui:displayPopup(lang["Can't do this right now"], 2.5) return end
 		if filter_worker:is_active() then return end
 
 		if erase_history then return end
@@ -494,12 +550,14 @@ function edit:setupInputHandling()
 
 		if X then
 			-- avoid painting over the same pixel twice
-			if paint_history and paint_history[X] and paint_history[X][Y] then return end
+			if paint_history and paint_history[X] and paint_history[X][Y] and not self.alpha_lock_override then return end
 			if not paint_history[X] then paint_history[X] = {} end
 			paint_history[X][Y] = true
 
 			local col = gui.colour_picker:getColour()
-			paint:drawPixel{target = paint_target, pixel={X,Y}, colour=col, mirror=self.mirror_mode}
+			local alpha_lock = self.active_layer.alpha_lock
+			if self.alpha_lock_override then alpha_lock = false end
+			paint:drawPixel{target = paint_target, pixel={X,Y}, colour=col, mirror=self.mirror_mode, alphalock = alpha_lock}
 		end
 	end)
 	local paint_action_end = Hook:new(function ()
@@ -517,6 +575,16 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("edit_action","down"):addHook(paint_action_start)
 	self.viewport_input:getEvent("edit_action","held"):addHook(paint_action_held)
 	self.viewport_input:getEvent("edit_action","up"):addHook(paint_action_end)
+
+	local override_alpha = Hook:new(function ()
+		self.alpha_lock_override = true
+	end)
+	local override_alpha_off = Hook:new(function ()
+		self.alpha_lock_override = false
+	end)
+	self.viewport_input:getEvent("edit_alpha_override","down"):addHook(override_alpha)
+	self.viewport_input:getEvent("edit_alpha_override","held"):addHook(override_alpha)
+	self.viewport_input:getEvent("edit_alpha_override","up"):addHook(override_alpha_off)
 
 	local erase_history = nil
 	local erase_layer = nil
@@ -771,8 +839,9 @@ function edit:rotateCamMode(mdx,mdy)
 end
 
 function edit:update_filter_worker()
-	if fw:preview_state() then
+	if fw.active_worker then
 		fw.active_worker:preview()
+		self:lockEdit()
 	end
 
 	if not fw:is_commit() then return end
@@ -781,6 +850,7 @@ function edit:update_filter_worker()
 	self:commitCommand("commit_paint", {layer=layer,old_texture=oldt,new_texture=newt})
 	fw:add_to_history()
 	fw:discard()
+	self:unlockEdit()
 end
 
 function edit:autosave(dt)
@@ -797,7 +867,7 @@ function edit:autosave(dt)
 		self:saveProjectToFile(autosave_file)
 		autosave_file:close()
 
-		self:updateSessionFile("running")
+		self:updateSessionFile(self.active_mode or "wide")
 
 		self.autosave_timer=0
 	end
@@ -808,8 +878,8 @@ function edit:checkSessionFile()
 	local crash_file = love.filesystem.newFile(autosave.session_file, "r")
 
 	if not crash_file then
-		self:updateSessionFile("running")
-		return "running"
+		self:updateSessionFile(self.active_mode or "wide")
+		return self.active_mode or "wide"
 	end	
 
 	local data = crash_file:read()
@@ -827,6 +897,20 @@ end
 function edit:recoverAutosave()
 	local autosave = require 'cfg.autosave'
 	edit:load{skin_data=love.graphics.newImage(autosave.autosave_file)}
+end
+
+function edit:getPreviewStatus()
+	return filter_worker.preview_on
+end
+function edit:setPreviewStatus(s)
+	filter_worker:set_preview_state(s)
+end
+
+function edit:lockEdit()
+	self.lock_edit = true
+end
+function edit:unlockEdit()
+	self.lock_edit = false
 end
 
 function edit:update(dt)

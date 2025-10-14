@@ -61,7 +61,6 @@ function MapEditGUIWindow:define(default_props, layout_def)
 				this.elements[i] = elements[i]
 			end
 			for i,v in pairs(props) do
-				print(i,v)
 				this.props[i]=v
 			end
 

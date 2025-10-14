@@ -130,9 +130,9 @@ function MapEditGUILayout:define(layout, ...)
 					elseif stype == "-y" then
 						-- layout for the bottom region of the split
 						layout.x = x
-						layout.y = y+yoffset
+						layout.y = y+h-yoffset
 						layout.w = w
-						layout.h = h-yoffset
+						layout.h = yoffset
 
 						update_xywh(layout.sub,
 						-- top region

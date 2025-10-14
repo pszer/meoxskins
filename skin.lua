@@ -56,6 +56,7 @@ function skin:addLayer(texture, name, index, visible)
 			texture=canvas,
 			name=name,
 			visible=visible,
+			alpha_lock = false,
 			preview=nil,
 
 			open_preview = function(c)
@@ -81,6 +82,25 @@ function skin:addLayer(texture, name, index, visible)
 
 			discard_preview = function()
 				t.preview = nil
+			end,
+
+			merge_result = function(layer, mode)
+				local texture = love.graphics.newCanvas(64,64)
+				texture:setFilter("nearest","nearest")
+				love.graphics.reset()
+				love.graphics.setCanvas(texture)
+				love.graphics.draw(layer.texture)
+				if mode then
+					love.graphics.setBlendMode(mode)
+				end
+				love.graphics.draw(t.texture)
+				love.graphics.setBlendMode("alpha")
+				love.graphics.reset()
+				return texture
+			end,
+
+			rename = function(str)
+				t.name = tostring(str)
 			end
 		}
 	table.insert(self.layers, index, t)
@@ -98,7 +118,6 @@ function skin:getLayerIndex(layer)
 end
 
 function skin:swapLayers(i1,i2)
-	print(i1,i2)
 	local temp = self.layers[i2]
 	self.layers[i2] = self.layers[i1]
 	self.layers[i1] = temp
@@ -147,6 +166,7 @@ function skin:createEmptyLayer(name)
 			texture=canvas,
 			name=name,
 			visible=true,
+			alpha_lock = false,
 			preview=nil,
 
 			open_preview = function(c)
@@ -172,6 +192,25 @@ function skin:createEmptyLayer(name)
 
 			discard_preview = function()
 				t.preview = nil
+			end,
+
+			merge_result = function(layer, mode)
+				local texture = love.graphics.newCanvas(64,64)
+				texture:setFilter("nearest","nearest")
+				love.graphics.reset()
+				love.graphics.setCanvas(texture)
+				love.graphics.draw(layer.texture)
+				if mode then
+					love.graphics.setBlendMode(mode)
+				end
+				love.graphics.draw(t.texture)
+				love.graphics.setBlendMode("alpha")
+				love.graphics.reset()
+				return texture
+			end,
+
+			rename = function(str)
+				t.name = tostring(str)
 			end
 		}
 	return t

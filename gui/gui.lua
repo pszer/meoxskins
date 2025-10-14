@@ -14,6 +14,7 @@ local guitextinput    = require 'gui.textinput'
 local guicolourpicker = require 'gui.colourselect'
 local guivisible      = require 'gui.visible'
 local guilayers       = require 'gui.layers'
+local guitickbox      = require 'gui.tickbox'
 
 local lang         = require 'gui.guilang'
 
@@ -109,6 +110,39 @@ function MapEditGUI:define(mapedit)
 		win_max_h=300,
 	}, picker_win_layout)
 	-- Picker window
+	--
+	-- Curves filter window
+	local curves_layout = guilayout:define(
+		{id="tools_region",
+		 split_type="+y",
+		 split_pix=20,
+		 sub=
+			{id="curves_region",
+			 split_type="+y",
+			 split_pix=394,
+			 sub=
+				{id="buttons_region",
+				split_type=nil,
+				},
+			}
+		},
+		{"curves_region", region_pixoffset_f(10,10)},
+		{"buttons_region", region_offset_f(0.97,0.00)},
+		{"buttons_region", region_offset_f(0.63,0.00)},
+		{"buttons_region", region_offset_f(0.03,0.06)},
+		{"tools_region", region_offset_f(0.07,0.40)},
+		{"tools_region", region_offset_f(0.30,0.40)},
+		{"tools_region", region_offset_f(0.54,0.40)},
+		{"tools_region", region_offset_f(0.78,0.40)}
+	)
+	local curves_win = guiwindow:define({
+		win_min_w=384+10,
+		win_max_w=384+10,
+		win_min_h=439,
+		win_max_h=439,
+		win_focus=false
+	}, curves_layout)
+	-- Picker window
 	
 	-- Wide/Slim skin mode window
 	local skin_mode_win_layout = guilayout:define(
@@ -185,11 +219,27 @@ function MapEditGUI:define(mapedit)
 		win_focus=true,
 	}, lang_win_layout)
 
+	-- Rename layer window
+	local rename_layer_layout = guilayout:define(
+		{id="region",
+		 split_type=nil},
+		{"region", region_offset_f(0.5,0.10)},
+		{"region", region_offset_f(0.5,0.56)},
+		{"region", region_offset_f(0.37,0.75)},
+		{"region", region_offset_f(0.63,0.75)}
+	)
+	local rename_layer_win = guiwindow:define({
+		win_min_w=240,
+		win_max_w=240,
+		win_min_h=80,
+		win_max_h=80,
+		win_focus=true,
+	}, rename_layer_layout)
 
 	local hsl_adjust_layout = guilayout:define(
 		{id="panel",
 		 split_type="-x",
-		 split_pix=70,
+		 split_pix=85,
 		 sub =
 		{id="text",
 		 split_type="+y",
@@ -203,9 +253,9 @@ function MapEditGUI:define(mapedit)
 			 split_type=nil
 			}
 		 }}},
-		{"text", region_offset_f(0.00000-0.01,0.2)},
-		{"text", region_offset_f(0.33333-0.01,0.2)},
-		{"text", region_offset_f(0.66666-0.01,0.2)},
+		{"text", region_offset_f(0.00000-0.025,0.2)},
+		{"text", region_offset_f(0.33333-0.025,0.2)},
+		{"text", region_offset_f(0.66666-0.025,0.2)},
 		{"bars", region_offset_f(-0.1666+0.3333-0.04,0)},
 		{"bars", region_offset_f(-0.1666+0.6666-0.04,0)},
 		{"bars", region_offset_f(-0.1666+1.0000-0.04,0)},
@@ -215,11 +265,12 @@ function MapEditGUI:define(mapedit)
 
 		{"panel", region_pixoffset_f(2,14)},
 		{"panel", region_pixoffset_f(2,39)},
-		{"panel", region_pixoffset_f(2,94)}
+		{"panel", region_pixoffset_f(2,94)},
+		{"panel", region_pixoffset_f(2,115)}
 	)
 	local hsl_adjust_win = guiwindow:define({
-		win_min_w=240,
-		win_max_w=240,
+		win_min_w=220,
+		win_max_w=220,
 		win_min_h=316,
 		win_max_h=316,
 		win_focus=false,
@@ -228,7 +279,7 @@ function MapEditGUI:define(mapedit)
 	local contrast_adjust_layout = guilayout:define(
 		{id="panel",
 		 split_type="-x",
-		 split_pix=70,
+		 split_pix=85,
 		 sub =
 		{id="text",
 		 split_type="+y",
@@ -242,15 +293,16 @@ function MapEditGUI:define(mapedit)
 			 split_type=nil
 			}
 		 }}},
-		{"text", region_offset_f(0.0-0.01,0.2)},
-		{"text", region_offset_f(0.5-0.01,0.2)},
+		{"text", region_offset_f(0.0-0.04,0.2)},
+		{"text", region_offset_f(0.5-0.04,0.2)},
 		{"bars", region_offset_f(-0.25+0.5-0.04,0)},
 		{"bars", region_offset_f(-0.25+1.0-0.04,0)},
-		{"input", region_offset_f(0.0+0.05,0.2)},
-		{"input", region_offset_f(0.5+0.05,0.2)},
+		{"input", region_offset_f(0.0+0.08,0.2)},
+		{"input", region_offset_f(0.5+0.08,0.2)},
 
-		{"panel", region_pixoffset_f(2,14)},
-		{"panel", region_pixoffset_f(2,39)}
+		{"panel", region_pixoffset_f(4,14)},
+		{"panel", region_pixoffset_f(4,39)},
+		{"panel", region_pixoffset_f(4,94)}
 	)
 	local contrast_adjust_win = guiwindow:define({
 		win_min_w=175,
@@ -329,6 +381,16 @@ function MapEditGUI:define(mapedit)
 				edit:commitCommand("delete_layer",{layer=edit.active_layer})
 		    return end,
 			disable = disable},
+		 {lang["Merge layer down"],
+		  action=function(props)
+				if not active_layer then return end
+				local index = skin:getLayerIndex(active_layer)
+				local base_layer = skin.layers[index-1]
+				if base_layer then
+					edit:mergeLayerDown(base_layer)
+				end
+		    return end,
+			disable = disable},
 		 {lang["Move layer down"],
 		  action=function(props)
 				if not active_layer then return end
@@ -347,6 +409,56 @@ function MapEditGUI:define(mapedit)
 				if index>=count then return end
 				edit:commitCommand("swap_layers",{index1=index,index2=index+1})
 		    return end,
+			disable = disable},
+		{" --- "},
+		 {lang["Rename layer"],
+		  action=function(props)
+				if not active_layer then return end
+
+				local initial_name = active_layer.name 
+				local function test_unique(str, start)
+					local skin = require 'skin'
+					for i,v in ipairs(skin.layers) do
+						if v.name == str and str ~= start then
+							return false
+						end
+					end
+					return true
+				end
+
+				local input = 
+						guitextinput:new("",0,0,220,20,
+							function(str) return str end,
+							function(str) if not test_unique(str, initial_name) or #str >= 21 then return "~(lred)"..str else return str end end,
+							"middle","bottom")
+		    return rename_layer_win:new({},
+					{
+						guitextbox:new(lang["Rename layer ~b"] .. tostring(active_layer.name) .. "",0,0,300,"left","middle","top",true),
+						input,
+
+						guibutton:new(lang["~b~(green)Confirm"],nil,0,0,
+							function(self,win)
+								if not test_unique(input:getText()) or #input:getText() >= 21 then
+									if #input:getText() >= 21 then
+										MapEditGUI:displayPopup(lang["Name is too long"], 2.0)
+									else
+										MapEditGUI:displayPopup(lang["Name already exists"], 2.0)
+									end
+								else
+									active_layer.rename(input:get())
+									win:delete()
+								end
+							end,
+							"middle","middle"),
+						guibutton:new(lang["Cancel"],nil,0,0,
+							function(self,win)
+								win:delete()
+							end,
+							"middle","middle")
+					},
+					200,80,500,400
+				)
+			end,
 			disable = disable},
 		{" --- "},
 		 {lang["Slim/Wide mode"],
@@ -416,9 +528,16 @@ function MapEditGUI:define(mapedit)
 				local worker = fw:new(filters.get("hsl_adjust"), active_layer, {hueShift=0.0,satScale=1.0,lumScale=1.0,lumCurvedRemap=0.0})
 				worker:update_args(params)
 
-				local function remaptoggle()
-					if params.lumCurvedRemap == 1.0 then params.lumCurvedRemap = 0.0 else params.lumCurvedRemap = 1.0 end	
+				local function remaptoggle(to)
+					if not to then params.lumCurvedRemap = 0.0 else params.lumCurvedRemap = 1.0 end	
 					worker:update_args(params)
+				end
+				local function trunc(n)
+					if n >= 0 then
+						return math.floor(n * 100) / 100
+					else
+						return math.ceil(n * 100) / 100
+					end
 				end
 
 				local hue_in, sat_in, lum_in
@@ -434,7 +553,7 @@ function MapEditGUI:define(mapedit)
 						end),
 					guiscrollb:new(256, 0.5, function(scrlb)
 							params.satScale = (scrlb.ratio-0.5)*-2.0 + 1.0
-							sat_in:setText(tostring(params.satScale))
+							sat_in:setText(tostring(trunc(params.satScale)))
 							worker:update_args(params)
 						end),
 					guiscrollb:new(256, 0.5, function(scrlb)
@@ -442,7 +561,7 @@ function MapEditGUI:define(mapedit)
 							if params.lumScale > 1.0 then
 								params.lumScale = 2.1*(params.lumScale - 1.0) + 1.0
 							end
-							lum_in:setText(tostring(params.lumScale))
+							lum_in:setText(tostring(trunc(params.lumScale)))
 							worker:update_args(params)
 						end)
 				hue_in, sat_in, lum_in =
@@ -495,8 +614,9 @@ function MapEditGUI:define(mapedit)
 					sat_in,
 					lum_in,
 					guibutton:new(lang["~b~(green)Confirm"],nil,0,0,function(self,win) fw:set_commit(true) win:delete() end,"left","top",false),
-					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) fw:discard() win:delete() end,"left","top",false),
-					guibutton:new(lang["~(lpurple)Gamma"],nil,0,0,function(self,win) remaptoggle() end,"left","top",true,false),
+					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) edit:unlockEdit() fw:discard() win:delete() end,"left","top",false),
+					guitickbox:new(lang["~(lpurple)Gamma"],0,0,"tick",function(self,win) remaptoggle(self.state) end, false, false),
+					guitickbox:new(lang["Preview"],0,0,"tick",function(self,win) edit:setPreviewStatus(self.state) end, edit:getPreviewStatus(), false),
 				},
 				0,0,300,330)
 			end,
@@ -510,7 +630,7 @@ function MapEditGUI:define(mapedit)
 				local worker = fw:new(filters.get("contrast"), active_layer, {})
 				worker:update_args(params)
 
-				function trunc(n)
+				local function trunc(n)
 					if n >= 0 then
 						return math.floor(n * 100) / 100
 					else
@@ -562,9 +682,92 @@ function MapEditGUI:define(mapedit)
 					lum_in,
 					contrast_in,
 					guibutton:new(lang["~b~(green)Confirm"],nil,0,0,function(self,win) fw:set_commit(true) win:delete() end,"left","top",false),
-					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) fw:discard() win:delete() end,"left","top",false),
+					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) edit:unlockEdit() fw:discard() win:delete() end,"left","top",false),
+					guitickbox:new(lang["Preview"],0,0,"tick",function(self,win) edit:setPreviewStatus(self.state) end, edit:getPreviewStatus(), false),
 				},
 				0,0,300,330)
+			end,
+			disable = disable},
+		 {lang["Curves"],
+		  action=function(props)
+				if not active_layer then return end
+				local filters = require 'filters'
+				local fw = require 'filterworker'
+				local params = {}
+				local worker = fw:new(filters.get("curves"), active_layer, {})
+
+				local function trunc(n)
+					if n >= 0 then
+						return math.floor(n * 100) / 100
+					else
+						return math.ceil(n * 100) / 100
+					end
+				end
+
+				local histogram = require 'histogram'
+				vs,vp,vi = histogram.retrieve(active_layer.texture, "value")
+				rs,rp,ri = histogram.retrieve(active_layer.texture, "red")
+				gs,gp,gi = histogram.retrieve(active_layer.texture, "green")
+				bs,bp,bi = histogram.retrieve(active_layer.texture, "blue")
+				local histograms = {
+					value = { sorted = vs, percentile = vp, interval = vi },
+					red   = { sorted = rs, percentile = rp, interval = ri },
+					green = { sorted = gs, percentile = gp, interval = gi },
+					blue  = { sorted = bs, percentile = bp, interval = bi },
+				}
+
+				local guicurves = require 'gui.curves'
+				local curve = guicurves:new(0.95,0.95,
+					function() 
+						worker:update_args(params)
+						fw.active_worker._update_preview=true
+					end,
+					histograms)
+
+				local valuetick,redtick,bluetick,greentick
+				valuetick = guitickbox:new(lang["Value"],0,0,"dot",
+					function(self,win)
+						if not self.state then self.state = true return end
+						redtick.state,greentick.state,bluetick.state = false,false,false
+						curve.active_channel = "value"
+					end, true, false)
+				redtick = guitickbox:new(lang["Red"],0,0,"dot",
+					function(self,win)
+						if not self.state then self.state = true return end
+						valuetick.state,greentick.state,bluetick.state = false,false,false
+						curve.active_channel = "red"
+					end, false, false)
+				greentick = guitickbox:new(lang["Green"],0,0,"dot",
+					function(self,win)
+						if not self.state then self.state = true return end
+						valuetick.state,redtick.state,bluetick.state = false,false,false
+						curve.active_channel = "green"
+					end, false, false)
+				bluetick = guitickbox:new(lang["Blue"],0,0,"dot",
+					function(self,win)
+						if not self.state then self.state = true return end
+						valuetick.state,redtick.state,greentick.state = false,false,false
+						curve.active_channel = "blue"
+					end, false, false)
+
+				params.valueCurve = curve.value.samples
+				params.redCurve   = curve.red.samples
+				params.greenCurve = curve.green.samples
+				params.blueCurve  = curve.blue.samples
+				worker:update_args(params)
+
+		    local curves = curves_win:new({},
+				{
+					curve,
+					guibutton:new(lang["~b~(green)Confirm"],nil,0,0,function(self,win) fw:set_commit(true) win:delete() end,"right","top",false),
+					guibutton:new(lang["Cancel"],nil,0,0,function(self,win) edit:unlockEdit() fw:discard() win:delete() end,"left","top",false),
+					guitickbox:new(lang["Preview"],0,0,"tick",function(self,win) edit:setPreviewStatus(self.state) end, edit:getPreviewStatus(), false),
+					valuetick,redtick,greentick,bluetick
+				},
+				0,0,300,330)
+
+				curves:centre(0.2,0.5)
+				return curves
 			end,
 			disable = disable},
 		{" --- "},
@@ -946,6 +1149,7 @@ function MapEditGUI:setupInputHandling()
 		win:setX(window_move_start_x + dx)
 		win:setY(window_move_start_y + dy)
 		win:update()
+		win:updateHoverInfo()
 	end)
 
 	local window_move_finish = Hook:new(function ()

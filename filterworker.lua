@@ -74,6 +74,8 @@ function filter_worker:new(filter, layer, args, silent_commit)
 	end
 
 	function fw:preview()
+		if not filter_worker.preview_on then fw.layer.discard_preview() return end
+
 		if not self._update_preview then return end
 		fw.layer.open_preview(fw:result())
 		self._update_preview = false
@@ -123,8 +125,13 @@ function filter_worker:is_active()
 end
 
 function filter_worker:preview_state(s)
-	if not s then return filter_worker.active_worker~=nil and filter_worker.preview_on end
+	return filter_worker.preview_on
+end
+function filter_worker:set_preview_state(s)
 	filter_worker.preview_on = s
+	if filter_worker.active_worker then
+		filter_worker.active_worker._update_preview=true
+	end
 end
 
 return filter_worker

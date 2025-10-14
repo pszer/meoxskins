@@ -39,6 +39,13 @@ local MapEditGUIRender = {
 	__bar = nil,
 	__visible = nil,
 	__invisible = nil,
+	__alphalock = nil,
+	__alphalock_off = nil,
+
+	__sel_on   = nil,
+	__sel_off  = nil,
+	__tick_on  = nil,
+	__tick_off = nil,
 
 	icons = {},
 
@@ -125,6 +132,8 @@ function MapEditGUIRender:initAssets()
 
 	self.__visible = Loader:getTextureReference("visible.png")
 	self.__invisible = Loader:getTextureReference("invisible.png")
+	self.__alphalock = Loader:getTextureReference("alphalock.png")
+	self.__alphalock_off = Loader:getTextureReference("alphalock_off.png")
 
 	self.head = Loader:getTextureReference("s_head.png")
 	self.head_o = Loader:getTextureReference("s_heado.png")
@@ -139,6 +148,15 @@ function MapEditGUIRender:initAssets()
 	self.leftarm = Loader:getTextureReference("s_leftarm.png")
 	self.leftarm_o = Loader:getTextureReference("s_leftarmo.png")
 	self.mirror = Loader:getTextureReference("s_mirror.png")
+
+	self.__tick_on = Loader:getTextureReference("tick_on.png")
+	self.__tick_off = Loader:getTextureReference("tick_off.png")
+	self.__sel_on = Loader:getTextureReference("sel_on.png")
+	self.__sel_off = Loader:getTextureReference("sel_off.png")
+	self.__tick_on_d = Loader:getTextureReference("tick_on_d.png")
+	self.__tick_off_d = Loader:getTextureReference("tick_off_d.png")
+	self.__sel_on_d = Loader:getTextureReference("sel_on_d.png")
+	self.__sel_off_d = Loader:getTextureReference("sel_off_d.png")
 
 	self.checkerboard_tex = Loader:getTextureReference("checkerboard.png")
 	self.checkerboard_tex:setWrap("repeat","repeat")
@@ -346,7 +364,6 @@ function MapEditGUIRender:createDrawableText(string, font, font_bold, font_itali
 			end
 
 			local in_col_table = col_table[in_bracket]
-			--print("in_bracket", in_bracket)
 			if in_col_table then
 				curr_col = in_col_table
 			else

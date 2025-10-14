@@ -56,6 +56,7 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 
 		self.scrollbar:update()
 		self:generateText()
+		self:updateText()
 	end
 
 	function this:generateText()
@@ -63,9 +64,21 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 			if not v.__text then
 				local str = v.name
 				if str and str ~= "" then
+					v.__last_name = str
 					local draw_text = guirender:createDrawableText(str)
 					v.__text = draw_text
 				end
+			end
+		end
+	end
+
+	function this:updateText()
+		for i,v in ipairs(self.table()) do
+			local str = v.name
+			if str and str ~= v.__last_name then
+				v.__last_name = str
+				local draw_text = guirender:createDrawableText(str)
+				v.__text = draw_text
 			end
 		end
 	end
@@ -123,9 +136,16 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 
 			local visible = t[count-I].visible
 			if visible then
-				love.graphics.draw(guirender.__visible, _x+grid_pix_w-66,_y)
+				love.graphics.draw(guirender.__visible, _x+grid_pix_w-54,_y)
 			else
-				love.graphics.draw(guirender.__invisible, _x+grid_pix_w-66,_y)
+				love.graphics.draw(guirender.__invisible, _x+grid_pix_w-54,_y)
+			end
+
+			local alpha_lock = t[count-I].alpha_lock
+			if alpha_lock then
+				love.graphics.draw(guirender.__alphalock, _x+grid_pix_w-80,_y-1)
+			else
+				love.graphics.draw(guirender.__alphalock_off, _x+grid_pix_w-80,_y-1)
 			end
 		end
 
@@ -166,11 +186,17 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 				local h_offset = self.grid_h_offset
 				local _x,_y = X,
 											Y*grid_pix_h - h_offset + y
-				if mx >= _x+grid_pix_w-41 and mx <= _x+grid_pix_w-25 and
+				if mx >= _x+grid_pix_w-42+12 and mx <= _x+grid_pix_w-22+12 and
 				   my >= _y+17 and my <= _y+41 then
 					 self.hovered_visible_icon = true
 				else
 					self.hovered_visible_icon = false
+				end
+				if mx >= _x+grid_pix_w-42+12-26 and mx <= _x+grid_pix_w-22+12-26 and
+				   my >= _y+17 and my <= _y+41 then
+					 self.hovered_alphalock_icon = true
+				else
+					self.hovered_alphalock_icon = false
 				end
 			else
 				self.hovered_visible_icon = false
@@ -213,11 +239,14 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 			self.scrollbar:action()
 			return
 		elseif self.hover and self.hovered_selection then
-			--self.curr_selection = self.hovered_selection
-			if not self.hovered_visible_icon then
+			if not (self.hovered_visible_icon or self.hovered_alphalock_icon) then
 				set_active(self.hovered_selection)
 			else
-				self.hovered_selection.visible = not self.hovered_selection.visible
+				if self.hovered_visible_icon then
+					self.hovered_selection.visible = not self.hovered_selection.visible
+				else
+					self.hovered_selection.alpha_lock = not self.hovered_selection.alpha_lock
+				end
 			end
 		end
 

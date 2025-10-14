@@ -1,6 +1,9 @@
 -- filter resources
 --
 
+local def_curve = {}
+for i=1,256 do def_curve[i] = (i-1)/255 end
+
 local filters = {
 
 	defs = {
@@ -24,6 +27,13 @@ local filters = {
 			shader = "filter/contrast.glsl",
 			params = {"lumBrightness","lumContrast"},
 			defaults = {lumBrightness=0.0,lumContrast=1.0},
+		},
+		["curves"] = {
+			filter_implement = "shader",
+			name = "Curves",
+			shader = "filter/curves.glsl",
+			params = {{"valueCurve",true},{"redCurve",true},{"greenCurve",true},{"blueCurve",true}},
+			defaults = {valueCurve=def_curve, redCurve=def_curve, greenCurve=def_curve, blueCurve=def_curve},
 		},
 	},
 

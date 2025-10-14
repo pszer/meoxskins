@@ -10,14 +10,19 @@ vec4 position(mat4 transform, vec4 vertex) {
 #ifdef PIXEL
 
 uniform vec4 colour;
+uniform bool alphaLock;
+uniform Image target;
 
-void effect( ) {
-	vec4 curr_col = love_Canvases[0];
-
-	if (curr_col.a == 0.0) {
-		love_Canvases[0] = vec4(colour.xyz, 1.0);
+vec4 effect(vec4 vcolor, Image tex, vec2 texcoord, vec2 pixcoord) {
+	vec4 curr_col = Texel(target, pixcoord.xy/64.0);
+	if (curr_col.a <= 0.0) {
+		if (alphaLock) {
+			return curr_col;
+		} else {
+			return vec4(colour.xyz, 1.0);
+		}
 	} else {
-		love_Canvases[0] = colour;
+		return colour;
 	}
 }
 

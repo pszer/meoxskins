@@ -45,6 +45,7 @@ EDIT_KEY_SETTINGS = {
 	["edit_erase"]  = { "x"    , nil , default = "x"  },
 	["edit_mirror"]  = { "m"    , nil , default = "m"  },
 	["edit_grid"]  = { "g"    , nil , default = "g"  },
+	["edit_alpha_override"]  = { "a"    , nil , default = "a"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},

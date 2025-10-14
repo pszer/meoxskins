@@ -1,6 +1,6 @@
 local paint = {
 
-	paint_shader = love.graphics.newShader("paint.glsl"),
+	paint_shader = love.graphics.newShader("paint.glsl", "paint.glsl"),
 
 	mirror = {
 
@@ -126,6 +126,7 @@ function paint:drawPixel(args)
 	local pos    = args.pixel
 	local colour = args.colour
 	local mirror = args.mirror
+	local alphalock = args.alphalock or false
 
 	if not canvas then error("paint:drawPixel(): no target given.") end
 	if not pos then error("paint:drawPixel(): no pixel position given.") end
@@ -145,9 +146,6 @@ function paint:drawPixel(args)
 
 		for i,v in pairs(mirror_info) do
 			if test_rect(v.rect) then
-				print("hit",i)
-				print(pos[1],pos[2],unpack(v.rect))
-
 				local m1 = v.rect
 				local m2 = mirror_info[v.dest].rect
 
@@ -156,7 +154,7 @@ function paint:drawPixel(args)
 
 				local new_pos = {Dx,pos[2]+Dy}
 
-				self:drawPixel{target=canvas,pixel=new_pos,colour=colour,mirror=false}
+				self:drawPixel{target=canvas,pixel=new_pos,colour=colour,mirror=false,alphalock=alphalock}
 			end
 		end
 	end
@@ -164,6 +162,8 @@ function paint:drawPixel(args)
 	love.graphics.reset()
 	love.graphics.setShader(self.paint_shader)
 	self.paint_shader:send("colour", colour)
+	self.paint_shader:send("target", canvas)
+	self.paint_shader:send("alphaLock", alphalock)
 	love.graphics.setCanvas(canvas)
 	love.graphics.points(pos[1]-1, pos[2])
 	love.graphics.reset()
@@ -217,6 +217,7 @@ function paint:fillFace(args)
 	local mesh = args.mesh
 	local t_i  = args.index
 	local col  = args.colour
+	local alphalock = args.alphalock or false
 
 	local start = math.floor((t_i-1) / 6) * 6 + 1
 
@@ -240,8 +241,9 @@ function paint:fillFace(args)
 	love.graphics.reset()
 	love.graphics.setShader(self.paint_shader)
 	self.paint_shader:send("colour", col)
+	self.paint_shader:send("alphaLock", alphalock)
+	self.paint_shader:send("target", canvas)
 	love.graphics.setCanvas(canvas)
-	--love.graphics.points(pos[1], pos[2])
 	love.graphics.rectangle("fill",min_x,min_y,max_x-min_x,max_y-min_y)
 	love.graphics.setShader()
 	love.graphics.setCanvas()

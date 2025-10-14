@@ -51,7 +51,11 @@ function filter:define_shader_filter(shader, params, defaults, name)
 		for _,uniform in pairs(self.params) do
 			if type(uniform) == "table" and uniform[2] then
 				-- arrays must be unpacked for the love2d shader send function
-				f.shader:send(uniform, (args[uniform[1]] and unpack(args[uniform[1]])) or unpack(f.defaults[uniform[1]]))
+				if args[uniform[1]] then
+					f.shader:send(uniform[1], unpack(args[uniform[1]]))
+				else
+					f.shader:send(uniform[1], unpack(f.defaults[uniform[1]]))
+				end
 			else
 				f.shader:send(uniform, args[uniform] or f.defaults[uniform])
 			end

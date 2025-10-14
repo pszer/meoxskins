@@ -127,7 +127,8 @@ function MapEditGUIScreen:new(layout, throw_obj, lock, win_lock)
 			local hover = false
 			local wins = self:getFocusedWindowStack()
 
-			for i,v in ipairs(wins) do
+			for i=#wins,1,-1 do
+				v = wins[i]
 				v:update()
 				if hover then
 					v.hover = false
