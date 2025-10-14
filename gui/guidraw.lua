@@ -22,6 +22,7 @@ local MapEditGUIRender = {
 	__font_ibold_fname  = "AnonymousPro-BoldItalic.ttf",
 
 	cxtm_bg_col = {0.094,0.161,0.290},
+	x_bg_col = {0.62,0.27,0.117},
 	__cxtm_bb = nil, -- bottom border for a context menu box
 	__cxtm_tt = nil, -- top border for a context menu box
 	__cxtm_rr = nil, -- right border for a context menu box
@@ -123,6 +124,15 @@ function MapEditGUIRender:initAssets()
 	self.__cxtm_tr = Loader:getTextureReference("cxtm_tr.png")
 	self.__cxtm_tl = Loader:getTextureReference("cxtm_tl.png")
 
+	self.__x_bb = Loader:getTextureReference("x_bb.png")
+	self.__x_tt = Loader:getTextureReference("x_tt.png")
+	self.__x_ll = Loader:getTextureReference("x_ll.png")
+	self.__x_rr = Loader:getTextureReference("x_rr.png")
+	self.__x_br = Loader:getTextureReference("x_br.png")
+	self.__x_bl = Loader:getTextureReference("x_bl.png")
+	self.__x_tr = Loader:getTextureReference("x_tr.png")
+	self.__x_tl = Loader:getTextureReference("x_tl.png")
+
 	self.__scrlb_tt = Loader:getTextureReference("scrlb_tt.png")
 	self.__scrlb_mm = Loader:getTextureReference("scrlb_mm.png")
 	self.__scrlb_bb = Loader:getTextureReference("scrlb_bb.png")
@@ -168,6 +178,12 @@ function MapEditGUIRender:initAssets()
 		"icon_dup.png",
 		"icon_copy.png",
 		"icon_sub.png",
+		"icon_close.png",
+		"icon_hue.png",
+		"icon_about.png",
+		"icon_vis.png",
+
+		"icon_curves.png",
 
 		"flag_en.png",
 		"flag_pl.png",
@@ -712,7 +728,7 @@ function MapEditGUIRender:drawTile(x,y,w,h, bg_col, border_col)
 	love.graphics.setColor(1,1,1,1)
 end
 
-function MapEditGUIRender:drawOption(x,y,w,h, txt, icon, arrow, state, buffer_info)
+function MapEditGUIRender:drawOption(x,y,w,h, txt, icon, arrow, state, buffer_info, text_align)
 	cxtm_bb = self.__cxtm_bb 
 	cxtm_tt = self.__cxtm_tt 
 	cxtm_rr = self.__cxtm_rr 
@@ -754,6 +770,10 @@ function MapEditGUIRender:drawOption(x,y,w,h, txt, icon, arrow, state, buffer_in
 		bl = buffer_info.l
 	end
 
+	if type(icon) == "string" then
+		icon = self.icons[icon]
+	end
+
 	-- if hoverable
 	local int = math.floor
 	if state == "hover" then
@@ -767,30 +787,45 @@ function MapEditGUIRender:drawOption(x,y,w,h, txt, icon, arrow, state, buffer_in
 		love.graphics.setBlendMode("subtract","alphamultiply")
 
 		if txt then
-			love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			local txt_x = int(x+bl)
+			if text_align == "middle" then
+				local txt_w = txt:getDimensions()
+				txt_x = int(x+w*0.5-txt_w*0.5)
+			end
+			love.graphics.draw(txt,txt_x,int(y+buffer_info.t))
 		end
 		if icon then
-			love.graphics.draw(icon,x+buffer_info.icon_l,y+buffer_info.icon_t)
+			love.graphics.draw(icon,int(x+buffer_info.icon_l),int(y+buffer_info.icon_t))
 		end
 
 		love.graphics.setBlendMode(mode, alphamode)
 
 	elseif state ~= "disable" then
 		if txt then
-			love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			local txt_x = int(x+bl)
+			if text_align == "middle" then
+				local txt_w = txt:getDimensions()
+				txt_x = int(x+w*0.5-txt_w*0.5)
+			end
+			love.graphics.draw(txt,txt_x,int(y+buffer_info.t))
 		end
 		if icon then
-			love.graphics.draw(icon,x+buffer_info.icon_l,y+buffer_info.icon_t)
+			love.graphics.draw(icon,int(x+buffer_info.icon_l),int(y+buffer_info.icon_t))
 		end
 	else
 		love.graphics.setShader(self.grayscale)
 		love.graphics.setColor(0.9,0.9,1,0.3)
 
 		if txt then
-		love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			local txt_x = int(x+bl)
+			if text_align == "middle" then
+				local txt_w = txt:getDimensions()
+				txt_x = int(x+w*0.5-txt_w*0.5)
+			end
+			love.graphics.draw(txt,txt_x,int(y+buffer_info.t))
 		end
 		if icon then
-			love.graphics.draw(icon,x+buffer_info.icon_l,y+buffer_info.icon_t)
+			love.graphics.draw(icon,int(x+buffer_info.icon_l),int(y+buffer_info.icon_t))
 		end
 
 		love.graphics.setShader()
@@ -798,6 +833,78 @@ function MapEditGUIRender:drawOption(x,y,w,h, txt, icon, arrow, state, buffer_in
 	if arrow then
 		love.graphics.draw(self.icons["icon_sub.png"],
 			x + w - buffer_info.arrow_r, y + buffer_info.arrow_t)
+	end
+
+	love.graphics.setColor(1,1,1,1)
+end
+
+function MapEditGUIRender:drawCloseButton(x,y,w,h, txt, icon, arrow, state, buffer_info, text_align)
+	x_bb = self.__x_bb 
+	x_tt = self.__x_tt 
+	x_rr = self.__x_rr 
+	x_ll = self.__x_ll 
+	x_tr = self.__x_tr 
+	x_tl = self.__x_tl 
+	x_br = self.__x_br 
+	x_bl = self.__x_bl
+
+	local bg_col = self.x_bg_col
+	local col = col or {1,1,1}
+
+	love.graphics.origin()
+
+	love.graphics.setColor(bg_col[1], bg_col[2], bg_col[3],1)
+	love.graphics.rectangle("fill",x,y,w,h)
+
+	love.graphics.setColor(col[1],col[2],col[3],1)
+
+	love.graphics.translate(x,y)
+
+	love.graphics.draw(x_tl,0  ,0,   0, 1,1)
+	love.graphics.draw(x_tr,w-2,0,   0, 1,1)
+	love.graphics.draw(x_bl,0  ,h-2, 0, 1,1)
+	love.graphics.draw(x_br,w-2,h-2, 0, 1,1)
+
+	local w2 = w-4
+	local h2 = h-4
+	love.graphics.draw(x_ll,0  ,2  , 0, 1 ,h2)
+	love.graphics.draw(x_rr,w-2,2  , 0, 1 ,h2)
+	love.graphics.draw(x_tt,2  ,0  , 0, w2,1 )
+	love.graphics.draw(x_bb,2  ,h-2, 0, w2,1 )
+
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.origin()
+
+	local bl = buffer_info.l_no_icon
+	if icon then
+		bl = buffer_info.l
+	end
+
+	if type(icon) == "string" then
+		icon = self.icons[icon]
+	end
+
+	-- if hoverable
+	local int = math.floor
+	if state == "hover" then
+		local mode, alphamode = love.graphics.getBlendMode()
+		love.graphics.setColor(255/255,161/255,66/255,0.8)
+		love.graphics.setBlendMode("add","alphamultiply")
+
+		love.graphics.rectangle("fill",x,y,w,h)
+
+		love.graphics.setColor(1,1,1,1)
+		love.graphics.setBlendMode("subtract","alphamultiply")
+
+		if icon then
+			love.graphics.draw(icon,int(x+buffer_info.icon_l),int(y+buffer_info.icon_t))
+		end
+
+		love.graphics.setBlendMode(mode, alphamode)
+	else
+		if icon then
+			love.graphics.draw(icon,int(x+buffer_info.icon_l),int(y+buffer_info.icon_t))
+		end
 	end
 
 	love.graphics.setColor(1,1,1,1)

@@ -25,9 +25,9 @@ function render:setup3DCanvas()
 	 }
 end
 
-function render:clear3DCanvas()
+function render:clear3DCanvas(r,g,b)
 	self:setup3DCanvas()
-	love.graphics.clear(unpack(require 'bg_col'))
+	love.graphics.clear(r,g,b)
 end
 
 local id = cpml.mat4.new()

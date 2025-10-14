@@ -57,8 +57,9 @@ EDIT_KEY_SETTINGS = {
 
 	["panel_select"] = { "mouse1" , nil , default = "mouse1" },
 
-	["window_select"] = { "mouse1" , nil , default = "mouse1" },
-	["window_move"]   = { "mouse3" , nil , default = "mouse3" },
+	["window_select"]     = { "mouse1" , nil , default = "mouse1" },
+	["window_move"]       = { "mouse3" , nil , default = "mouse3" },
+	["window_move_bar"]   = { "mouse1" , "mouse3" , default = "mouse1" },
 
 }
 

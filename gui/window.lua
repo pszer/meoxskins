@@ -21,6 +21,8 @@ local MapEditGUIWindow = {
 
 		icon_l = 2,
 		icon_t = 1,
+
+		titlebar_h = 20
 	}
 }
 MapEditGUIWindow.__index = MapEditGUIWindow
@@ -37,6 +39,12 @@ local WindowProps = Props:prototype{
 	{"win_max_w"    , "number", 5000  , PropIntegerMax(5000), "window maximum size (x direction)"},
 	{"win_max_h"    , "number", 5000  , PropIntegerMax(5000), "window maximum size (x direction)"},
 	{"win_focus"    , "boolean", false, nil, "flag to force-grab all inputs"},
+	{"win_titlebar" , "boolean", false, nil, "show titlebar"},
+	{"win_title"    , "string", "", nil, "show titlebar"},
+	{"win_title_format", "boolean", true, nil, "use text formatting/colouring for title text"},
+	{"win_close"     , "function", function(self) self:delete() end, nil, "function called when titlebar close window button is pressed"},
+	{"win_icon"      , "string", "", nil, "titlebar icon"},
+	{"win_show_close", "boolean", true, nil, "show close button"},
 
 	{"win_delete"   , "boolean", false, nil, "flag to delete window"}
 }
@@ -55,7 +63,19 @@ function MapEditGUIWindow:define(default_props, layout_def)
 				h=h,
 
 				hover = false,
+				hover_titlebar = false,
+
+				close_button = nil,
+				title_text = nil,
 			}
+
+			local guibutton = require 'gui.button'
+			this.close_button = guibutton:new("","icon_close.png",0,0,
+				function() this.props.win_close(this) end, "right","top",nil,nil,20)
+			this.close_button.draw_mode="close"
+			if this.props.win_title ~= "" then
+				this.title_text = guirender:createDrawableText(this.props.win_title)
+			end
 
 			for i,v in ipairs(elements) do
 				this.elements[i] = elements[i]
@@ -94,6 +114,8 @@ function MapEditGUIWindow:define(default_props, layout_def)
 			end
 
 			function this:updateLayout()
+				self.close_button:setX(self.x+self.w)
+				self.close_button:setY(self.y-MapEditGUIWindow.buffer_info.titlebar_h)
 				if self.layout then
 					self.layout:setX(self.x)
 					self.layout:setY(self.y)
@@ -139,13 +161,29 @@ function MapEditGUIWindow:define(default_props, layout_def)
 			end
 
 			function this:updateHoverInfo()
+				local x,y,w,h = self.x, self.y, self.w, self.h
+					local mx,my = love.mouse.getPosition()
+
+				if self.props.win_titlebar then
+					if x<=mx and mx<=x+w and
+						 y-MapEditGUIWindow.buffer_info.titlebar_h <= my and
+						 my <= y then
+						 self.hover_titlebar = true
+					else
+						self.hover_titlebar = false
+					end
+
+					y = y - MapEditGUIWindow.buffer_info.titlebar_h
+					h = h + MapEditGUIWindow.buffer_info.titlebar_h
+				else
+					self.hover_titlebar = false
+				end
+
 				local hover = nil
 				if self.props.win_focus then
 					self.hover = true
 					hover = self
 				else
-					local x,y,w,h = self.x, self.y, self.w, self.h
-					local mx,my = love.mouse.getPosition()
 					if x<=mx and mx<=x+w and
 						 y<=my and my<=y+h
 					then
@@ -165,6 +203,10 @@ function MapEditGUIWindow:define(default_props, layout_def)
 						end
 					end
 				end
+
+				if self.props.win_show_close and self.props.win_titlebar then 
+					self.close_button:updateHoverInfo()
+				end
 				return hover
 			end
 
@@ -181,6 +223,7 @@ function MapEditGUIWindow:define(default_props, layout_def)
 				if hover then
 					return hover
 				end
+				if self.props.hover_titlebar then return self.close_button end
 				if self.hover then return self end
 				return nil
 			end
@@ -188,8 +231,20 @@ function MapEditGUIWindow:define(default_props, layout_def)
 			function this:draw()
 				local x,y,w,h = self.x,self.y,self.w,self.h
 				guirender:drawOption(x,y,w,h, nil, nil, nil, nil, MapEditGUIWindow.buffer_info)
+				if self.props.win_titlebar then
+					local icon = self.props.win_icon
+					if icon == "" then icon = false end
+					guirender:drawOption(
+						x, y-MapEditGUIWindow.buffer_info.titlebar_h,
+						w, MapEditGUIWindow.buffer_info.titlebar_h,
+						self.title_text, icon, nil, nil, MapEditGUIWindow.buffer_info, nil)
+				end
 				for i,v in ipairs(self.elements) do
 					v:draw()
+				end
+
+				if self.props.win_show_close and self.props.win_titlebar then
+					self.close_button:draw()
 				end
 			end
 
@@ -198,6 +253,10 @@ function MapEditGUIWindow:define(default_props, layout_def)
 			end
 
 			function this:click()
+				if self.props.win_show_close and self.props.win_titlebar and self.close_button.hover then
+					return self.props.win_close(self)
+				end
+
 				for i,v in ipairs(self.elements) do
 					if v.getCurrentlyHoveredOption then
 						h_info = v:getCurrentlyHoveredOption()

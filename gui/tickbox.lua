@@ -114,7 +114,7 @@ function MapEditTickbox:new(str,x,y,appearance,action,start,disable)
 		love.graphics.draw(graphic,self.x,self.y)
 		if self.hover and not self.disable then
 			love.graphics.setBlendMode("add")
-			love.graphics.setColor(1,1,1,0.1)
+			love.graphics.setColor(1,1,1,0.3)
 			love.graphics.draw(graphic,self.x,self.y)
 			love.graphics.setBlendMode("alpha")
 		end

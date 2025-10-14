@@ -19,11 +19,23 @@ local MapEditGUIButton = {
 
 		icon_l = 2,
 		icon_t = 1,
+	},
+	buffer_info_empty = {
+		l  = 4,
+		r = 0,
+		t = 5,
+		b = 3,
+
+		arrow_r = 20,
+		arrow_t = 1,
+
+		icon_l = 0,
+		icon_t = 1,
 	}
 }
 MapEditGUIButton.__index = MapEditGUIButton
 
-function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_held)
+function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_held, force_w, force_h)
 	assert((str or icon))
 
 	local this = {
@@ -40,7 +52,9 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 		align_x = align_x or "middle",
 		align_y = align_y or "middle",
 		held = start_held,
-		toggle = toggle
+		toggle = toggle,
+
+		draw_mode="default"
 	}
 
 	if toggle then
@@ -60,12 +74,15 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 
 	if this.text ~= "" then
 		this.text = guirender:createDrawableText(str)
+	else
+		this.text = nil
 	end
 
 	local text_drawable = this.text
 	local icon = this.icon
 	local buffer_info = MapEditGUIButton.buffer_info
-	local w,h = text_drawable:getDimensions()
+	local w,h = 0,11
+	if text_drawable then w,h = text_drawable:getDimensions() end
 	if icon then
 		w = w + buffer_info.l + buffer_info.r
 	else
@@ -74,6 +91,10 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 	h = h + buffer_info.t + buffer_info.b
 	this.w = w
 	this.h = h
+
+	if force_w then this.w = force_w end
+	if force_h then this.h = force_h end
+
 
 	this.bg = guirender:createContextMenuBackground(this.w,this.h)
 
@@ -105,7 +126,15 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 		else
 			state="normal"
 		end
-		guirender:drawGenericOption(self.x,self.y,self.w,self.h, self.bg,self.text,self.icon,nil,state,MapEditGUIButton.buffer_info)
+		if self.text then
+			guirender:drawGenericOption(self.x,self.y,self.w,self.h, self.bg,self.text,self.icon,nil,state,MapEditGUIButton.buffer_info)
+		else
+			if self.draw_mode=="default" then
+				guirender:drawGenericOption(self.x,self.y,self.w,self.h, self.bg,self.text,self.icon,nil,state,MapEditGUIButton.buffer_info_empty)
+			else
+				guirender:drawCloseButton(self.x,self.y,self.w,self.h, self.text,self.icon,nil,state,MapEditGUIButton.buffer_info_empty)
+			end
+		end
 	end
 
 	function this.setX(self,x)

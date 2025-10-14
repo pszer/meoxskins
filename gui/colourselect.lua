@@ -336,6 +336,11 @@ function EditGUIColorSelect:new(colour_change_hook, action)
 		this:updateColour()
 	end
 
+	function this:getRGB()
+		local R,G,B = hslToRgb(self.curr_hue, self.curr_sat, self.curr_lum)
+		return R/255, G/255, B/255
+	end
+
 	function this:updateColour()
 		local R,G,B = hslToRgb(self.curr_hue, self.curr_sat, self.curr_lum)
 		self.curr_col[1] = R/255

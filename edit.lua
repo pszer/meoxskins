@@ -61,6 +61,8 @@ local edit = {
 	lock_edit = false,
 
 	alpha_lock_override = false,
+
+	bg_col = {78/255, 138/255, 126/255}
 }
 edit.__index = edit
 
@@ -427,10 +429,10 @@ function edit:commitRedo()
 end
 
 function edit:canUndo()
-	return self.props.mapedit_command_pointer > 0
+	return self.command_pointer > 0
 end
 function edit:canRedo()
-	return self.props.mapedit_command_pointer ~= #(self.props.mapedit_command_stack)
+	return self.command_pointer ~= #(self.command_stack)
 end
 
 function edit:setActiveLayer(layer)
@@ -913,6 +915,12 @@ function edit:unlockEdit()
 	self.lock_edit = false
 end
 
+function edit:setBackgroundColour(r,g,b)
+	self.bg_col[1] = r
+	self.bg_col[2] = g
+	self.bg_col[3] = b
+end
+
 function edit:update(dt)
 	gui:update(dt)
 	self.viewport_input:poll()
@@ -921,7 +929,7 @@ function edit:update(dt)
 end
 
 function edit:draw()
-	render:clear3DCanvas()
+	render:clear3DCanvas(self.bg_col[1], self.bg_col[2], self.bg_col[3])
 	render:viewportPass(render.shader3d)
 	if edit.render_grid then
 		render:viewportPass(render.shader3dgrid, false, true)

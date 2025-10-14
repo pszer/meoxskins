@@ -85,8 +85,12 @@ function MapEditGUI:define(mapedit)
 	local about_win = guiwindow:define({
 		win_min_w=300,
 		win_max_w=300,
-		win_min_h=100,
-		win_max_h=100,
+		win_min_h=110,
+		win_max_h=110,
+		win_titlebar=true,
+		win_title=lang["About"],
+		win_icon="icon_about.png",
+		win_show_close=false,
 	}, about_win_layout)
 	-- About window
 
@@ -108,6 +112,11 @@ function MapEditGUI:define(mapedit)
 		win_max_w=300,
 		win_min_h=300,
 		win_max_h=300,
+		win_titlebar=true,
+		win_title=lang["Colour Picker"],
+		win_icon="icon_hue.png",
+		win_show_close=false,
+		win_close=function() end
 	}, picker_win_layout)
 	-- Picker window
 	--
@@ -140,7 +149,10 @@ function MapEditGUI:define(mapedit)
 		win_max_w=384+10,
 		win_min_h=439,
 		win_max_h=439,
-		win_focus=false
+		win_focus=false,
+		win_titlebar=true,
+		win_title=lang["Curves"],
+		win_icon="icon_curves.png"
 	}, curves_layout)
 	-- Picker window
 	
@@ -184,6 +196,11 @@ function MapEditGUI:define(mapedit)
 		win_max_w=160,
 		win_min_h=180,
 		win_max_h=180,
+		win_titlebar=true,
+		win_title=lang["Visible parts"],
+		win_close=function() end,
+		win_icon="icon_vis.png",
+		win_show_close=false
 	}, visible_win_layout)
 	-- Visible parts window
 	
@@ -217,6 +234,9 @@ function MapEditGUI:define(mapedit)
 		win_min_h=115,
 		win_max_h=115,
 		win_focus=true,
+		win_titlebar=true,
+		win_title=lang["Language"],
+		win_show_close=true
 	}, lang_win_layout)
 
 	-- Rename layer window
@@ -234,6 +254,8 @@ function MapEditGUI:define(mapedit)
 		win_min_h=80,
 		win_max_h=80,
 		win_focus=true,
+		win_titlebar=true,
+		win_show_close=true,
 	}, rename_layer_layout)
 
 	local hsl_adjust_layout = guilayout:define(
@@ -274,6 +296,10 @@ function MapEditGUI:define(mapedit)
 		win_min_h=316,
 		win_max_h=316,
 		win_focus=false,
+		win_titlebar=true,
+		win_title=lang["Adjust HSL"],
+		win_icon="icon_hue.png",
+		win_show_close = true
 	}, hsl_adjust_layout)
 
 	local contrast_adjust_layout = guilayout:define(
@@ -310,6 +336,9 @@ function MapEditGUI:define(mapedit)
 		win_min_h=316,
 		win_max_h=316,
 		win_focus=false,
+		win_titlebar=true,
+		win_title=lang["Contrast/Brightness"],
+		win_show_close = true
 	}, contrast_adjust_layout)
 
 	context["help_context"] = 
@@ -346,7 +375,7 @@ function MapEditGUI:define(mapedit)
 
 		 {lang["~iAbout"],
 		  action=function(props)
-		    local win = about_win:new({},
+		    local win = about_win:new({win_show_close=false},
 				{
 					guiimage:new("ic.png",0,0,80,120,function() self:displayPopup(lang["~b~(red)Do not click the kappa."]) end),
 					guitextbox:new(lang["\nWelcome!\n\nMeoxSkins editor © 2025 \nMIT license (see LICENSE.md)"],0,0,300,"center"),
@@ -369,6 +398,17 @@ function MapEditGUI:define(mapedit)
 			local active_layer = edit:getActiveLayer()
 			local disable = active_layer==nil
 		return
+		 {lang["Undo"],
+		  action=function(props)
+		    edit:commitUndo() end,
+			disable = not edit:canUndo(),
+		  icon = nil},
+		 {lang["Redo"],
+		  action=function(props)
+		    edit:commitRedo() end,
+			disable = not edit:canRedo(),
+		  icon = nil},
+
 		 {lang["~(green)New layer"],
 		  action=function(props)
 				local layer = skin:createEmptyLayer()
@@ -433,7 +473,7 @@ function MapEditGUI:define(mapedit)
 							"middle","bottom")
 		    return rename_layer_win:new({},
 					{
-						guitextbox:new(lang["Rename layer ~b"] .. tostring(active_layer.name) .. "",0,0,300,"left","middle","top",true),
+						guitextbox:new(lang["Rename ~b\""] .. tostring(active_layer.name) .. "\"",0,0,300,"left","middle","top",true),
 						input,
 
 						guibutton:new(lang["~b~(green)Confirm"],nil,0,0,
@@ -461,6 +501,13 @@ function MapEditGUI:define(mapedit)
 			end,
 			disable = disable},
 		{" --- "},
+		 {lang["Change background colour"],
+		  action=function(props)
+				local picker = self.colour_picker
+				local r,g,b = picker:getRGB()
+				edit:setBackgroundColour(r,g,b)
+		    return end,
+			disable = disable,tooltip=lang["Changes background to the currently picked colour."]},
 		 {lang["Slim/Wide mode"],
 		  action=function(props)
 				edit:commitCommand("swap_mode",{})
@@ -602,7 +649,7 @@ function MapEditGUI:define(mapedit)
 						end
 				)
 
-		    return hsl_adjust_win:new({},
+		    return hsl_adjust_win:new({win_close=function(win) edit:unlockEdit() fw:discard() win:delete() end},
 				{
 					guitextbox:new(lang["Hue"],0,0,66,"center"),
 					guitextbox:new(lang["Sat"],0,0,66,"center"),
@@ -673,7 +720,7 @@ function MapEditGUI:define(mapedit)
 						end
 				)
 
-		    return contrast_adjust_win:new({},
+		    return contrast_adjust_win:new({win_close=function(win) edit:unlockEdit() fw:discard() win:delete() end},
 				{
 					guitextbox:new(lang["Lum"],0,0,66,"center"),
 					guitextbox:new(lang["Con"],0,0,66,"center"),
@@ -756,7 +803,7 @@ function MapEditGUI:define(mapedit)
 				params.blueCurve  = curve.blue.samples
 				worker:update_args(params)
 
-		    local curves = curves_win:new({},
+		    local curves = curves_win:new({win_close=function(win) edit:unlockEdit() fw:discard() win:delete() end},
 				{
 					curve,
 					guibutton:new(lang["~b~(green)Confirm"],nil,0,0,function(self,win) fw:set_commit(true) win:delete() end,"right","top",false),
@@ -908,14 +955,6 @@ function MapEditGUI:define(mapedit)
 			function(a) edit.active_layer = a end
 		)
 
-	--[[self.layers_win = layers_win:new({},
-	{guilayers:new(
-		function() return skin.layers end,
-		function() return edit.active_layer end,
-		function(a) edit.active_layer = a end
-	)},20,20,20,340)
-	self.main_panel:pushWindow(self.layers_win)--]]
-
 	local w,h = love.graphics.getDimensions()
 	self.main_panel = guiscreen:new(
 		panel_layout:new(
@@ -978,16 +1017,16 @@ function MapEditGUI:define(mapedit)
 	)
 	self.colour_picker:colour_change_hook()
 
-	self.colour_picker_win = colour_win:new({},
-		{self.colour_picker,self.hex_input},20,20,20,30)
+	self.colour_picker_win = colour_win:new({win_show_close=false},
+		{self.colour_picker,self.hex_input},20,20,12,50)
 	self.main_panel:pushWindow(self.colour_picker_win)
 
-	self.visible_win = visible_win:new({},
+	self.visible_win = visible_win:new({win_show_close=false},
 	{guivisible:new(
 		function() local edit=require 'edit' return edit.active_mode end,
 		function() local edit=require 'edit' return edit.mirror_mode end
 	)}
-	,20,20,340,30)
+	,20,20,80,380)
 	self.main_panel:pushWindow(self.visible_win)
 
 	self.main_panel:update()
@@ -1114,7 +1153,7 @@ function MapEditGUI:setupInputHandling()
 	self.cxtm_input:getEvent("cxtm_select", "down"):addHook(cxtm_select_option)
 
 	self.panel_input = InputHandler:new(CONTROL_LOCK.EDIT_PANEL,
-	                                   {"panel_select","window_move"})
+	                                   {"panel_select","window_move","window_move_bar"})
 	local panel_select_option = Hook:new(function ()
 		local m = self.main_panel
 		local gui_object = m:click()
@@ -1125,13 +1164,14 @@ function MapEditGUI:setupInputHandling()
 	self.panel_input:getEvent("panel_select", "down"):addHook(panel_select_option)
 
 	self.win_input = InputHandler:new(CONTROL_LOCK.EDIT_WINDOW,
-	                                 {"window_select","window_move"})
+	                                 {"window_select","window_move","window_move_bar"})
 	local window_select_option = Hook:new(function ()
 		local m = self.main_panel:clickOnWindow()
 	end)
 	self.win_input:getEvent("window_select", "down"):addHook(window_select_option)
 
 	local window_move_start = Hook:new(function ()
+		if window_move_flag then return end
 		local win = self.main_panel:getCurrentlyHoveredWindow()
 		if not win then return end
 		window_move_flag = true
@@ -1159,6 +1199,20 @@ function MapEditGUI:setupInputHandling()
 	self.win_input:getEvent("window_move", "down"):addHook(window_move_start)
 	self.win_input:getEvent("window_move", "held"):addHook(window_move_action)
 	self.win_input:getEvent("window_move", "up"):addHook(window_move_finish)
+
+	local window_bar_move_start = Hook:new(function ()
+		if window_move_flag then return end
+		local win = self.main_panel:getCurrentlyHoveredWindow()
+		if not win or not win.hover_titlebar then return end
+		window_move_flag = true
+		window_move_m_start_x, window_move_m_start_y = love.mouse.getPosition()
+		window_move_window = win
+		window_move_start_x, window_move_start_y = win.x, win.y
+	end)
+
+	self.win_input:getEvent("window_move_bar", "down"):addHook(window_bar_move_start)
+	self.win_input:getEvent("window_move_bar", "held"):addHook(window_move_action)
+	self.win_input:getEvent("window_move_bar", "up"):addHook(window_move_finish)
 
 end
 
