@@ -146,7 +146,7 @@ function MapEditGUILayout:define(layout, ...)
 				update_xywh(self.layout, self.x,self.y,self.w,self.h, update_xywh)
 
 				local int = math.floor
-				for i,v in ipairs(self.elements) do
+				for i,v in pairs(self.elements) do
 					local def = elements_def[i]
 					local region_id = def[1]
 					local xywh_func = def[2]

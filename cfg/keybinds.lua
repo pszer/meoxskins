@@ -48,6 +48,13 @@ EDIT_KEY_SETTINGS = {
 	["edit_alpha_override"]  = { "a"    , nil , default = "a"  },
 	["edit_hide_overlay"] = { "tab" , nil , default = "tab" },
 
+	["edit_hide_head"] = { "1" , "kp1" , default = "1" },
+	["edit_hide_torso"] = { "6" , "kp2" , default = "2" },
+	["edit_hide_arm_l"] = { "2" , "kp3" , default = "3" },
+	["edit_hide_arm_r"] = { "3" , "kp4" , default = "4" },
+	["edit_hide_leg_l"] = { "4" , "kp5" , default = "5" },
+	["edit_hide_leg_r"] = { "5" , "kp6" , default = "6" },
+
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},
 	["alt"]             = { "lalt"   , nil    , default = "lalt"},

@@ -9,7 +9,7 @@ local MapEditGUITextElement = {
 }
 MapEditGUITextElement.__index = MapEditGUITextElement
 
-function MapEditGUITextElement:new(str,x,y,limit,align,align_x,align_y,format)
+function MapEditGUITextElement:new(str,x,y,limit,align,align_x,align_y,format,static)
 	assert(str and type(str)=="string")
 
 	local this = {
@@ -21,6 +21,7 @@ function MapEditGUITextElement:new(str,x,y,limit,align,align_x,align_y,format)
 		align = align or "left",
 		align_x = align_x or "left",
 		align_y = align_y or "top",
+		static = static or false,
 		text = nil
 	}
 
@@ -41,6 +42,8 @@ function MapEditGUITextElement:new(str,x,y,limit,align,align_x,align_y,format)
 	end
 
 	function this:updateHoverInfo()
+		if self.static then return end
+
 		local x,y,w,h = self.x, self.y, self.w, self.h
 		local mx,my = love.mouse.getPosition()
 		if x<=mx and mx<=x+w and

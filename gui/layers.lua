@@ -141,8 +141,12 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 				love.graphics.draw(guirender.__invisible, _x+grid_pix_w-54,_y)
 			end
 
+			local edit = require 'edit' 
+			local override = edit.alpha_lock_override
 			local alpha_lock = t[count-I].alpha_lock
-			if alpha_lock then
+			if override then
+				love.graphics.draw(guirender.__alphalock_override, _x+grid_pix_w-80,_y-1)
+			elseif alpha_lock then
 				love.graphics.draw(guirender.__alphalock, _x+grid_pix_w-80,_y-1)
 			else
 				love.graphics.draw(guirender.__alphalock_off, _x+grid_pix_w-80,_y-1)

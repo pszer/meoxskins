@@ -22,6 +22,8 @@ local filter_worker = fw
 local histogram  = require 'histogram'
 local cubiccurve = require 'cubiccurve'
 
+local bindings = require 'bindings'
+
 local edit = {
 
 	mode = "viewport",
@@ -485,6 +487,12 @@ function edit:setupInputHandling()
 	                    {"cam_zoom_out","cam_zoom_in","cam_rotate",
 											 "edit_undo","edit_redo","edit_action","edit_colour_pick","edit_colour_fill",
 											 "edit_erase","edit_mirror","edit_grid","edit_alpha_override","edit_hide_overlay",
+											 "edit_hide_head",
+											 "edit_hide_torso",
+											 "edit_hide_arm_l",
+											 "edit_hide_arm_r",
+											 "edit_hide_leg_l",
+											 "edit_hide_leg_r",
 										   {"ctrl",CONTROL_LOCK.META},{"alt",CONTROL_LOCK.META},{"super",CONTROL_LOCK.META}})
 
 	-- hooks for camera rotation
@@ -542,6 +550,20 @@ function edit:setupInputHandling()
 	self.viewport_input:getEvent("ctrl", "up"):addHook(disable_ctrl_hook)
 	self.viewport_input:getEvent("alt", "down"):addHook(enable_alt_hook)
 	self.viewport_input:getEvent("alt", "up"):addHook(disable_alt_hook)
+
+	local toggle_head = Hook:new(function () model:toggleLimb("head", self.active_mode) end)
+	local toggle_torso = Hook:new(function () model:toggleLimb("torso", self.active_mode) end)
+	local toggle_arm_l = Hook:new(function () model:toggleLimb("arm_l", self.active_mode) end)
+	local toggle_arm_r = Hook:new(function () model:toggleLimb("arm_r", self.active_mode) end)
+	local toggle_leg_l = Hook:new(function () model:toggleLimb("leg_l", self.active_mode) end)
+	local toggle_leg_r = Hook:new(function () model:toggleLimb("leg_r", self.active_mode) end)
+
+	self.viewport_input:getEvent("edit_hide_head","down"):addHook(toggle_head)
+	self.viewport_input:getEvent("edit_hide_torso","down"):addHook(toggle_torso)
+	self.viewport_input:getEvent("edit_hide_leg_l","down"):addHook(toggle_leg_l)
+	self.viewport_input:getEvent("edit_hide_leg_r","down"):addHook(toggle_leg_r)
+	self.viewport_input:getEvent("edit_hide_arm_r","down"):addHook(toggle_arm_r)
+	self.viewport_input:getEvent("edit_hide_arm_l","down"):addHook(toggle_arm_l)
 
 	local hideoverlaytoggle = false
 	local hide_overylay_hook = Hook:new(function ()

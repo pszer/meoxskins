@@ -29,11 +29,11 @@ local MapEditGUI = {
 	toolbars = {},
 
 	main_panel = nil,
+	main_toolbar = nil,
+	control_tooltip = nil,
 
 	curr_context_menu = nil,
 	curr_popup = nil,
-	
-	main_toolbar = nil,
 
 	cxtm_input = nil,
 
@@ -1122,7 +1122,8 @@ function MapEditGUI:define(mapedit)
 
 		{"toolbar_region", function(l) return l.x,l.y,l.w,l.h end},
 		{"viewport_region", region_pixoffset_f(0,0)},
-		{"layers_region", region_default_f}
+		{"layers_region", region_default_f},
+		{"layers_region", region_offset_f(0.005,0.99)}
 	)
 
 	local skin = require 'skin'
@@ -1134,14 +1135,18 @@ function MapEditGUI:define(mapedit)
 			function(a) edit.active_layer = a end
 		)
 
+	local bindings = require 'bindings'
+	self.control_tooltip = guitextbox:new(bindings.controlTooltip(),0,0,500,"left","left","bottom",true)
+
 	local w,h = love.graphics.getDimensions()
 	self.main_panel = guiscreen:new(
 		panel_layout:new(
-		  0,0,w,h,{main_toolbar,layers_picker}),
+		  0,0,w,h,{main_toolbar,layers_picker,nil,self.control_tooltip}),
 			function(o) self:handleTopLevelThrownObject(o) end,
 			CONTROL_LOCK.EDIT_PANEL,
 			CONTROL_LOCK.EDIT_WINDOW
 	)
+	self.main_panel:addElement(self.control_tooltip)
 
 	self.colour_picker = guicolourpicker:new(
 		function(picker)
@@ -1207,6 +1212,7 @@ function MapEditGUI:define(mapedit)
 	)}
 	,20,20,80,380)
 	self.main_panel:pushWindow(self.visible_win)
+
 
 	self.main_panel:update()
 	self.main_panel:resize()

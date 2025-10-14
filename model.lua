@@ -302,4 +302,26 @@ function model:isOverlayFullyHidden(mode)
 		(not self.visible["leg_r_o"])
 end
 
+function model:toggleLimb(limb, mode)
+	if limb == "arm_l" then
+		if mode == "wide" then
+			self:toggleLimb("arm_wide_l")
+		else
+			self:toggleLimb("arm_slim_l")
+		end
+		return
+	end
+	if limb == "arm_r" then
+		if mode == "wide" then
+			self:toggleLimb("arm_wide_r")
+		else
+			self:toggleLimb("arm_slim_r")
+		end
+		return
+	end
+
+	local v = self.visible[limb] or self.visible[limb .. "_o"]
+	self.visible[limb], self.visible[limb .. "_o"] = not v, not v
+end
+
 return model

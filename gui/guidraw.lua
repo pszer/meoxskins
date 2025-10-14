@@ -144,6 +144,7 @@ function MapEditGUIRender:initAssets()
 	self.__invisible = Loader:getTextureReference("invisible.png")
 	self.__alphalock = Loader:getTextureReference("alphalock.png")
 	self.__alphalock_off = Loader:getTextureReference("alphalock_off.png")
+	self.__alphalock_override = Loader:getTextureReference("alphalock_override.png")
 
 	self.head = Loader:getTextureReference("s_head.png")
 	self.head_o = Loader:getTextureReference("s_heado.png")
