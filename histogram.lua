@@ -49,7 +49,7 @@ function histogram.retrieve(image, channel)
 		local R,G,B,A = image_data:getPixel(x,y)
 
 		if A > 0.0 then -- ignore blank pixels
-			local P = channel(image_data:getPixel(R,G,B,A))
+			local P = channel(R,G,B,A)
 			sort_in(P, x,y)
 		end
 	end

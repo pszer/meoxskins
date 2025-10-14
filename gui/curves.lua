@@ -24,10 +24,10 @@ function EditGUICurves:new(wS,hS, curves_change_hook, histograms, action)
 		active_channel = "value",
 		drag_index   = nil,
 
-		value = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil},
-		red   = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil},
-		green = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil},
-		blue  = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil},
+		value = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil,histogram_graphic=nil},
+		red   = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil,histogram_graphic=nil},
+		green = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil,histogram_graphic=nil},
+		blue  = {x={0.0,1.0},y={0.0,1.0},samples={},get_sample=nil,histogram_graphic=nil},
 
 		__action = action,
 
@@ -36,7 +36,9 @@ function EditGUICurves:new(wS,hS, curves_change_hook, histograms, action)
 
 		hover = false,
 
-		curve_samples = {}
+		curve_samples = {},
+
+		regen_graphics = true
 	}
 
 	_,this.value.get_sample = cubiccurve.generate(this.value.x, this.value.y, this.sample_count, this.value.samples, true)
@@ -69,6 +71,45 @@ function EditGUICurves:new(wS,hS, curves_change_hook, histograms, action)
 
 		-- update positions for colour picker elements
 		local Sx,Sy,Sw,Sh = self.x,self.y,self.w,self.h
+
+		if self.regen_graphics then
+			this:generateHistogramGraphic("value")
+			this:generateHistogramGraphic("red")
+			this:generateHistogramGraphic("blue")
+			this:generateHistogramGraphic("green")
+			self.regen_graphics = false
+		end
+	end
+
+	function this:generateHistogramGraphic(channel_name)
+		local channel = self[channel_name]
+		if not histograms[channel_name] then return end
+
+		local canvas = love.graphics.newCanvas(self.w,self.h)
+		love.graphics.reset()
+		love.graphics.setCanvas(canvas)
+		love.graphics.setColor(1,1,1,0.9)
+		if channel_name=="red"   then love.graphics.setColor(1,0,0,0.9) end
+		if channel_name=="green" then love.graphics.setColor(0,1,0,0.9) end
+		if channel_name=="blue"  then love.graphics.setColor(0,0,1,0.9) end
+
+		local population = #histograms[channel_name].sorted
+
+		local xstep = 16
+		local interval = xstep * 1/self.w
+		local value = 0.0
+		local _start_i = 1
+		for x=0,self.w-1,xstep do
+			local count, _start_i = histograms[channel_name].interval(value, interval, _start_i)
+
+			if count > 4 then count = count + 1 end
+			local height = (4096/(population+1)) * (512*count/4096)
+			value = value + interval
+			love.graphics.rectangle("fill",x, self.h-height,xstep,height)
+		end
+
+		love.graphics.reset()
+		channel.histogram_graphic = canvas
 	end
 
 	function this:setActiveChannel(c)
@@ -89,6 +130,10 @@ function EditGUICurves:new(wS,hS, curves_change_hook, histograms, action)
 		love.graphics.setColor(0.21,0.21,0.21,1)
 		love.graphics.rectangle("fill",x,y,w,h)
 		love.graphics.setColor(0.8,0.8,0.8,0.8)
+
+		if self[self.active_channel].histogram_graphic then
+			love.graphics.draw(self[self.active_channel].histogram_graphic,self.x,self.y)
+		end
 
 		love.graphics.line(x+w/4, y, x+w/4, y+h)
 		love.graphics.line(x+w/2, y, x+w/2, y+h)
@@ -257,11 +302,14 @@ function EditGUICurves:new(wS,hS, curves_change_hook, histograms, action)
 	function this.setY(self,y)
 		self.y = y end
 	function this.setW(self,w)
+		self.regen_graphics=true
 		self.w = math.floor(w * wS) end
 	function this.setH(self,h)
+		self.regen_graphics=true
 		self.h = math.floor(h * hS) end
 
 	setmetatable(this, EditGUICurves)
+
 	return this
 end
 
