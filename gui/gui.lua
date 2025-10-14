@@ -15,6 +15,7 @@ local guicolourpicker = require 'gui.colourselect'
 local guivisible      = require 'gui.visible'
 local guilayers       = require 'gui.layers'
 local guitickbox      = require 'gui.tickbox'
+local cursor       = require 'gui.cursor'
 
 local lang         = require 'gui.guilang'
 
@@ -279,6 +280,8 @@ function MapEditGUI:define(mapedit)
 		win_show_close=true
 	}, lang_win_layout)
 
+	-- Key settings
+
 	-- Rename layer window
 	local rename_layer_layout = guilayout:define(
 		{id="region",
@@ -387,11 +390,6 @@ function MapEditGUI:define(mapedit)
 		}
 		,
 		function(props) return
-		 {lang["Keybinds"],
-		  action=function(props)
-		    return end,
-			disable = true},
-
 		 {lang["Set Language"],
 		  action=function(props)
 		    local win = lang_win:new({},
@@ -1061,6 +1059,103 @@ function MapEditGUI:define(mapedit)
 			end
 		end},
 		{" --- "},
+		{lang["Key settings"],action=function()
+			local bindings = require 'bindings'
+			local edit = require 'edit'
+
+			local function get(b,k)
+				return bindings.getReadableTxt(EDIT_KEY_SETTINGS[k][b])
+			end
+
+			local opts = {
+				{"Erase Pixel", "edit_erase"},
+				{"Fill Face", "edit_colour_fill"},
+				{"Pick Pixel Colour", "edit_colour_pick"},
+				{"Toggle Mirror", "edit_mirror"},
+				{"Toggle Grid", "edit_grid"},
+				{"Ignore Alpha Lock", "edit_alpha_override"},
+				{"Hide/Show Overlay", "edit_hide_overlay"},
+				{"Head", "edit_hide_head"},
+				{"L Arm", "edit_hide_arm_l"},
+				{"R Arm", "edit_hide_arm_r",},
+				{"L Leg", "edit_hide_leg_l"},
+				{"R Leg", "edit_hide_leg_r"},
+				{"Torso", "edit_hide_torso"}
+			}
+
+			local opts_N = #opts
+			local layout_entries = {}
+			for i,v in ipairs(opts) do
+				table.insert(layout_entries, {"text_region", region_offset_f(0.05, (i-1)/(opts_N+1)+0.02)})
+			end
+			for i,v in ipairs(opts) do
+				table.insert(layout_entries, {"bind1", region_offset_f(0.05, (i-1)/(opts_N+1)+0.02)})
+			end
+			for i,v in ipairs(opts) do
+				table.insert(layout_entries, {"bind2", region_offset_f(0.05, (i-1)/(opts_N+1)+0.02)})
+			end
+			table.insert(layout_entries,
+				{"bind1", region_offset_f(0.05, opts_N/(opts_N+1)+0.02)})
+
+			local key_settings_layout = guilayout:define(
+				{id="text_region",
+				 split_type="+x",
+				 split_ratio=0.3333,
+				 sub=
+				{id="bind1",
+				 split_type="+x",
+				 split_ratio=0.5,
+				 sub=
+				{id="bind2",
+				}}},
+				unpack(layout_entries)
+			)
+			local key_settings_win = guiwindow:define({
+				win_min_w=430,
+				win_max_w=430,
+				win_min_h=410,
+				win_max_h=410,
+				win_focus=false,
+				win_titlebar=true,
+				win_icon="icon_key.png",
+				win_title=lang["Key settings"],
+				win_show_close=true
+			}, key_settings_layout)
+
+			local elements = {}
+			for i,v in ipairs(opts) do
+				table.insert(elements,
+					guitextbox:new(lang[v[1]], 0,0, 200, "left", "left","top",false,true))
+			end
+			for i,v in ipairs(opts) do
+				table.insert(elements,
+					guibutton:new(bindings.getReadableTxt0(get(1,v[2])),nil,0,0,
+						function(self) edit:listenForKeyChange(v[2],1,function() self:generateText(
+							bindings.getReadableTxt0(EDIT_KEY_SETTINGS[v[2]][1])) end)
+						end,"left","top",nil,false,100,20,"middle"))
+			end
+			for i,v in ipairs(opts) do
+				table.insert(elements,
+					guibutton:new(bindings.getReadableTxt0(get(2,v[2])),nil,0,0,
+						function(self) edit:listenForKeyChange(v[2],2,function() self:generateText(
+							bindings.getReadableTxt0(EDIT_KEY_SETTINGS[v[2]][2])) end)
+						end,"left","top",nil,false,100,20,"middle"))
+			end
+
+			table.insert(elements,
+					guibutton:new(lang["Reset"],nil,0,0,
+						function(self) resetKeySettings() MapEditGUI:updateKeybindTooltip() end,"left","top",nil,false,100,20,"middle"))
+
+			local win = key_settings_win:new(
+				{win_show_close=true},
+				elements
+				,300,300,300,300
+			)
+			win:centre()
+
+			return win
+		end},
+		{" --- "},
 		{lang["~iQuit"],action=function()love.event.quit()end}
 		end
 		)
@@ -1421,6 +1516,12 @@ function MapEditGUI:handleTopLevelThrownObject(obj)
 	end
 end
 
+function MapEditGUI:updateKeybindTooltip(str)
+	local bindings = require 'bindings'
+	str = str or bindings.controlTooltip()
+	self.control_tooltip:generateText(str)
+end
+
 function MapEditGUI:poll()
 	self.cxtm_input:poll()
 	self.panel_input:poll()
@@ -1472,6 +1573,10 @@ function MapEditGUI:update(dt)
 	self:updatePopupMenu()
 	self:updateContextMenu()
 	self:poll()
+
+	if self.curr_context_menu then
+		cursor.arrow()
+	end
 end
 
 function MapEditGUI:resize()

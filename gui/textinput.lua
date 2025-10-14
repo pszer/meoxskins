@@ -5,6 +5,8 @@
 local guirender = require 'gui.guidraw'
 local utf8 = require("utf8")
 
+local cursor = require 'gui.cursor'
+
 local MapEditGUITextInput
 MapEditGUITextInput = {
 	__type = "mapedittextinput",
@@ -350,6 +352,7 @@ function MapEditGUITextInput:new(init_str,x,y,w,h,validator,format_func,align_x,
 		   y<=my and my<=y+h
 		then
 			self.hover = true
+			cursor.ibeam()
 			return self
 		end
 		self.hover = false

@@ -35,7 +35,7 @@ end
 EDIT_KEY_SETTINGS = {
 
 	["edit_action"]  = { "mouse1"  , nil , default = "mouse1"  },
-	["cam_rotate"]   = { "mouse2"  , "mouse3" , default = "mouse2"  },
+	["cam_rotate"]   = { "mouse2"  , "mouse3" , default = "mouse2" , default2 = "mouse3" },
 	["cam_zoom_in"]   = { "wheelup"  , nil , default = "wheelup"  },
 	["cam_zoom_out"]  = { "wheeldown"    , nil , default = "wheeldown"  },
 	["edit_undo"]  = { "z"    , nil , default = "z"  },
@@ -48,26 +48,26 @@ EDIT_KEY_SETTINGS = {
 	["edit_alpha_override"]  = { "a"    , nil , default = "a"  },
 	["edit_hide_overlay"] = { "tab" , nil , default = "tab" },
 
-	["edit_hide_head"] = { "1" , "kp1" , default = "1" },
-	["edit_hide_torso"] = { "6" , "kp2" , default = "2" },
-	["edit_hide_arm_l"] = { "2" , "kp3" , default = "3" },
-	["edit_hide_arm_r"] = { "3" , "kp4" , default = "4" },
-	["edit_hide_leg_l"] = { "4" , "kp5" , default = "5" },
-	["edit_hide_leg_r"] = { "5" , "kp6" , default = "6" },
+	["edit_hide_head"] = { "1" , "kp1" , default = "1" , default2 = "kp1" },
+	["edit_hide_torso"] = { "6" , "kp2" , default = "2" , default2 = "kp2"  },
+	["edit_hide_arm_l"] = { "2" , "kp3" , default = "3" , default2 = "kp3"  },
+	["edit_hide_arm_r"] = { "3" , "kp4" , default = "4" , default2 = "kp4"  },
+	["edit_hide_leg_l"] = { "4" , "kp5" , default = "5" , default2 = "kp5"  },
+	["edit_hide_leg_r"] = { "5" , "kp6" , default = "6" , default2 = "kp6"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},
 	["alt"]             = { "lalt"   , nil    , default = "lalt"},
 
 	["cxtm_select"] = { "mouse1" , nil , default = "mouse1" },
-	["cxtm_scroll_up"]   = { "up"   , "wheelup"   , default = "up" },
-	["cxtm_scroll_down"] = { "down" , "wheeldown" , default = "down" },
+	["cxtm_scroll_up"]   = { "up"   , "wheelup"   , default = "up" , default2 = "wheelup" },
+	["cxtm_scroll_down"] = { "down" , "wheeldown" , default = "down" , default2 = "wheeldown" },
 
 	["panel_select"] = { "mouse1" , nil , default = "mouse1" },
 
 	["window_select"]     = { "mouse1" , nil , default = "mouse1" },
 	["window_move"]       = { "mouse3" , nil , default = "mouse3" },
-	["window_move_bar"]   = { "mouse1" , "mouse3" , default = "mouse1" },
+	["window_move_bar"]   = { "mouse1" , "mouse3" , default = "mouse1" , default2 = "mouse3" },
 
 }
 
@@ -105,13 +105,13 @@ function keyChangeSetting( setting , new_scancode , slot , force_unique_keybinds
 	local is_valid = IS_VALID_SCANCODE(new_scancode)
 	if not is_valid then
 		print(string.format("keyChangeSetting: \"%s\" is an invalid scancode", new_scancode))
-		return
+		return false
 	end
 
 	local s = KEY_SETTINGS[setting]
 	if not s then
 		print(string.format("keyChangeSetting: no setting \"%s\" exists", setting))
-		return
+		return false
 	end
 
 	-- overwrite settings for other keys with same scancode
@@ -138,4 +138,26 @@ function keyRevertDefault( setting )
 	end
 
 	s[1] = s.default
+	s[2] = s.default2
+end
+
+function exportKeySettings( )
+	local k ={}
+	for i,v in pairs(KEY_SETTINGS) do
+		k[i] = {v[1],v[2]}
+	end
+	return k
+end
+function importKeySettings( k )
+	if not k then return end
+	for i,v in pairs(k) do
+		KEY_SETTINGS[i][1] = v[1]
+		KEY_SETTINGS[i][2] = v[2]
+	end
+end
+
+function resetKeySettings()
+	for i,v in pairs(KEY_SETTINGS) do
+		keyRevertDefault(i)
+	end
 end

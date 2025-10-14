@@ -55,6 +55,16 @@ function render:viewportPass(shader,clear,single)
 	end
 end
 
+function render:viewportGround(shader)
+	love.graphics.setShader(shader)
+	camera:sendToShader()
+	shader:send("u_model", "column", id)
+	love.graphics.setDepthMode("lequal",true)
+	love.graphics.setMeshCullMode("none")
+
+	love.graphics.draw(model.ground)
+end
+
 function render:clearDepthBuffer()
 	self:setup3DCanvas()
 	love.graphics.clear(false,true,true)

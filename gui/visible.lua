@@ -5,6 +5,7 @@
 
 local guirender = require 'gui.guidraw'
 local guibutton = require 'gui.button'
+local cursor = require 'gui.cursor'
 
 local EditGUIVisible = {
 	__type = "mapeditbutton",
@@ -85,6 +86,43 @@ function EditGUIVisible:new(get_mode, get_mirror_mode)
 		   y<=my and my<=y+h
 		then
 			self.hover = true
+
+			local mx,my = love.mouse.getPosition()
+			mx = mx - self.x
+			my = my - self.y
+
+			local mode = self.get_mode()
+			local translate = self.translate[mode]
+			local function test_rect(rect)
+				local x,y,w,h = rect[1],rect[2],rect[3],rect[4]
+				return mx >= x and mx <= x+w and
+							 my >= y and my <= y+h
+			end
+			local function test(part_name, exclude)
+				local rect1 = self.box_info[part_name]
+				if not test_rect(rect1) then return false end
+				if not exclude or (exclude and not test_rect(self.box_info[exclude])) then
+					return true
+				end
+				return false
+			end
+
+			if test("head_o","head") then cursor.hand() 
+			elseif test("head",nil) then cursor.hand() 
+			elseif test("torso_o","torso") then cursor.hand() 
+			elseif test("torso",nil) then cursor.hand() 
+			elseif test("leftarm_o","leftarm") then cursor.hand() 
+			elseif test("leftarm",nil) then cursor.hand() 
+			elseif test("rightarm_o","rightarm") then cursor.hand() 
+			elseif test("rightarm",nil) then cursor.hand() 
+			elseif test("leftleg_o","leftleg") then cursor.hand() 
+			elseif test("leftleg",nil) then cursor.hand() 
+			elseif test("rightleg_o","rightleg") then cursor.hand() 
+			elseif test("rightleg",nil) then cursor.hand() end
+			if test_rect{115,129,24,31} then
+				cursor.hand()
+			end
+
 			return self
 		end
 		self.hover = false

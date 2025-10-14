@@ -32,12 +32,16 @@ vec4 position(mat4 transform, vec4 vertex) {
 #ifdef PIXEL
 
 uniform Image MainTex;
-//uniform Image SkinTexture;
+
+uniform float width;
+uniform float cellSize;
+uniform float alpha;
 
 void effect( ) {
-	vec2 f = mod(VaryingTexCoord.xy-vec2(1/2048,1/2048), vec2(1/64.0,1/64.0));
-	if (f.x < 1/1024.0 || f.y < 1/1024.0 ) {
-		love_Canvases[0] = vec4(0.9,0.9,0.9,0.15);
+	//vec2 f = mod(VaryingTexCoord.xy-vec2(1/2048,1/2048), vec2(1/cellSize,1/cellSize));
+	vec2 f = mod(VaryingTexCoord.xy-vec2(1/2048,1/2048), vec2(1/cellSize,1/cellSize));
+	if (f.x < width || f.y < width || VaryingTexCoord.x > 1.0-width || VaryingTexCoord.y > 1.0-width) {
+		love_Canvases[0] = vec4(VaryingColor.xyz,alpha);
 	} else {
 		love_Canvases[0] = vec4(0.0,0.0,0.0,0.0);
 	}

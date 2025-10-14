@@ -32,6 +32,8 @@ local model = {
 		arm_wide_l_o = love.graphics.newMesh(v_format, modelv.arm_wide_l_o, "triangles", "static"),
 	},
 
+	ground = love.graphics.newMesh(v_format, modelv.ground, "triangles", "static"),
+
 	draw_order = {
 		"head",
 		"torso",

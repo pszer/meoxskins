@@ -4,6 +4,7 @@
 
 local guiscrollb  = require 'gui.scrollbar'
 local guirender   = require 'gui.guidraw'
+local cursor      = require 'gui.cursor'
 
 local EditGUILayers = {
 	layer_w = 280,
@@ -192,12 +193,14 @@ function EditGUILayers:new(get_layers, get_active, set_active)
 											Y*grid_pix_h - h_offset + y
 				if mx >= _x+grid_pix_w-42+12 and mx <= _x+grid_pix_w-22+12 and
 				   my >= _y+17 and my <= _y+41 then
+					 cursor.hand()
 					 self.hovered_visible_icon = true
 				else
 					self.hovered_visible_icon = false
 				end
 				if mx >= _x+grid_pix_w-42+12-26 and mx <= _x+grid_pix_w-22+12-26 and
 				   my >= _y+17 and my <= _y+41 then
+					 cursor.hand()
 					 self.hovered_alphalock_icon = true
 				else
 					self.hovered_alphalock_icon = false

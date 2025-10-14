@@ -29,13 +29,14 @@ function MapEditGUITextElement:new(str,x,y,limit,align,align_x,align_y,format,st
 	if this.align == "centre" then this.align="center" end
 	if this.align == "middle" then this.align="center" end
 
-	--this.text = guirender:createDrawableText(str)
-	if not format then
-		this.text = guirender:createDrawableTextLimited(str, this.limit, this.align)
-	else
-		this.text = guirender:createDrawableText(str)
+	function this:generateText(str)
+		if not format then
+			self.text = guirender:createDrawableTextLimited(str, self.limit, self.align)
+		else
+			self.text = guirender:createDrawableText(str)
+		end
+		self.w,self.h = self.text:getDimensions()
 	end
-	this.w,this.h = this.text:getDimensions()
 
 	function this:draw()
 		love.graphics.draw(self.text, self.x, self.y)
@@ -89,6 +90,7 @@ function MapEditGUITextElement:new(str,x,y,limit,align,align_x,align_y,format,st
 		end
 
 	setmetatable(this, MapEditGUITextElement)
+	this:generateText(str)
 	return this
 end
 

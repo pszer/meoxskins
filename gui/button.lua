@@ -4,6 +4,7 @@
 --
 
 local guirender = require 'gui.guidraw'
+local cursor = require 'gui.cursor'
 
 local MapEditGUIButton = {
 	__type = "mapeditbutton",
@@ -35,7 +36,7 @@ local MapEditGUIButton = {
 }
 MapEditGUIButton.__index = MapEditGUIButton
 
-function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_held, force_w, force_h)
+function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_held, force_w, force_h, text_align)
 	assert((str or icon))
 
 	local this = {
@@ -72,31 +73,33 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 		this.action = toggleable_action
 	end
 
-	if this.text ~= "" then
-		this.text = guirender:createDrawableText(str)
-	else
-		this.text = nil
+	function this:generateText(txt)
+		self.text = txt or self.text
+		if self.text ~= "" then
+			self.text = guirender:createDrawableText(self.text)
+		else
+			self.text = nil
+		end
+
+		local text_drawable = self.text
+		local icon = self.icon
+		local buffer_info = MapEditGUIButton.buffer_info
+		local w,h = 0,11
+		if text_drawable then w,h = text_drawable:getDimensions() end
+		if icon then
+			w = w + buffer_info.l + buffer_info.r
+		else
+			w = w + buffer_info.l_no_icon + buffer_info.r
+		end
+		h = h + buffer_info.t + buffer_info.b
+		self.w = w
+		self.h = h
+
+		if force_w then self.w = force_w end
+		if force_h then self.h = force_h end
+
+		self.bg = guirender:createContextMenuBackground(self.w,self.h)
 	end
-
-	local text_drawable = this.text
-	local icon = this.icon
-	local buffer_info = MapEditGUIButton.buffer_info
-	local w,h = 0,11
-	if text_drawable then w,h = text_drawable:getDimensions() end
-	if icon then
-		w = w + buffer_info.l + buffer_info.r
-	else
-		w = w + buffer_info.l_no_icon + buffer_info.r
-	end
-	h = h + buffer_info.t + buffer_info.b
-	this.w = w
-	this.h = h
-
-	if force_w then this.w = force_w end
-	if force_h then this.h = force_h end
-
-
-	this.bg = guirender:createContextMenuBackground(this.w,this.h)
 
 	function this:updateHoverInfo()
 		local x,y,w,h = self.x, self.y, self.w, self.h
@@ -104,6 +107,7 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 		if x<=mx and mx<=x+w and
 		   y<=my and my<=y+h
 		then
+			cursor.hand()
 			self.hover = true
 			return self
 		end
@@ -127,10 +131,10 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 			state="normal"
 		end
 		if self.text then
-			guirender:drawGenericOption(self.x,self.y,self.w,self.h, self.bg,self.text,self.icon,nil,state,MapEditGUIButton.buffer_info)
+			guirender:drawGenericOption(self.x,self.y,self.w,self.h, self.bg,self.text,self.icon,nil,state,MapEditGUIButton.buffer_info, text_align)
 		else
 			if self.draw_mode=="default" then
-				guirender:drawGenericOption(self.x,self.y,self.w,self.h, self.bg,self.text,self.icon,nil,state,MapEditGUIButton.buffer_info_empty)
+				guirender:drawGenericOption(self.x,self.y,self.w,self.h, self.bg,self.text,self.icon,nil,state,MapEditGUIButton.buffer_info_empty, text_align)
 			else
 				guirender:drawCloseButton(self.x,self.y,self.w,self.h, self.text,self.icon,nil,state,MapEditGUIButton.buffer_info_empty)
 			end
@@ -161,6 +165,7 @@ function MapEditGUIButton:new(str,icon,x,y,action,align_x,align_y,toggle,start_h
 		end
 
 	setmetatable(this, MapEditGUIButton)
+	this:generateText()
 	return this
 end
 

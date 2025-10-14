@@ -3,6 +3,7 @@
 require "assetloader"
 
 local guirender   = require 'gui.guidraw'
+local cursor      = require 'gui.cursor'
 
 local EditGUIColorSelect = {
 	pad = 12,
@@ -268,10 +269,13 @@ function EditGUIColorSelect:new(colour_change_hook, action)
 		self.hover_alpha = false
 		if test_rect(mx,my, self.colour_x, self.colour_y, self.colour_w, self.colour_h) then
 			self.hover_colour = true
+			cursor.cross()
 		elseif test_rect(mx,my, self.hue_x, self.hue_y, self.hue_w, self.hue_h) then
 			self.hover_hue = true
+			cursor.cross()
 		elseif test_rect(mx,my, self.alpha_x, self.alpha_y, self.alpha_w, self.alpha_h) then
 			self.hover_alpha = true
+			cursor.cross()
 		end
 
 		if self.hover then return self end

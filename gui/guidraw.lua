@@ -183,6 +183,7 @@ function MapEditGUIRender:initAssets()
 		"icon_hue.png",
 		"icon_about.png",
 		"icon_vis.png",
+		"icon_key.png",
 
 		"icon_curves.png",
 
@@ -644,7 +645,8 @@ function MapEditGUIRender:createContextMenuBackground(w,h, col)
 end
 
 
-function MapEditGUIRender:drawGenericOption(x,y,w,h, bg, txt, icon, arrow, state, buffer_info)
+function MapEditGUIRender:drawGenericOption(x,y,w,h, bg, txt, icon, arrow, state, buffer_info, text_align)
+	text_align = text_align or "left"
 	local bl = buffer_info.l_no_icon
 	if icon then
 		bl = buffer_info.l
@@ -667,7 +669,14 @@ function MapEditGUIRender:drawGenericOption(x,y,w,h, bg, txt, icon, arrow, state
 		love.graphics.setBlendMode("subtract","alphamultiply")
 
 		if txt then
-			love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			if text_align=="left" then
+				love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			elseif text_align=="middle" then
+				local tw,th = txt:getDimensions()
+				love.graphics.draw(txt,int(x+bl+w*0.5-tw*0.5),int(y+buffer_info.t))
+			else
+				love.graphics.draw(txt,int(x+bl+w-tw),int(y+buffer_info.t))
+			end
 		end
 
 		if icon then
@@ -678,8 +687,16 @@ function MapEditGUIRender:drawGenericOption(x,y,w,h, bg, txt, icon, arrow, state
 
 	elseif state ~= "disable" then
 		if txt then
-			love.graphics.draw(txt, int(x+bl), int(y+buffer_info.t))
+			if text_align=="left" then
+				love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			elseif text_align=="middle" then
+				local tw,th = txt:getDimensions()
+				love.graphics.draw(txt,int(x+bl+w*0.5-tw*0.5),int(y+buffer_info.t))
+			else
+				love.graphics.draw(txt,int(x+bl+w-tw),int(y+buffer_info.t))
+			end
 		end
+
 		if icon then
 			love.graphics.draw(icon,int(x+buffer_info.icon_l),int(y+buffer_info.icon_t))
 		end
@@ -688,7 +705,14 @@ function MapEditGUIRender:drawGenericOption(x,y,w,h, bg, txt, icon, arrow, state
 		love.graphics.setColor(0.9,0.9,1,0.3)
 
 		if txt then
-			love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			if text_align=="left" then
+				love.graphics.draw(txt,int(x+bl),int(y+buffer_info.t))
+			elseif text_align=="middle" then
+				local tw,th = txt:getDimensions()
+				love.graphics.draw(txt,int(x+bl+w*0.5-tw*0.5),int(y+buffer_info.t))
+			else
+				love.graphics.draw(txt,int(x+bl+w-tw),int(y+buffer_info.t))
+			end
 		end
 		if icon then
 			love.graphics.draw(icon,x+buffer_info.icon_l,y+buffer_info.icon_t)

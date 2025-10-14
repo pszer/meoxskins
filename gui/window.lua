@@ -5,6 +5,7 @@
 require "prop"
 
 local guirender = require 'gui.guidraw'
+local cursor = require 'gui.cursor'
 
 local MapEditGUIWindow = {
 	__type = "mapeditwindow",
@@ -169,6 +170,7 @@ function MapEditGUIWindow:define(default_props, layout_def)
 						 y-MapEditGUIWindow.buffer_info.titlebar_h <= my and
 						 my <= y then
 						 self.hover_titlebar = true
+						 --cursor.hand()
 					else
 						self.hover_titlebar = false
 					end

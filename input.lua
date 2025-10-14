@@ -49,6 +49,8 @@ CONTROL_LOCK = {
 --              priority | status | queued status
 	CONSOLE      = {0,        0,     0},
 
+	KEY_CHANGE   = {-1,  0, 0},
+
 	EDIT_CONTEXT   = {100,      0,0},
 	EDIT_WINDOW    = {102,      0,0},
 	EDIT_PANEL     = {104,      0,0},
@@ -186,6 +188,15 @@ end
 
 function clearKeys()
 	CONTROL_KEYS_DOWN = {}
+end
+
+function getKeysDown()
+	local c=1
+	local keys = {}
+	for i,v in pairs(CONTROL_KEYS_DOWN) do
+		keys[c] = {i,unpack(v)}
+	end
+	return keys
 end
 
 -- prematurely stop a key input

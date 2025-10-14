@@ -3,6 +3,7 @@
 --
 
 local guirender = require 'gui.guidraw'
+local cursor = require 'gui.cursor'
 
 local MapEditGUIScrollbar = {}
 MapEditGUIScrollbar.__index = MapEditGUIScrollbar
@@ -52,6 +53,7 @@ function MapEditGUIScrollbar:new(h, start_ratio, on_scroll, h_ratio)
 		   y<=my and my<=y+h
 		then
 			self.hover = true
+			cursor.hand()
 			return self
 		end
 		self.hover = false

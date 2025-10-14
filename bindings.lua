@@ -8,10 +8,10 @@ bindings.readable_txt = {
 	["mouse1"] = "Left click",
 	["mouse2"] = "Right click",
 	["mouse3"] = "Middle click",
-	["mouse4"] = "Mouse button 4",
-	["mouse5"] = "Mouse button 5",
-	["wheelup"]   = "Mousewheel up",
-	["wheeldown"] = "Mousewheel down",
+	["mouse4"] = "Button 4",
+	["mouse5"] = "Button 5",
+	["wheelup"]   = "Mwheel up",
+	["wheeldown"] = "Mwheel down",
 	["tab"] = "Tab",
 	["return"] = "Return",
 	["space"] = "Space",
@@ -28,6 +28,12 @@ bindings.readable_txt = {
 	["right"] = "Right arrow",
 }
 
+function bindings.getReadableTxt0(b)
+	if not b then return "" end
+	b = bindings.readable_txt[b] or b
+	b = string.upper(b:sub(1,1)) .. b:sub(2,-1)
+	return b
+end
 function bindings.getReadableTxt(b)
 	if not b then return nil end
 	b = bindings.readable_txt[b] or b
@@ -59,20 +65,20 @@ function bindings.controlTooltip()
 	end
 
 	local string = ""
-	string = string .. lang["Erase Pixel: "] .. t("edit_erase") .. "~n"
-	string = string .. lang["Fill Face: "] .. t("edit_colour_fill") .. "~n"
-	string = string .. lang["Pick Pixel Colour: "] .. t("edit_colour_pick") .. "~n ~n"
-	string = string .. lang["Toggle Mirror: "] .. t("edit_mirror") .. "~n"
-	string = string .. lang["Toggle Grid: "] .. t("edit_grid") .. "~n"
-	string = string .. lang["Ignore Alpha Lock: "] .. t("edit_alpha_override") .. "~n"
-	string = string .. lang["Hide/Show Overlay: "] .. t("edit_hide_overlay") .. "~n ~n"
-	string = string .. lang["Hide/Show: "] .. "~n"
-	string = string .. lang["Head: "] .. "~b".. t1("edit_hide_head") .. "~r~n"
-	string = string .. lang["L Arm: "] .."~b".. t1("edit_hide_arm_l") .. "~r~n"
-	string = string .. lang["R Arm: "] .."~b".. t1("edit_hide_arm_r") .. "~r~n"
-	string = string .. lang["L Leg: "] .."~b".. t1("edit_hide_leg_l") .. "~r~n"
-	string = string .. lang["R Leg: "] .."~b".. t1("edit_hide_leg_r") .. "~r~n"
-	string = string .. lang["Torso: "] .."~b".. t1("edit_hide_torso") .. "~r~n"
+	string = string .. lang["Erase Pixel"] .. ": "..t("edit_erase") .. "~n"
+	string = string .. lang["Fill Face"] .. ": "..t("edit_colour_fill") .. "~n"
+	string = string .. lang["Pick Pixel Colour"] .. ": "..t("edit_colour_pick") .. "~n ~n"
+	string = string .. lang["Toggle Mirror"] .. ": "..t("edit_mirror") .. "~n"
+	string = string .. lang["Toggle Grid"] .. ": "..t("edit_grid") .. "~n"
+	string = string .. lang["Ignore Alpha Lock"] .. ": "..t("edit_alpha_override") .. "~n"
+	string = string .. lang["Hide/Show Overlay"] .. ": "..t("edit_hide_overlay") .. "~n ~n"
+	string = string .. lang["Hide/Show"] .. "~n"
+	string = string .. lang["Head"] .. ": ".."~b".. t1("edit_hide_head") .. "~r~n"
+	string = string .. lang["L Arm"] ..": ".."~b".. t1("edit_hide_arm_l") .. "~r~n"
+	string = string .. lang["R Arm"] ..": ".."~b".. t1("edit_hide_arm_r") .. "~r~n"
+	string = string .. lang["L Leg"] ..": ".."~b".. t1("edit_hide_leg_l") .. "~r~n"
+	string = string .. lang["R Leg"] ..": ".."~b".. t1("edit_hide_leg_r") .. "~r~n"
+	string = string .. lang["Torso"] ..": ".."~b".. t1("edit_hide_torso") .. "~r~n"
 
 	return string
 end

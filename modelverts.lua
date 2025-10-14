@@ -4,6 +4,8 @@
 
 local cube = require "cube"
 
+local ground_size=64
+
 local model = {
 
 	head = cube.cubeToTris{
@@ -227,6 +229,15 @@ local model = {
 		},
 		origin = {0,0,0},
 	},
+
+	ground = {
+		{-ground_size,18.5,-ground_size, 0,0, 0,-1,0},
+		{-ground_size,18.5, ground_size, 0,1, 0,-1,0},
+		{ ground_size,18.5,-ground_size, 1,0, 0,-1,0},
+		{ ground_size,18.5,-ground_size, 1,0, 0,-1,0},
+		{-ground_size,18.5, ground_size, 0,1, 0,-1,0},
+		{ ground_size,18.5, ground_size, 1,1, 0,-1,0},
+	}
 
 }
 

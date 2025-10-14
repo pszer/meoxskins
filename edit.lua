@@ -24,6 +24,8 @@ local cubiccurve = require 'cubiccurve'
 
 local bindings = require 'bindings'
 
+local cursor = require 'gui.cursor'
+
 local edit = {
 
 	mode = "viewport",
@@ -64,7 +66,10 @@ local edit = {
 
 	alpha_lock_override = false,
 
-	bg_col = {78/255, 138/255, 126/255}
+	bg_col = {78/255, 138/255, 126/255},
+
+	key_change_for = nil,
+	key_change_a_or_b = nil,
 }
 edit.__index = edit
 
@@ -172,9 +177,6 @@ function edit:load(args)
 	self:init()
 end
 
-function edit:quit()
-	self:saveConfig()
-end
 
 function edit:loadConfig(conf_fpath)
 	local fpath = conf_fpath or "editcfg.lua"
@@ -187,6 +189,7 @@ function edit:loadConfig(conf_fpath)
 	if status and conf then
 		local lang_setting = conf.lang_setting
 		lang:setLanguage(lang_setting)
+		importKeySettings(conf.keybinds)
 	end
 	file:close()
 end
@@ -204,7 +207,8 @@ function edit:saveConfig(conf_fpath)
 	end
 
 	local conf_table = {
-		lang_setting = lang.__curr_lang
+		lang_setting = lang.__curr_lang,
+		keybinds = exportKeySettings()
 	}
 	local serialise = require 'serialise'
 	local str = "return "..serialise(conf_table)
@@ -966,7 +970,43 @@ function edit:setBackgroundColour(r,g,b)
 	self.bg_col[3] = b
 end
 
+function edit:listenForKeyChange(bind,a_or_b, callback)
+	self.key_change_for = bind
+	self.key_change_a_or_b = a_or_b
+	self.key_change_callback = callback
+	CONTROL_LOCK.KEY_CHANGE.open()
+end
+function edit:handleKeyChange()
+	if not self.key_change_for then
+		return
+	end
+
+	local keys = getKeysDown()
+	local k
+	for i,v in ipairs(keys) do
+		if v[2] == "down" then
+			k = v
+			break
+		end
+	end
+
+	if k then
+		keyChangeSetting(self.key_change_for, k[1], self.key_change_a_or_b)
+
+		self.key_change_for    = nil
+		self.key_change_a_or_b = nil
+		if self.key_change_callback then
+			self.key_change_callback()
+		end
+
+		CONTROL_LOCK.KEY_CHANGE.close()
+		gui:updateKeybindTooltip()
+	end
+end
+
 function edit:update(dt)
+	cursor.arrow()
+	self:handleKeyChange()
 	gui:update(dt)
 	self.viewport_input:poll()
 	self:update_filter_worker()
@@ -977,7 +1017,22 @@ function edit:draw()
 	render:clear3DCanvas(self.bg_col[1], self.bg_col[2], self.bg_col[3])
 	render:viewportPass(render.shader3d)
 	if edit.render_grid then
+		render.shader3dgrid:send("width",3/2048.0)
+		render.shader3dgrid:send("cellSize",64.0)
+		render.shader3dgrid:send("alpha",0.15)
+		love.graphics.setColor(0.9,0.9,0.9,1)
 		render:viewportPass(render.shader3dgrid, false, true)
+		render.shader3dgrid:send("width",2/2048.0)
+		render.shader3dgrid:send("cellSize",8.0)
+		render.shader3dgrid:send("alpha",0.5)
+		love.graphics.setColor(0.0,0.0,0.0,1)
+		render:viewportGround(render.shader3dgrid)
+		render.shader3dgrid:send("alpha",0.7)
+		render.shader3dgrid:send("width",2/2048.0)
+		render.shader3dgrid:send("cellSize",2.0)
+		love.graphics.setColor(0.8,0.8,0.8,1)
+		render:viewportGround(render.shader3dgrid)
+		render:viewportGround(render.shader3dgrid)
 	end
 
 	love.graphics.setCanvas()
@@ -1082,6 +1137,7 @@ end
 
 function edit:quit()
 	self:updateSessionFile("exit")
+	self:saveConfig()
 end
 
 return edit
