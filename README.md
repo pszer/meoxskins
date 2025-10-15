@@ -33,7 +33,7 @@ Run the included executable:
 MeoxSkins.exe
 ```
 
-![Viewport](https://github.com/pszer/meoxskins/blob/master/screenshot.png)
+![Viewport](docs/screenshot.png)
 
 Use **File → Open** to load an existing skin, or start painting from scratch.
 
@@ -62,7 +62,7 @@ The **Alpha slider** controls transparency — useful for blending colors.
 
 Pick an existing color by pressing **O** while hovering over it. This does not affect the current alpha value.
 
-![Colour Picker](https://github.com/pszer/meoxskins/blob/master/picker.png)
+![Colour Picker](docs/picker.png)
 
 ---
 
@@ -91,7 +91,7 @@ When saving:
 - **File → Save** merges layers into a standard `.png` for Minecraft.  
 - **File → Save as Project** exports all layers side-by-side in a single image, reopenable by MeoxSkins.
 
-![Example Skin Project](https://github.com/pszer/meoxskins/blob/master/testskin.png)
+![Example Skin Project](docs/testskin.png)
 
 ---
 
@@ -104,13 +104,13 @@ Filters apply only to the active layer. Recently used filters appear under **Rec
 Adjust contrast with the *Con* slider and brightness with *Lum*.  
 Contrast scales color distance from midpoint `RGB(0.5, 0.5, 0.5)`.
 
-![Contrast Brightness](https://github.com/pszer/meoxskins/blob/master/contrast.png)
+![Contrast Brightness](docs/contrast.png)
 
 ### Adjust HSL
 Modify *Hue*, *Saturation*, and *Luminance*.  
 The *Gamma* option makes luminance changes more perceptually soft.
 
-![Adjust HSL](https://github.com/pszer/meoxskins/blob/master/adjustHSL.png)
+![Adjust HSL](docs/adjustHSL.png)
 
 ### Curves
 A powerful tool for fine-tuning contrast and color.  
@@ -123,7 +123,7 @@ Delete points by moving them off the edge.
 Select channels via checkboxes and reset with **Reset**.  
 A histogram displays pixel distribution for the active channel.
 
-![Curves](https://github.com/pszer/meoxskins/blob/master/curves.png)
+![Curves](docs/curves.png)
 
 ### Invert (HSL)
 Inverts colors perceptually by rotating hue 180° and setting luminance to `1.0 - Lum`.
@@ -148,7 +148,7 @@ Each action supports two bindings. Click a key button and press the new key to a
 Adjust the model’s pose via **Skin → Pose**.  
 Modify *Pitch*, *Yaw*, and *Roll* for each limb using sliders — useful for painting hard-to-reach areas or taking screenshots.
 
-![Pose Window](https://github.com/pszer/meoxskins/blob/master/pose.png)
+![Pose Window](docs/pose.png)
 
 ---
 
