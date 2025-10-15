@@ -49,11 +49,11 @@ EDIT_KEY_SETTINGS = {
 	["edit_hide_overlay"] = { "tab" , nil , default = "tab" },
 
 	["edit_hide_head"] = { "1" , "kp1" , default = "1" , default2 = "kp1" },
-	["edit_hide_torso"] = { "6" , "kp2" , default = "2" , default2 = "kp2"  },
-	["edit_hide_arm_l"] = { "2" , "kp3" , default = "3" , default2 = "kp3"  },
-	["edit_hide_arm_r"] = { "3" , "kp4" , default = "4" , default2 = "kp4"  },
-	["edit_hide_leg_l"] = { "4" , "kp5" , default = "5" , default2 = "kp5"  },
-	["edit_hide_leg_r"] = { "5" , "kp6" , default = "6" , default2 = "kp6"  },
+	["edit_hide_torso"] = { "6" , "kp2" , default = "6" , default2 = "kp6"  },
+	["edit_hide_arm_l"] = { "2" , "kp3" , default = "2" , default2 = "kp2"  },
+	["edit_hide_arm_r"] = { "3" , "kp4" , default = "3" , default2 = "kp3"  },
+	["edit_hide_leg_l"] = { "4" , "kp5" , default = "4" , default2 = "kp4"  },
+	["edit_hide_leg_r"] = { "5" , "kp6" , default = "5" , default2 = "kp5"  },
 
 	["super"]           = { "lshift" , nil    , default = "lshift"},
 	["ctrl"]            = { "lctrl"  , nil    , default = "lctrl"},

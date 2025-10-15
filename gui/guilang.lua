@@ -349,6 +349,278 @@ local MapEditGUILanguageStrings = {
 		pl ="Tryb wąski/szeroki",
 		jp ="スリム・ワイドモード",
 	},
+	["Colour Picker"]={
+		eng="Colour Picker",
+		pl ="Próbnik Kolorów",
+		jp ="カラーピッカー",
+	},
+	["Visible Parts"]={
+		eng="Visible Parts",
+		pl ="Widoczne Części",
+		jp ="見える部分",
+	},
+	["Filters"]={
+		eng="Filters",
+		pl ="Filtry",
+		jp ="フィルタ",
+	},
+	["Recent filters"]={
+		eng="Recent filters",
+		pl ="Ostatnie filtry",
+		jp ="最近のフィルター",
+	},
+	["Skin"]={
+		eng="Skin",
+		pl ="Skin",
+		jp ="スキン",
+	},
+	["Save as project"]={
+		eng="Save as project",
+		pl ="Zapisz jako projekt",
+		jp ="プロジェクトとしてセーブ",
+	},
+	["Key settings"]={
+		eng="Key settings",
+		pl ="Ustawienia klawiszy",
+		jp ="キー設定",
+	},
+	["Merge layer down"]={
+		eng="Merge layer down",
+		pl ="Scalić warstwę w dół",
+		jp ="レイヤーを下にマージ",
+	},
+	["Rename layer"]={
+		eng="Rename layer",
+		pl ="Zmień nazwę warstwy",
+		jp ="レイヤの名前を変更",
+	},
+	["Change background colour"]={
+		eng="Change background colour",
+		pl ="Zmień kolor tła",
+		jp ="背景色を変更",
+	},
+	["Toggle grid"]={
+		eng="Toggle grid",
+		pl ="Przełącz siatkę",
+		jp ="グリッドの切り替え",
+	},
+	["Adjust HSL"]={
+		eng="Adjust HSL",
+		pl ="Dostosuj HSL",
+		jp ="HSLを調整",
+	},
+	["Contrast/Brightness"]={
+		eng="Contrast/Brightness",
+		pl ="Kontrast/Jasność",
+		jp ="コントラスト/明るさ",
+	},
+	["Curves"]={
+		eng="Curves",
+		pl ="Paski",
+		jp ="曲線",
+	},
+	["Invert (HSL)"]={
+		eng="Invert (HSL)",
+		pl ="Odwrotność (HSL)",
+		jp ="色反転 (HSL)",
+	},
+	["Pose"]={
+		eng="Pose",
+		pl ="Poza",
+		jp ="ポーズ",
+	},
+	["~b~(green)Confirm"]={
+		eng="~b~(green)Confirm",
+		pl ="~b~(green)Konfirmuj",
+		jp ="~b~(green)はい",
+	},
+	["Rename ~b\""]={
+		eng="Rename ~b\"",
+		pl ="Zmień nazwę ~b\"",
+		jp ="名前を変更~b\"",
+	},
+	["Gamma"]={
+		eng="Gamma",
+		pl ="Gamma",
+		jp ="ガンマ",
+	},
+	["Preview"]={
+		eng="Preview",
+		pl ="Podgląd",
+		jp ="プレビュー",
+	},
+	["Hue"]={
+		eng="Hue",
+		pl ="Hue",
+		jp ="色彩",
+	},
+	["Sat"]={
+		eng="Sat",
+		pl ="Sat",
+		jp ="彩度",
+	},
+	["Lum"]={
+		eng="Lum",
+		pl ="Lum",
+		jp ="輝度",
+	},
+	["Con"]={
+		eng="Con",
+		pl ="Kon",
+		jp ="コン",
+	},
+	[""]={
+		eng="",
+		pl ="",
+		jp ="",
+	},
+	["Yaw"]={
+		eng="Yaw",
+		pl ="Yaw",
+		jp ="ヨー",
+	},
+	["Pitch"]={
+		eng="Pitch",
+		pl ="Pitch",
+		jp ="ピッチ",
+	},
+	["Roll"]={
+		eng="Roll",
+		pl ="Roll",
+		jp ="ロール",
+	},
+	["Head"]={
+		eng="Head",
+		pl ="Głowa",
+		jp ="頭",
+	},
+	["Right arm"]={
+		eng="Right arm",
+		pl ="Prawe ramię",
+		jp ="右腕",
+	},
+	["Left arm"]={
+		eng="Left arm",
+		pl ="Lewe ramię",
+		jp ="左腕",
+	},
+	["Left leg"]={
+		eng="Left arm",
+		pl ="Lewe noga",
+		jp ="左脚",
+	},
+	["Right leg"]={
+		eng="Right leg",
+		pl ="Prawe noga",
+		jp ="右脚",
+	},
+	["R arm"]={
+		eng="R arm",
+		pl ="P ramię",
+		jp ="右腕",
+	},
+	["L arm"]={
+		eng="L arm",
+		pl ="L ramię",
+		jp ="左腕",
+	},
+	["L leg"]={
+		eng="L arm",
+		pl ="L noga",
+		jp ="左脚",
+	},
+	["R leg"]={
+		eng="R leg",
+		pl ="P noga",
+		jp ="右脚",
+	},
+	["Torso"]={
+		eng="Torso",
+		pl ="Tułów",
+		jp ="胴体",
+	},
+	["Reset"]={
+		eng="Reset",
+		pl ="Reset",
+		jp ="リセット",
+	},
+	["Name is too long"]={
+		eng="Name is too long",
+		pl ="Nazwa jest za długa",
+		jp ="名前が長すぎる",
+	},
+	["Name already exists"]={
+		eng="Name already exists",
+		pl ="Nazwa już istnieje",
+		jp ="名前はすでに存在します",
+	},
+	["Changes background to the currently picked colour."]={
+		eng="Changes background to the currently picked colour.",
+		pl ="Zmien tło na aktualnie wybrany kolor",
+		jp ="背景色を現在選択されている色に変更します",
+	},
+	["Enable or disable the grid overlay."]={
+		eng="Enable or disable the grid overlay.",
+		pl ="Włącz lub wyłącz siatke.",
+		jp ="グリッドを有効または無効にします。",
+	},
+	["Change skin to have wide or slim arms."]={
+		eng="Change skin to have wide or slim arms.",
+		pl ="Zmień skórę, aby mieć szerokie lub szczupłe ramiona.",
+		jp ="スキンを変更して腕を太くしたり細くしたりします。",
+	},
+	["Change pose of limbs."]={
+		eng="Change pose of limbs.",
+		pl ="Zmień pozycję kończyn.",
+		jp ="手足のポーズを変える。",
+	},
+
+	["Hide/Show"]={
+		eng="Hide/Show",
+		pl ="Ukryj/Pokaż",
+		jp ="非表示/表示",
+	},
+
+	["Erase Pixel"]={
+		eng="Erase Pixel",
+		pl ="Usuń Piksel",
+		jp ="ピクセルを消去",
+	},
+	["Fill Face"]={
+		eng="Fill Face",
+		pl ="Wypełnij Twarz",
+		jp ="面を塗りつぶす",
+	},
+	["Pick Pixel Colour"]={
+		eng="Pick Pixel Colour",
+		pl ="Wybierz Kolor Piksela",
+		jp ="ピクセルの色を選択",
+	},
+	["Toggle Mirror"]={
+		eng="Toggle Mirror",
+		pl ="Przełącz Lustrzane Odbicie",
+		jp ="鏡像切り替え",
+	},
+	["Toggle Grid"]={
+		eng="Toggle Grid",
+		pl ="Przełącz Siatkę",
+		jp ="グリッドの切り替え",
+	},
+	["Ignore Alpha Lock"]={
+		eng="Ignore Alpha Lock",
+		pl ="Zignoruj Blokadę Alfa",
+		jp ="アルファロックを無視",
+	},
+	["Hide/Show Overlay"]={
+		eng="Hide/Show Overlay",
+		pl ="Ukryj/Pokaż Nakładkę",
+		jp ="オーバーレイを非表示/表示",
+	},
+	["Language"]={
+		eng="Language",
+		pl ="Język",
+		jp ="言語",
+	},
 
 }
 

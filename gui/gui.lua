@@ -238,7 +238,7 @@ function MapEditGUI:define(mapedit)
 		win_min_h=180,
 		win_max_h=180,
 		win_titlebar=true,
-		win_title=lang["Visible parts"],
+		win_title=lang["Visible Parts"],
 		win_close=function() end,
 		win_icon="icon_vis.png",
 		win_show_close=false
@@ -1017,7 +1017,7 @@ function MapEditGUI:define(mapedit)
 				dirmem.init("open", filepath)
 			end
 		end},
-		{lang["Save as Project"],action=function()
+		{lang["Save as project"],action=function()
 			local edit = require 'edit'
 			local dialog = require 'dialog'
 			local dirmem = require 'dirmem'
