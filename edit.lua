@@ -593,6 +593,9 @@ function edit:setupInputHandling()
 		local layer = self:getActiveLayer()
 		paint_layer = layer
 		paint_target = layer.open_preview()
+
+		self.viewport_input:lockInverse{"edit_action"}
+		CONTROL_LOCK.EDIT_VIEW.elevate()
 	end)
 	local paint_action_held = Hook:new(function ()
 		if not paint_history then return end
@@ -621,6 +624,9 @@ function edit:setupInputHandling()
 		paint_history = nil
 		paint_layer = nil
 		paint_target = nil
+
+		self.viewport_input:unlockAll()
+		CONTROL_LOCK.EDIT_VIEW.open()
 	end)
 
 	self.viewport_input:getEvent("edit_action","down"):addHook(paint_action_start)
