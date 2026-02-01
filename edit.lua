@@ -651,6 +651,9 @@ function edit:setupInputHandling()
 		local layer = self:getActiveLayer()
 		erase_layer = layer
 		erase_target = layer.open_preview()
+
+		self.viewport_input:lockInverse{"edit_erase"}
+		CONTROL_LOCK.EDIT_VIEW.elevate()
 	end)
 	local erase_action_held = Hook:new(function ()
 		if not erase_history then return end
@@ -669,7 +672,8 @@ function edit:setupInputHandling()
 		if erase_layer then
 			local old,new = erase_layer.commit_preview()
 
-			self:commitCommand("commit_paint", {layer=erase_layer,old_texture=old,new_texture=new,mirror=self.mirror_mode})
+			self.viewport_input:unlockAll()
+			CONTROL_LOCK.EDIT_VIEW.open()
 		end
 
 		erase_history = nil
