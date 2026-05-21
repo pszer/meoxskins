@@ -267,13 +267,14 @@ function MapEditGUI:define(mapedit)
 		{"region", region_ypixoffset_f(0.0,10)},
 		{"region", region_ypixoffset_f(0.5,35)},
 		{"region", region_ypixoffset_f(0.5,60)},
-		{"region", region_ypixoffset_f(0.5,85)}
+		{"region", region_ypixoffset_f(0.5,85)},
+		{"region", region_ypixoffset_f(0.5,110)}
 	)
 	local lang_win = guiwindow:define({
-		win_min_w=100,
-		win_max_w=100,
-		win_min_h=115,
-		win_max_h=115,
+		win_min_w=108,
+		win_max_w=108,
+		win_min_h=140,
+		win_max_h=140,
 		win_focus=true,
 		win_titlebar=true,
 		win_title=lang["Language"],
@@ -402,6 +403,9 @@ function MapEditGUI:define(mapedit)
 					                                                   guirender:loadFonts(lang:getFontInfo())
 					                                                   MapEditGUI:define(mapedit) end,"middle","top"),
 					guibutton:new("Japanese","flag_jp.png",0,0, function(self,win) lang:setLanguage("jp")
+					                                                     guirender:loadFonts(lang:getFontInfo())
+					                                                     MapEditGUI:define(mapedit) end,"middle","top"),
+					guibutton:new("Indonesian","flag_id.png",0,0, function(self,win) lang:setLanguage("id")
 					                                                     guirender:loadFonts(lang:getFontInfo())
 					                                                     MapEditGUI:define(mapedit) end,"middle","top"),
 				},

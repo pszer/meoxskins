@@ -678,10 +678,11 @@ function edit:setupInputHandling()
 		if erase_layer then
 			local old,new = erase_layer.commit_preview()
 
-			self.viewport_input:unlockAll()
-			CONTROL_LOCK.EDIT_VIEW.open()
+			self:commitCommand("commit_paint", {layer=erase_layer,old_texture=old,new_texture=new})
 		end
 
+		self.viewport_input:unlockAll()
+		CONTROL_LOCK.EDIT_VIEW.open()
 		erase_history = nil
 		erase_layer = nil
 		erase_target = nil

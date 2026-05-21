@@ -284,6 +284,14 @@ function model:hideOverlayShortcut(on)
 		self.visible["leg_l_o"]      = __overlay_mem["leg_l_o"] or self.visible["leg_l_o"] 
 		self.visible["leg_r_o"]      = __overlay_mem["leg_r_o"] or self.visible["leg_r_o"] 
 	end
+
+	if self.mode == "wide" then
+		self.visible["arm_slim_r_o"] = false
+		self.visible["arm_slim_l_o"] = false
+	else
+		self.visible["arm_wide_r_o"] = false
+		self.visible["arm_wide_l_o"] = false
+	end
 end
 
 function model:isOverlayFullyHidden(mode)

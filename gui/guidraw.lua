@@ -190,6 +190,7 @@ function MapEditGUIRender:initAssets()
 		"flag_en.png",
 		"flag_pl.png",
 		"flag_jp.png",
+		"flag_id.png",
 	}
 	for i,v in ipairs(icon_list) do
 		self.icons[v] = Loader:getTextureReference(v)

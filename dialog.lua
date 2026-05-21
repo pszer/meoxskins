@@ -146,7 +146,8 @@ typedef const char *LPCSTR;
 typedef char *LPSTR;
 typedef void *HWND;
 typedef void *HINSTANCE;
-typedef long LPARAM;    
+typedef long LPARAM;
+typedef intptr_t WPARAM;
 typedef int BOOL;      
 
 typedef struct {
