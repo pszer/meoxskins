@@ -158,7 +158,8 @@ Change the program language via **Help → Set Language**.
 Supported languages:
 - English  
 - Polish / Polski  
-- Japanese / 日本語  
+- Japanese / 日本語
+- Indonesian / Bahasa Indonesia
 
 Autosaves occur every 10 seconds and are recovered after a crash.
 
